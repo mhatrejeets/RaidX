@@ -1,4 +1,4 @@
-// app.js
+// Updated app.js with Bonus Toggle and Super Tackle Logic
 
 let teamA = {
   name: "Team A",
@@ -32,6 +32,7 @@ let game = true;
 let raid = 1;
 let selectedRaider = null;
 let selectedDefenders = [];
+let bonusTaken = false;
 
 function endGame() {
   game = false;
@@ -43,23 +44,14 @@ function handlePlayerClick(playerId) {
   let opposingTeam = raid % 2 !== 0 ? teamB : teamA;
   let player = [...currentTeam.players, ...opposingTeam.players].find(p => p.id === playerId);
 
-  if (raid % 2 !== 0) {
-    // Team A raiding
-    if (currentTeam.players.includes(player) && player.status === "in") {
-      selectedRaider = player;
-    } else if (opposingTeam.players.includes(player) && player.status === "in") {
-      toggleDefenderSelection(player);
-    }
-  } else {
-    // Team B raiding
-    if (currentTeam.players.includes(player) && player.status === "in") {
-      selectedRaider = player;
-    } else if (opposingTeam.players.includes(player) && player.status === "in") {
-      toggleDefenderSelection(player);
-    }
+  if (currentTeam.players.includes(player) && player.status === "in") {
+    selectedRaider = player;
+  } else if (opposingTeam.players.includes(player) && player.status === "in") {
+    toggleDefenderSelection(player);
   }
 
   updateCurrentRaidDisplay();
+  updateBonusToggleVisibility();
 }
 
 function toggleDefenderSelection(player) {
@@ -88,6 +80,8 @@ function raidSuccessful() {
   let scoringTeam = raid % 2 !== 0 ? teamA : teamB;
   scoringTeam.score += selectedDefenders.length;
 
+  if (bonusTaken) scoringTeam.score += 1;
+
   selectedDefenders.forEach(def => def.status = "out");
   revivePlayers(scoringTeam, selectedDefenders.length);
   checkAllOut();
@@ -102,7 +96,13 @@ function defenseSuccessful() {
   }
 
   let defendingTeam = raid % 2 !== 0 ? teamB : teamA;
-  defendingTeam.score += 1;
+  let defendersInCourt = defendingTeam.players.filter(p => p.status === "in").length;
+
+  defendingTeam.score += 1; // Tackle point
+
+  if (defendersInCourt <= 3) {
+    defendingTeam.score += 1; // Super Tackle bonus
+  }
 
   selectedRaider.status = "out";
   revivePlayers(defendingTeam, 1);
@@ -131,9 +131,12 @@ function checkAllOut() {
 function nextRaid() {
   selectedRaider = null;
   selectedDefenders = [];
+  bonusTaken = false;
+  document.getElementById("bonus-toggle").checked = false;
   raid++;
   updateDisplay();
   updateCurrentRaidDisplay();
+  updateBonusToggleVisibility();
 }
 
 function updateDisplay() {
@@ -160,6 +163,13 @@ function renderPlayers() {
   render(teamB, "teamB-players");
 }
 
+function updateBonusToggleVisibility() {
+  const bonusToggle = document.getElementById("bonus-toggle");
+  const opposingTeam = raid % 2 !== 0 ? teamB : teamA;
+  const inPlayers = opposingTeam.players.filter(p => p.status === "in").length;
+  bonusToggle.disabled = inPlayers < 6;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("teamA-name").textContent = teamA.name;
   document.getElementById("teamB-name").textContent = teamB.name;
@@ -167,5 +177,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("teamB-score").textContent = teamB.score;
   document.getElementById("teamA-header").textContent = teamA.name;
   document.getElementById("teamB-header").textContent = teamB.name;
+
+  const bonusToggle = document.getElementById("bonus-toggle");
+  bonusToggle.addEventListener("change", () => {
+    bonusTaken = bonusToggle.checked;
+  });
+
   renderPlayers();
+  updateBonusToggleVisibility();
 });
