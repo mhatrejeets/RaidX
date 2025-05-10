@@ -129,7 +129,17 @@ function defenseSuccessful() {
   let defendingTeam = getDefendingTeam();
   let scoringTeam = getRaidingTeam();
 
-  defendingTeam.score += 1;
+  let activeDefenders = defendingTeam.players.filter(p => p.status === "in").length;
+
+  // Base point for successful defense
+  let points = 1;
+
+  // Super tackle bonus: if 3 or fewer defenders and raider is caught
+  if (activeDefenders <= 3) {
+    points += 1;
+  }
+
+  defendingTeam.score += points;
 
   selectedRaider.status = "out";
   revivePlayers(defendingTeam, 1);
