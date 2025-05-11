@@ -1,6 +1,7 @@
 let teamA = {
   name: "Team A",
   score: 0,
+  emptyRaidCount: 0,
   players: [
     { id: "A1", name: "Player A1", status: "in" },
     { id: "A2", name: "Player A2", status: "in" },
@@ -15,6 +16,7 @@ let teamA = {
 let teamB = {
   name: "Team B",
   score: 0,
+  emptyRaidCount: 0,
   players: [
     { id: "B1", name: "Player B1", status: "in" },
     { id: "B2", name: "Player B2", status: "in" },
@@ -31,7 +33,6 @@ let raid = 1;
 let selectedRaider = null;
 let selectedDefenders = [];
 let bonusTaken = false;
-let emptyRaidCount = 0; // Added for Do or Die rule
 
 function endGame() {
   game = false;
@@ -106,7 +107,7 @@ function raidSuccessful() {
     defendingTeam.score += 1;
   }
 
-  emptyRaidCount = 0; // Reset empty raid count
+  raidingTeam.emptyRaidCount = 0; // Reset for successful raid
   checkAllOut();
   nextRaid();
 }
@@ -135,7 +136,7 @@ function defenseSuccessful() {
     raidingTeam.score += 1;
   }
 
-  emptyRaidCount = 0; // Reset empty raid count
+  raidingTeam.emptyRaidCount = 0; // Reset for point-scoring raid
   revivePlayers(defendingTeam, 1);
   checkAllOut();
   nextRaid();
@@ -154,14 +155,13 @@ function emptyRaid() {
     raidingTeam.score += 1;
   }
 
-  emptyRaidCount++;
+  raidingTeam.emptyRaidCount++;
 
-  if (emptyRaidCount >= 3) {
-    // Do or Die logic: raider out and defending team gets 1 point
+  if (raidingTeam.emptyRaidCount >= 3) {
     selectedRaider.status = "out";
     defendingTeam.score += 1;
     alert("Do or Die Raid! Raider is out and defending team gets 1 point.");
-    emptyRaidCount = 0; // Reset
+    raidingTeam.emptyRaidCount = 0;
   }
 
   nextRaid();
@@ -198,7 +198,6 @@ function nextRaid() {
   updateDisplay();
   updateCurrentRaidDisplay();
   updateBonusToggleVisibility();
-  updateRaidInfoUI();
 }
 
 function updateDisplay() {
