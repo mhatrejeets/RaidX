@@ -1,6 +1,6 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,10 +13,12 @@
       padding: 1rem;
       border-radius: 0.5rem;
     }
+
     .team-score {
       font-size: 2rem;
       font-weight: bold;
     }
+
     .player-card {
       text-align: center;
       padding: 1rem;
@@ -24,18 +26,33 @@
       margin: 0.5rem;
       width: 100%;
     }
+
     .team-section {
       border: 3px solid transparent;
       border-radius: 0.75rem;
       padding: 1rem;
       background-color: #f6fefb;
     }
+    .player-card {
+  margin: 5px;
+  min-width: 100px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.player-card.btn-secondary {
+  background-color: #ccc;
+  color: #333;
+}
+
     .team-section.left {
       border-left: 4px solid orange;
     }
+
     .team-section.right {
       border-left: 4px solid #007bff;
     }
+
     .action-controls {
       margin-top: 1rem;
       background-color: #f8f9fa;
@@ -43,13 +60,15 @@
       border-radius: 0.5rem;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
+
     .form-check {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-    } 
+    }
   </style>
 </head>
+
 <body class="bg-light">
 
   <!-- Scoreboard -->
@@ -114,10 +133,15 @@
         <button class="btn btn-danger" onclick="defenseSuccessful()">Defense Successful</button>
         <button class="btn btn-warning" onclick="emptyRaid()">Empty Raid</button>
       </div>
+      <div class="d-flex gap-2">
+        <button id="raider-lobby-entry" class="btn btn-outline-warning">Raider Lobby Entry</button>
+        <button id="defender-lobby-entry" class="btn btn-outline-info">Defender Lobby Entry</button>
+      </div>
       <button class="btn btn-dark ms-auto" onclick="endGame()">End Game</button>
     </div>
   </div>
 
   <script src="app.js"></script>
 </body>
+
 </html>

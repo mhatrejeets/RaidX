@@ -1,7 +1,6 @@
 let teamA = {
   name: "Team A",
   score: 0,
-  emptyRaidCount: 0,
   players: [
     { id: "A1", name: "Player A1", status: "in" },
     { id: "A2", name: "Player A2", status: "in" },
@@ -16,7 +15,6 @@ let teamA = {
 let teamB = {
   name: "Team B",
   score: 0,
-  emptyRaidCount: 0,
   players: [
     { id: "B1", name: "Player B1", status: "in" },
     { id: "B2", name: "Player B2", status: "in" },
@@ -33,6 +31,59 @@ let raid = 1;
 let selectedRaider = null;
 let selectedDefenders = [];
 let bonusTaken = false;
+let emptyRaidCountA = 0;
+let emptyRaidCountB = 0;
+let isDoOrDieRaid = false;
+
+function canRaid(team) {
+  const activePlayers = team.players.filter(player => player.status === "in").length;
+  return activePlayers >= 1 && activePlayers <= 7;
+}
+
+function enforceLobbyRule() {
+  const raidingTeam = getRaidingTeam();
+  if (!canRaid(raidingTeam)) {
+    alert(`${raidingTeam.name} does not have enough players to raid!`);
+    return false;
+  }
+  return true;
+}
+
+// function handleLobbyTouch(player, isRaiderTouchingLobby) {
+//   const raidingTeam = getRaidingTeam();
+//   const defendingTeam = getDefendingTeam();
+
+//   if (isRaiderTouchingLobby) {
+//     defendingTeam.score += 1;
+//     alert(`${raidingTeam.name}'s raider touched the lobby! ${defendingTeam.name} gets 1 point.`);
+//   } else {
+//     raidingTeam.score += 1;
+//     alert(`${defendingTeam.name}'s defender touched the lobby! ${raidingTeam.name} gets 1 point.`);
+//   }
+
+//   nextRaid();
+// }
+function handleLobbyTouch(player, isRaiderTouchingLobby) {
+  const raidingTeam = getRaidingTeam();
+  const defendingTeam = getDefendingTeam();
+
+  if (isRaiderTouchingLobby) {
+    // Raider touches lobby – out
+    defendingTeam.score += 1;
+    player.status = "out";  // Mark raider as out
+    alert(`${raidingTeam.name}'s raider touched the lobby! ${defendingTeam.name} gets 1 point.`);
+  } else {
+    // Defender touches lobby – out
+    raidingTeam.score += 1;
+    player.status = "out";  // Mark defender as out
+    alert(`${defendingTeam.name}'s defender touched the lobby! ${raidingTeam.name} gets 1 point.`);
+  }
+
+  checkAllOut(); // In case this causes an all-out
+  renderPlayers(); // Update UI to reflect out status
+  nextRaid();
+}
+
 
 function endGame() {
   game = false;
@@ -93,13 +144,9 @@ function raidSuccessful() {
 
   raidingTeam.score += selectedDefenders.length;
 
-
-  if (bonusTaken) {
-    raidingTeam.score += 1;
-  }
+  if (bonusTaken) raidingTeam.score += 1;
 
   selectedDefenders.forEach(d => d.status = "out");
-
 
   revivePlayers(raidingTeam, selectedDefenders.length);
 
@@ -107,7 +154,7 @@ function raidSuccessful() {
     defendingTeam.score += 1;
   }
 
-  raidingTeam.emptyRaidCount = 0; // Reset for successful raid
+  resetEmptyRaidCount(raidingTeam);
   checkAllOut();
   nextRaid();
 }
@@ -121,23 +168,17 @@ function defenseSuccessful() {
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
 
-  let activeDefenders = defendingTeam.players.filter(p => p.status === "in").length;
   let points = 1;
 
-  if (activeDefenders <= 3) {
-    points += 1;
+  if (defendingTeam.players.filter(p => p.status === "in").length <= 3) points += 1;
 
-  }
 
   selectedRaider.status = "out";
   defendingTeam.score += points;
+  if (bonusTaken) raidingTeam.score += 1;
 
-  if (bonusTaken) {
-    raidingTeam.score += 1;
-  }
-
-  raidingTeam.emptyRaidCount = 0; // Reset for point-scoring raid
   revivePlayers(defendingTeam, 1);
+  resetEmptyRaidCount(raidingTeam);
   checkAllOut();
   nextRaid();
 }
@@ -151,20 +192,32 @@ function emptyRaid() {
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
 
-  if (bonusTaken) {
-    raidingTeam.score += 1;
+  if (bonusTaken) raidingTeam.score += 1;
+
+  const isTeamA = raidingTeam === teamA;
+
+  if (isTeamA) {
+    emptyRaidCountA++;
+    isDoOrDieRaid = emptyRaidCountA >= 3;
+  } else {
+    emptyRaidCountB++;
+    isDoOrDieRaid = emptyRaidCountB >= 3;
   }
 
-  raidingTeam.emptyRaidCount++;
-
-  if (raidingTeam.emptyRaidCount >= 3) {
+  if (isDoOrDieRaid) {
     selectedRaider.status = "out";
     defendingTeam.score += 1;
     alert("Do or Die Raid! Raider is out and defending team gets 1 point.");
-    raidingTeam.emptyRaidCount = 0;
+    if (isTeamA) emptyRaidCountA = 0;
+    else emptyRaidCountB = 0;
   }
 
   nextRaid();
+}
+
+function resetEmptyRaidCount(team) {
+  if (team === teamA) emptyRaidCountA = 0;
+  else emptyRaidCountB = 0;
 }
 
 function revivePlayers(team, count) {
@@ -184,11 +237,22 @@ function checkAllOut() {
   });
 }
 
+document.getElementById("raider-lobby-entry").addEventListener("click", function () {
+  handleLobbyTouch(selectedRaider, true);
+});
+
+document.getElementById("defender-lobby-entry").addEventListener("click", function () {
+  if (selectedDefenders.length > 0) {
+    handleLobbyTouch(selectedDefenders[0], false);
+  }
+});
+
 function nextRaid() {
   selectedRaider = null;
   selectedDefenders = [];
 
   bonusTaken = false;
+  isDoOrDieRaid = false;
 
   document.getElementById("bonus-toggle").checked = false;
   document.getElementById("bonus-toggle").disabled = true;
@@ -198,6 +262,7 @@ function nextRaid() {
   updateDisplay();
   updateCurrentRaidDisplay();
   updateBonusToggleVisibility();
+  updateRaidInfoUI();
 }
 
 function updateDisplay() {
@@ -205,16 +270,28 @@ function updateDisplay() {
   document.getElementById("teamB-score").textContent = teamB.score;
   renderPlayers();
 }
-
 function renderPlayers() {
   const render = (team, containerId) => {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     team.players.forEach(player => {
       const btn = document.createElement("button");
-      btn.className = `player-card btn ${player.status === "in" ? "btn-outline-primary" : "btn-secondary"}`;
+
+      // Add basic classes
+      btn.className = `player-card btn`;
+
+      if (player.status === "in") {
+        btn.classList.add("btn-outline-primary");
+      } else {
+        btn.classList.add("btn-secondary");
+        btn.style.textDecoration = "line-through"; // Strike-through effect
+        btn.disabled = true; // Prevent selection of out players
+        btn.style.opacity = "0.6"; // Make it look faded
+      }
+
       btn.textContent = player.name;
       btn.onclick = () => handlePlayerClick(player.id);
+
       container.appendChild(btn);
     });
   };
@@ -223,12 +300,33 @@ function renderPlayers() {
   render(teamB, "teamB-players");
 }
 
+// function renderPlayers() {
+//   const render = (team, containerId) => {
+//     const container = document.getElementById(containerId);
+//     container.innerHTML = "";
+//     team.players.forEach(player => {
+//       const btn = document.createElement("button");
+//       btn.className = `player-card btn ${player.status === "in" ? "btn-outline-primary" : "btn-secondary"}`;
+//       btn.textContent = player.name;
+//       btn.onclick = () => handlePlayerClick(player.id);
+//       container.appendChild(btn);
+//     });
+//   };
+
+//   render(teamA, "teamA-players");
+//   render(teamB, "teamB-players");
+// }
+
 function updateBonusToggleVisibility() {
   const bonusToggle = document.getElementById("bonus-toggle");
   const opposingTeam = getDefendingTeam();
   const inPlayers = opposingTeam.players.filter(p => p.status === "in").length;
 
   bonusToggle.disabled = inPlayers < 6;
+}
+
+function updateRaidInfoUI() {
+  document.getElementById("raid-number").textContent = `Raid: ${raid}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -239,11 +337,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("teamA-header").textContent = teamA.name;
   document.getElementById("teamB-header").textContent = teamB.name;
 
-  const bonusToggle = document.getElementById("bonus-toggle");
-  bonusToggle.addEventListener("change", () => {
-    bonusTaken = bonusToggle.checked;
+  document.getElementById("bonus-toggle").addEventListener("change", () => {
+    bonusTaken = document.getElementById("bonus-toggle").checked;
   });
 
   renderPlayers();
   updateBonusToggleVisibility();
+  updateRaidInfoUI();
 });
