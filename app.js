@@ -31,6 +31,7 @@ let raid = 1;
 let selectedRaider = null;
 let selectedDefenders = [];
 let bonusTaken = false;
+let emptyRaidCount = 0; // Added for Do or Die rule
 
 function endGame() {
   game = false;
@@ -68,7 +69,7 @@ function updateCurrentRaidDisplay() {
   if (!selectedRaider) {
     display.textContent = "Select a raider.";
   } else {
-display.textContent = `Raider: ${selectedRaider.name}, Defenders: ${selectedDefenders.map(p => p.name).join(", ")}`;
+    display.textContent = `Raider: ${selectedRaider.name}, Defenders: ${selectedDefenders.map(p => p.name).join(", ")}`;
   }
 }
 
@@ -89,25 +90,21 @@ function raidSuccessful() {
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
 
-  // Score for touches
   raidingTeam.score += selectedDefenders.length;
 
-  // Bonus point
   if (bonusTaken) {
     raidingTeam.score += 1;
   }
 
-  // Mark defenders out
   selectedDefenders.forEach(d => d.status = "out");
 
-  // Revive players in raiding team
   revivePlayers(raidingTeam, selectedDefenders.length);
 
-  // Super tackle check
   if (defendingTeam.players.filter(p => p.status === "in").length <= 3) {
-    defendingTeam.score += 1; // Super tackle bonus
+    defendingTeam.score += 1;
   }
 
+  emptyRaidCount = 0; // Reset empty raid count
   checkAllOut();
   nextRaid();
 }
@@ -124,20 +121,18 @@ function defenseSuccessful() {
   let activeDefenders = defendingTeam.players.filter(p => p.status === "in").length;
   let points = 1;
 
-  // Super tackle logic
   if (activeDefenders <= 3) {
     points += 1;
   }
 
-  // Raider caught
   selectedRaider.status = "out";
   defendingTeam.score += points;
 
-  // Bonus point if applicable
   if (bonusTaken) {
     raidingTeam.score += 1;
   }
 
+  emptyRaidCount = 0; // Reset empty raid count
   revivePlayers(defendingTeam, 1);
   checkAllOut();
   nextRaid();
@@ -150,9 +145,20 @@ function emptyRaid() {
   }
 
   const raidingTeam = getRaidingTeam();
+  const defendingTeam = getDefendingTeam();
 
   if (bonusTaken) {
     raidingTeam.score += 1;
+  }
+
+  emptyRaidCount++;
+
+  if (emptyRaidCount >= 3) {
+    // Do or Die logic: raider out and defending team gets 1 point
+    selectedRaider.status = "out";
+    defendingTeam.score += 1;
+    alert("Do or Die Raid! Raider is out and defending team gets 1 point.");
+    emptyRaidCount = 0; // Reset
   }
 
   nextRaid();
@@ -170,7 +176,7 @@ function checkAllOut() {
     if (team.players.every(p => p.status === "out")) {
       team.players.forEach(p => p.status = "in");
       const opponent = team === teamA ? teamB : teamA;
-      opponent.score += 2; // All Out bonus
+      opponent.score += 2;
     }
   });
 }
@@ -187,6 +193,7 @@ function nextRaid() {
   updateDisplay();
   updateCurrentRaidDisplay();
   updateBonusToggleVisibility();
+  updateRaidInfoUI();
 }
 
 function updateDisplay() {
