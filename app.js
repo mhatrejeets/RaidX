@@ -50,7 +50,6 @@ function handlePlayerClick(playerId) {
     toggleDefenderSelection(player);
   }
 
-  updateBonusToggle();
   updateCurrentRaidDisplay();
   updateBonusToggleVisibility();
 }
@@ -72,45 +71,23 @@ function updateCurrentRaidDisplay() {
   display.textContent = `Raider: ${selectedRaider.name}, Defenders: ${selectedDefenders.map(p => p.name).join(", ")}`;
 }
 
-function getDefendingTeam() {
-  return raid % 2 !== 0 ? teamB : teamA;
-}
-
-function getRaidingTeam() {
-  return raid % 2 !== 0 ? teamA : teamB;
-}
-
-function updateBonusToggle() {
-  const defendersIn = getDefendingTeam().players.filter(p => p.status === "in").length;
-  const bonusToggle = document.getElementById("bonus-toggle");
-  bonusToggle.disabled = defendersIn < 6;
-  bonusToggle.checked = false;
-}
-
 function raidSuccessful() {
   if (!selectedRaider || selectedDefenders.length === 0) {
     alert("Select a raider and defenders.");
     return;
   }
 
-  let scoringTeam = getRaidingTeam();
-  let defendingTeam = getDefendingTeam();
-
+  let scoringTeam = raid % 2 !== 0 ? teamA : teamB;
   scoringTeam.score += selectedDefenders.length;
-  if (document.getElementById("bonus-toggle").checked) {
-    scoringTeam.score += 1;
-  }
+
+  if (bonusTaken) scoringTeam.score += 1;
 
   if (bonusTaken) scoringTeam.score += 1;
 
   selectedDefenders.forEach(def => def.status = "out");
   revivePlayers(scoringTeam, selectedDefenders.length);
-
-  if (selectedDefenders.length <= 3) {
-    defendingTeam.score += 1;
-  }
-
   checkAllOut();
+
   nextRaid();
 }
 
@@ -121,41 +98,22 @@ function defenseSuccessful() {
   }
 
 
-  let defendingTeam = getDefendingTeam();
-  let scoringTeam = getRaidingTeam();
+  let defendingTeam = raid % 2 !== 0 ? teamB : teamA;
+  let defendersInCourt = defendingTeam.players.filter(p => p.status === "in").length;
 
-  let activeDefenders = defendingTeam.players.filter(p => p.status === "in").length;
 
-  let points = 1;
-  if (activeDefenders <= 3) {
-    points += 1; // Super tackle bonus
-  }
-  defendingTeam.score += points;
+  defendingTeam.score += 1; // Tackle point
 
-  // Bonus point for raider even if caught
-  if (document.getElementById("bonus-toggle").checked) {
-    scoringTeam.score += 1;
 
-  
+  if (defendersInCourt <= 3) {
+    defendingTeam.score += 1; // Super Tackle bonus
+
   }
 
   selectedRaider.status = "out";
   revivePlayers(defendingTeam, 1);
   checkAllOut();
 
-  nextRaid();
-}
-
-
-function emptyRaid() {
-  if (!selectedRaider) {
-    alert("Select a raider.");
-    return;
-  }
-  let scoringTeam = getRaidingTeam();
-  if (document.getElementById("bonus-toggle").checked) {
-    scoringTeam.score += 1;
-  }
   nextRaid();
 }
 
@@ -180,8 +138,8 @@ function nextRaid() {
   selectedRaider = null;
   selectedDefenders = [];
 
+  bonusTaken = false;
   document.getElementById("bonus-toggle").checked = false;
-  document.getElementById("bonus-toggle").disabled = true;
 
   raid++;
   updateDisplay();
@@ -192,6 +150,7 @@ function nextRaid() {
 function updateDisplay() {
   document.getElementById("teamA-score").textContent = teamA.score;
   document.getElementById("teamB-score").textContent = teamB.score;
+
   renderPlayers();
 }
 
