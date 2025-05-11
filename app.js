@@ -82,6 +82,8 @@ function raidSuccessful() {
 
   if (bonusTaken) scoringTeam.score += 1;
 
+  if (bonusTaken) scoringTeam.score += 1;
+
   selectedDefenders.forEach(def => def.status = "out");
   revivePlayers(scoringTeam, selectedDefenders.length);
   checkAllOut();
@@ -95,13 +97,17 @@ function defenseSuccessful() {
     return;
   }
 
+
   let defendingTeam = raid % 2 !== 0 ? teamB : teamA;
   let defendersInCourt = defendingTeam.players.filter(p => p.status === "in").length;
 
+
   defendingTeam.score += 1; // Tackle point
+
 
   if (defendersInCourt <= 3) {
     defendingTeam.score += 1; // Super Tackle bonus
+
   }
 
   selectedRaider.status = "out";
@@ -131,8 +137,10 @@ function checkAllOut() {
 function nextRaid() {
   selectedRaider = null;
   selectedDefenders = [];
+
   bonusTaken = false;
   document.getElementById("bonus-toggle").checked = false;
+
   raid++;
   updateDisplay();
   updateCurrentRaidDisplay();
