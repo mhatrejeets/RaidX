@@ -92,11 +92,13 @@ function raidSuccessful() {
 
   raidingTeam.score += selectedDefenders.length;
 
+
   if (bonusTaken) {
     raidingTeam.score += 1;
   }
 
   selectedDefenders.forEach(d => d.status = "out");
+
 
   revivePlayers(raidingTeam, selectedDefenders.length);
 
@@ -123,6 +125,7 @@ function defenseSuccessful() {
 
   if (activeDefenders <= 3) {
     points += 1;
+
   }
 
   selectedRaider.status = "out";
@@ -184,10 +187,12 @@ function checkAllOut() {
 function nextRaid() {
   selectedRaider = null;
   selectedDefenders = [];
+
   bonusTaken = false;
 
   document.getElementById("bonus-toggle").checked = false;
   document.getElementById("bonus-toggle").disabled = true;
+
 
   raid++;
   updateDisplay();
