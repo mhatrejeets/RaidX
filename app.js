@@ -143,9 +143,11 @@ function raidSuccessful() {
   const defendingTeam = getDefendingTeam();
 
   raidingTeam.score += selectedDefenders.length;
+
   if (bonusTaken) raidingTeam.score += 1;
 
   selectedDefenders.forEach(d => d.status = "out");
+
   revivePlayers(raidingTeam, selectedDefenders.length);
 
   if (defendingTeam.players.filter(p => p.status === "in").length <= 3) {
@@ -167,7 +169,9 @@ function defenseSuccessful() {
   const defendingTeam = getDefendingTeam();
 
   let points = 1;
+
   if (defendingTeam.players.filter(p => p.status === "in").length <= 3) points += 1;
+
 
   selectedRaider.status = "out";
   defendingTeam.score += points;
@@ -246,11 +250,13 @@ document.getElementById("defender-lobby-entry").addEventListener("click", functi
 function nextRaid() {
   selectedRaider = null;
   selectedDefenders = [];
+
   bonusTaken = false;
   isDoOrDieRaid = false;
 
   document.getElementById("bonus-toggle").checked = false;
   document.getElementById("bonus-toggle").disabled = true;
+
 
   raid++;
   updateDisplay();
