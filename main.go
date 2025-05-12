@@ -15,6 +15,16 @@ func main() {
 		return c.SendFile("./Static/scorer.html")
 	})
 
+	app.Get("/selectteam", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/selectteams.html")
+	})
+
+	app.Get("/api/team/:id", getTeamByID)
+
+
+
+	app.Get("/api/teams", getTeams)
+
 	app.Get("/start", func(c *fiber.Ctx) error {
     return c.SendFile("./Static/startscore.html")
 	})
@@ -26,6 +36,9 @@ func main() {
 	app.Post("/signup", SignupHandler)
 
 	app.Post("/login", LoginHandler)
+
+	setupWebSocket(app)
+
 
 
 	defer CloseDB()

@@ -1,30 +1,36 @@
-let teamA = {
-  name: "Team A",
-  score: 0,
-  players: [
-    { id: "A1", name: "Player A1", status: "in" },
-    { id: "A2", name: "Player A2", status: "in" },
-    { id: "A3", name: "Player A3", status: "in" },
-    { id: "A4", name: "Player A4", status: "in" },
-    { id: "A5", name: "Player A5", status: "in" },
-    { id: "A6", name: "Player A6", status: "in" },
-    { id: "A7", name: "Player A7", status: "in" },
-  ],
+const socket = new WebSocket("ws://localhost:3000/ws"); // Adjust your port/path if needed
+
+socket.onopen = () => {
+  console.log("WebSocket connection established");
 };
 
-let teamB = {
-  name: "Team B",
-  score: 0,
-  players: [
-    { id: "B1", name: "Player B1", status: "in" },
-    { id: "B2", name: "Player B2", status: "in" },
-    { id: "B3", name: "Player B3", status: "in" },
-    { id: "B4", name: "Player B4", status: "in" },
-    { id: "B5", name: "Player B5", status: "in" },
-    { id: "B6", name: "Player B6", status: "in" },
-    { id: "B7", name: "Player B7", status: "in" },
-  ],
+socket.onerror = (error) => {
+  console.error("WebSocket error:", error);
 };
+
+function sendPlayerStats() {
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type: "playerStats", data: playerStats }));
+  }
+}
+
+
+let teamA = { name: "", score: 0, players: [] };
+let teamB = { name: "", score: 0, players: [] };
+
+let playerStats = {};
+
+function initializePlayerStats(team) {
+  team.players.forEach(player => {
+    playerStats[player.id] = {
+      name: player.name,
+      id: player.id,
+      totalPoints: 0,
+      raidPoints: 0,
+      defencePoints: 0
+    };
+  });
+}
 
 let game = true;
 let raid = 1;
@@ -141,10 +147,19 @@ function raidSuccessful() {
 
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
+  let raidPoints = selectedDefenders.length;
 
-  raidingTeam.score += selectedDefenders.length;
+  raidingTeam.score += raidPoints;
 
-  if (bonusTaken) raidingTeam.score += 1;
+  // Update player stats
+  playerStats[selectedRaider.id].raidPoints += raidPoints;
+  playerStats[selectedRaider.id].totalPoints += raidPoints;
+
+  if (bonusTaken) {
+    raidingTeam.score += 1;
+    playerStats[selectedRaider.id].raidPoints += 1;
+    playerStats[selectedRaider.id].totalPoints += 1;
+  }
 
   selectedDefenders.forEach(d => d.status = "out");
 
@@ -153,6 +168,8 @@ function raidSuccessful() {
   if (defendingTeam.players.filter(p => p.status === "in").length <= 3) {
     defendingTeam.score += 1;
   }
+
+  sendPlayerStats(); // <-- Send updates via WebSocket
 
   resetEmptyRaidCount(raidingTeam);
   checkAllOut();
@@ -172,12 +189,25 @@ function defenseSuccessful() {
 
   if (defendingTeam.players.filter(p => p.status === "in").length <= 3) points += 1;
 
-
   selectedRaider.status = "out";
   defendingTeam.score += points;
-  if (bonusTaken) raidingTeam.score += 1;
+
+  // Assign points to defenders
+  selectedDefenders.forEach(def => {
+    playerStats[def.id].defencePoints += 1;
+    playerStats[def.id].totalPoints += 1;
+  });
+
+  if (bonusTaken) {
+    raidingTeam.score += 1;
+    playerStats[selectedRaider.id].raidPoints += 1;
+    playerStats[selectedRaider.id].totalPoints += 1;
+  }
 
   revivePlayers(defendingTeam, 1);
+
+  sendPlayerStats(); // <-- Send updates via WebSocket
+
   resetEmptyRaidCount(raidingTeam);
   checkAllOut();
   nextRaid();
@@ -329,13 +359,50 @@ function updateRaidInfoUI() {
   document.getElementById("raid-number").textContent = `Raid: ${raid}`;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const team1Id = params.get("team1_id");
+  const team2Id = params.get("team2_id");
+  const team1Name = params.get("team1_name");
+  const team2Name = params.get("team2_name");
+
+  socket.onopen = () => console.log("WebSocket connection established");
+  socket.onerror = (err) => console.error("WebSocket error:", err);
+  socket.onclose = () => console.log("WebSocket closed");
+
+  if (team1Id && team2Id) {
+    try {
+      const [res1, res2] = await Promise.all([
+        fetch(`/api/team/${team1Id}`),
+        fetch(`/api/team/${team2Id}`)
+      ]);
+
+      const data1 = await res1.json();
+      const data2 = await res2.json();
+
+      teamA.name = data1.team_name;
+      teamA.players = data1.players.map(p => ({ ...p, status: "in" }));
+      teamB.name = data2.team_name;
+      teamB.players = data2.players.map(p => ({ ...p, status: "in" }));
+
+
+    } catch (err) {
+      console.error("Failed to load teams:", err);
+    }
+  }
+
+  // Update UI with names
   document.getElementById("teamA-name").textContent = teamA.name;
   document.getElementById("teamB-name").textContent = teamB.name;
-  document.getElementById("teamA-score").textContent = teamA.score;
-  document.getElementById("teamB-score").textContent = teamB.score;
   document.getElementById("teamA-header").textContent = teamA.name;
   document.getElementById("teamB-header").textContent = teamB.name;
+
+  document.getElementById("teamA-score").textContent = teamA.score;
+  document.getElementById("teamB-score").textContent = teamB.score;
+
+
+    initializePlayerStats(teamA);
+    initializePlayerStats(teamB);
 
   document.getElementById("bonus-toggle").addEventListener("change", () => {
     bonusTaken = document.getElementById("bonus-toggle").checked;

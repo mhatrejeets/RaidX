@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select Teams</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #f0f0f0;
+    }
+    select, button {
+      padding: 0.5rem;
+      margin: 1rem;
+      font-size: 1rem;
+    }
+    button:disabled {
+      background-color: grey;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h2>Select Teams for the Match</h2>
+  <select id="team1">
+    <option value="">Select Team 1</option>
+  </select>
+  <select id="team2">
+    <option value="">Select Team 2</option>
+  </select>
+  <br>
+  <button id="startMatchBtn" disabled>Start Match</button>
+
+  <script>
+    let teams = [];
+
+    async function loadTeams() {
+      try {
+        const res = await fetch("/api/teams");
+        teams = await res.json();
+
+        const team1 = document.getElementById("team1");
+        const team2 = document.getElementById("team2");
+
+        teams.forEach(team => {
+          let option1 = new Option(team.team_name, team.id);
+          let option2 = new Option(team.team_name, team.id);
+          team1.add(option1);
+          team2.add(option2);
+        });
+      } catch (err) {
+        console.error("Failed to load teams:", err);
+      }
+    }
+
+    function validateSelection() {
+      const t1 = document.getElementById("team1").value;
+      const t2 = document.getElementById("team2").value;
+      document.getElementById("startMatchBtn").disabled = !(t1 && t2 && t1 !== t2);
+    }
+
+    document.getElementById("team1").addEventListener("change", validateSelection);
+    document.getElementById("team2").addEventListener("change", validateSelection);
+
+    document.getElementById("startMatchBtn").addEventListener("click", () => {
+      const team1Id = document.getElementById("team1").value;
+      const team2Id = document.getElementById("team2").value;
+
+      const team1 = teams.find(t => t.id === team1Id);
+      const team2 = teams.find(t => t.id === team2Id);
+
+      const queryParams = new URLSearchParams({
+        team1_id: team1.id,
+        team1_name: team1.team_name,
+        team2_id: team2.id,
+        team2_name: team2.team_name
+      });
+
+      window.location.href = `/scorer?${queryParams.toString()}`;
+    });
+
+    loadTeams();
+  </script>
+</body>
+</html>
