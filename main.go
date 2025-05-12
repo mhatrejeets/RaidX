@@ -25,6 +25,9 @@ func main() {
 
 	app.Post("/signup", SignupHandler)
 
+	app.Post("/login", LoginHandler)
+
+
 	defer CloseDB()
 	// Serve other static assets like CSS, JS if needed
 	app.Static("/static", "./Static")

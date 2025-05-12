@@ -85,5 +85,17 @@ func SignupHandler(c *fiber.Ctx) error {
 	}
 
 	// Return success message
-	return c.SendString("✅ Signup successful!")
+	return c.Type("html").SendString(`
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<script>
+			alert("✅ Signup successful!");
+			window.location.href = "/";
+		</script>
+	</head>
+	<body></body>
+	</html>
+`)
+
 }
