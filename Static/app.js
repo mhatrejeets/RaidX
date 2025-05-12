@@ -8,11 +8,26 @@ socket.onerror = (error) => {
   console.error("WebSocket error:", error);
 };
 
-function sendPlayerStats() {
+function sendGameStats() {
   if (socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify({ type: "playerStats", data: playerStats }));
+    const gameStats = {
+      type: "gameStats",
+      data: {
+        teamA: {
+          name: teamA.name,
+          score: teamA.score
+        },
+        teamB: {
+          name: teamB.name,
+          score: teamB.score
+        },
+        playerStats: playerStats
+      }
+    };
+    socket.send(JSON.stringify(gameStats));
   }
 }
+
 
 
 let teamA = { name: "", score: 0, players: [] };
@@ -169,7 +184,7 @@ function raidSuccessful() {
     defendingTeam.score += 1;
   }
 
-  sendPlayerStats(); // <-- Send updates via WebSocket
+  sendGameStats(); // <-- Send updates via WebSocket
 
   resetEmptyRaidCount(raidingTeam);
   checkAllOut();
@@ -329,24 +344,6 @@ function renderPlayers() {
   render(teamA, "teamA-players");
   render(teamB, "teamB-players");
 }
-
-// function renderPlayers() {
-//   const render = (team, containerId) => {
-//     const container = document.getElementById(containerId);
-//     container.innerHTML = "";
-//     team.players.forEach(player => {
-//       const btn = document.createElement("button");
-//       btn.className = `player-card btn ${player.status === "in" ? "btn-outline-primary" : "btn-secondary"}`;
-//       btn.textContent = player.name;
-//       btn.onclick = () => handlePlayerClick(player.id);
-//       container.appendChild(btn);
-//     });
-//   };
-
-//   render(teamA, "teamA-players");
-//   render(teamB, "teamB-players");
-// }
-
 function updateBonusToggleVisibility() {
   const bonusToggle = document.getElementById("bonus-toggle");
   const opposingTeam = getDefendingTeam();
@@ -356,8 +353,26 @@ function updateBonusToggleVisibility() {
 }
 
 function updateRaidInfoUI() {
-  document.getElementById("raid-number").textContent = `Raid: ${raid}`;
+  if (document.readyState === "loading") {
+    console.warn("⚠️ DOM not fully loaded");
+    
+    return;
+  }
+
+  const raidElement = document.getElementById("raid-number");
+
+  if (!raidElement) {
+    console.warn("⚠️ 'raid-number' element not found");
+    
+    return;
+  }
+
+  raidElement.textContent = `Raid: ${raid}`;
 }
+
+
+
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
@@ -365,6 +380,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const team2Id = params.get("team2_id");
   const team1Name = params.get("team1_name");
   const team2Name = params.get("team2_name");
+  const raidElement = document.getElementById("raid-number");
+  console.log("DOM fully loaded. Raid Element:", raidElement);
 
   socket.onopen = () => console.log("WebSocket connection established");
   socket.onerror = (err) => console.error("WebSocket error:", err);
@@ -380,10 +397,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data1 = await res1.json();
       const data2 = await res2.json();
 
+      const selectedA = JSON.parse(localStorage.getItem("teamA_selected"));
+      const selectedB = JSON.parse(localStorage.getItem("teamB_selected"));
+
       teamA.name = data1.team_name;
-      teamA.players = data1.players.map(p => ({ ...p, status: "in" }));
+      teamA.players = selectedA.map(p => ({ ...p, status: "in" }));
       teamB.name = data2.team_name;
-      teamB.players = data2.players.map(p => ({ ...p, status: "in" }));
+      teamB.players = selectedB.map(p => ({ ...p, status: "in" }));
+
 
 
     } catch (err) {

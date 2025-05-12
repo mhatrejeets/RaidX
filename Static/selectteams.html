@@ -43,7 +43,7 @@
         const team2 = document.getElementById("team2");
 
         teams.forEach(team => {
-          let option1 = new Option(team.team_name, team.id);
+          let option1 = new Option(team.team_name, team.id); // Use `_id` here
           let option2 = new Option(team.team_name, team.id);
           team1.add(option1);
           team2.add(option2);
@@ -63,21 +63,34 @@
     document.getElementById("team2").addEventListener("change", validateSelection);
 
     document.getElementById("startMatchBtn").addEventListener("click", () => {
-      const team1Id = document.getElementById("team1").value;
-      const team2Id = document.getElementById("team2").value;
+  const team1Id = document.getElementById("team1").value;
+  const team2Id = document.getElementById("team2").value;
 
-      const team1 = teams.find(t => t.id === team1Id);
-      const team2 = teams.find(t => t.id === team2Id);
+  console.log("Selected IDs:", { team1Id, team2Id });
+  console.log("Teams array:", teams);
 
-      const queryParams = new URLSearchParams({
-        team1_id: team1.id,
-        team1_name: team1.team_name,
-        team2_id: team2.id,
-        team2_name: team2.team_name
-      });
+  const team1 = teams.find(t => String(t.id) === team1Id);
+  const team2 = teams.find(t => String(t.id) === team2Id);
 
-      window.location.href = `/scorer?${queryParams.toString()}`;
-    });
+  console.log("Found teams:", { team1, team2 });
+
+  if (!team1 || !team2) {
+    alert("One or both selected teams could not be found.");
+    return;
+  }
+
+  const queryParams = new URLSearchParams({
+    team_id: team1.id,
+    team_key: "teamA_selected",
+    team1_id: team1.id,
+    team1_name: team1.team_name,
+    team2_id: team2.id,
+    team2_name: team2.team_name
+  });
+
+  window.location.href = `/playerselection?${queryParams.toString()}`;
+});
+
 
     loadTeams();
   </script>

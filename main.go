@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	InitDB()	
+	InitDB()
 	app := fiber.New()
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/home.html")
@@ -21,25 +21,25 @@ func main() {
 
 	app.Get("/api/team/:id", getTeamByID)
 
-
-
 	app.Get("/api/teams", getTeams)
 
 	app.Get("/start", func(c *fiber.Ctx) error {
-    return c.SendFile("./Static/startscore.html")
+		return c.SendFile("./Static/startscore.html")
 	})
 
 	app.Get("/signup", func(c *fiber.Ctx) error {
-    return c.SendFile("./Static/signup.html")
+		return c.SendFile("./Static/signup.html")
 	})
 
 	app.Post("/signup", SignupHandler)
 
 	app.Post("/login", LoginHandler)
 
+	app.Get("/playerselection", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/playerselection.html")
+	})
+
 	setupWebSocket(app)
-
-
 
 	defer CloseDB()
 	// Serve other static assets like CSS, JS if needed

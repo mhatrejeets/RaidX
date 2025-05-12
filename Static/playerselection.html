@@ -1,0 +1,69 @@
+<!-- Static/playerselection.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select Players</title>
+  <style>
+    .player-checkbox { margin: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Select 7 Players for <span id="team-name"></span></h2>
+  <form id="player-form">
+    <div id="player-list"></div>
+    <button type="submit">Confirm Selection</button>
+  </form>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const teamId = params.get("team_id");
+    const teamKey = params.get("team_key"); // "teamA_selected" or "teamB_selected"
+
+    fetch(`/api/team/${teamId}`)
+      .then(res => res.json())
+      .then(team => {
+        document.getElementById("team-name").textContent = team.team_name;
+
+        const list = document.getElementById("player-list");
+        team.players.forEach(player => {
+          const div = document.createElement("div");
+          div.classList.add("player-checkbox");
+          div.innerHTML = `
+            <input type="checkbox" name="players" value='${JSON.stringify(player)}' />
+            ${player.name}
+          `;
+          list.appendChild(div);
+        });
+      });
+
+    document.getElementById("player-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const selected = Array.from(document.querySelectorAll("input[name='players']:checked"))
+        .map(cb => JSON.parse(cb.value));
+
+      if (selected.length !== 7) {
+        alert("You must select exactly 7 players.");
+        return;
+      }
+
+      localStorage.setItem(teamKey, JSON.stringify(selected));
+
+      // Redirect to next team or scorer page
+      if (teamKey === "teamA_selected") {
+        // Select team B
+        const team2Id = params.get("team2_id");
+        window.location.href = `/playerselection?team_id=${team2Id}&team_key=teamB_selected&team1_id=${params.get("team1_id")}&team2_id=${params.get("team2_id")}`;
+      } else {
+        // All players selected, go to scorer
+        const team1Id = params.get("team1_id");
+        const team2Id = params.get("team2_id");
+        const team1Name = params.get("team1_name");
+        const team2Name = params.get("team2_name");
+
+        window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${team1Name}&team2_name=${team2Name}`;
+      }
+    });
+  </script>
+</body>
+</html>
