@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
@@ -21,52 +22,125 @@ type TeamStats struct {
 	Score int    `json:"score"`
 }
 
-type StatsMessage struct {
+type RaidDetails struct {
+	Type         string   `json:"type"`
+	Raider       string   `json:"raider"`
+	Defenders    []string `json:"defenders,omitempty"`
+	PointsGained int      `json:"pointsGained,omitempty"`
+	BonusTaken   bool     `json:"bonusTaken,omitempty"`
+	SuperTackle  bool     `json:"superTackle,omitempty"`
+}
+
+type EnhancedStatsMessage struct {
 	Type string `json:"type"`
 	Data struct {
 		TeamA       TeamStats             `json:"teamA"`
 		TeamB       TeamStats             `json:"teamB"`
 		PlayerStats map[string]PlayerStat `json:"playerStats"`
+		RaidDetails RaidDetails           `json:"raidDetails"`
 	} `json:"data"`
 }
 
+var viewerClients = struct {
+	clients map[*websocket.Conn]bool
+	mu      sync.Mutex
+}{
+	clients: make(map[*websocket.Conn]bool),
+}
+
+var broadcastChan = make(chan []byte)
+
+func StartBroadcastWorker() {
+	go func() {
+		for msg := range broadcastChan {
+			viewerClients.mu.Lock()
+			for conn := range viewerClients.clients {
+				err := conn.WriteMessage(websocket.TextMessage, msg)
+				if err != nil {
+					log.Println("Error sending message to viewer:", err)
+					conn.Close()
+					delete(viewerClients.clients, conn)
+				}
+			}
+			viewerClients.mu.Unlock()
+		}
+	}()
+}
+
+func BroadcastToViewers(message EnhancedStatsMessage) {
+	data, err := json.Marshal(message)
+	if err != nil {
+		log.Println("Error marshalling data for viewers:", err)
+		return
+	}
+	broadcastChan <- data
+}
+
 func setupWebSocket(app *fiber.App) {
-	app.Get("/ws", websocket.New(func(c *websocket.Conn) {
+	// Start the broadcast worker
+	StartBroadcastWorker()
+
+	// Handle scorer WebSocket
+	app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
 		defer func() {
-			log.Println("WebSocket connection closed")
+			log.Println("Scorer connection closed")
 			c.Close()
 		}()
 
 		for {
-			// Read message from WebSocket client
 			_, msg, err := c.ReadMessage()
 			if err != nil {
-				log.Println("Error reading WebSocket message:", err)
+				log.Println("Error reading message from scorer:", err)
 				break
 			}
 
-			// Unmarshal the JSON message
-			var receivedMessage StatsMessage
+			// Parse incoming stats
+			var receivedMessage EnhancedStatsMessage
 			err = json.Unmarshal(msg, &receivedMessage)
 			if err != nil {
-				log.Println("Error unmarshalling message:", err)
+				log.Println("Error unmarshalling scorer message:", err)
 				continue
 			}
 
-			// Check if the message type is "gameStats"
-			if receivedMessage.Type == "gameStats" {
-				log.Println("Game Stats Received:")
+			// Store data in Redis
+			err = SetRedisKey("gameStats", receivedMessage)
+			if err != nil {
+				log.Println("Error storing data in Redis:", err)
+			}
 
-				// Log team stats
-				log.Printf("Team A: %s, Score: %d\n", receivedMessage.Data.TeamA.Name, receivedMessage.Data.TeamA.Score)
-				log.Printf("Team B: %s, Score: %d\n", receivedMessage.Data.TeamB.Name, receivedMessage.Data.TeamB.Score)
+			// Broadcast updated stats to all viewers
+			BroadcastToViewers(receivedMessage)
+		}
+	}))
 
-				// Log player stats
-				log.Println("Player Stats:")
-				for playerID, stats := range receivedMessage.Data.PlayerStats {
-					log.Printf("Player ID: %s, Name: %s, Total Points: %d, Raid Points: %d, Defence Points: %d\n",
-						playerID, stats.Name, stats.TotalPoints, stats.RaidPoints, stats.DefencePoints)
-				}
+	// Handle viewer WebSocket
+	app.Get("/ws/viewer", websocket.New(func(c *websocket.Conn) {
+		viewerClients.mu.Lock()
+		viewerClients.clients[c] = true
+		viewerClients.mu.Unlock()
+
+		log.Printf("Viewer connected. Total viewers: %d", len(viewerClients.clients))
+
+		defer func() {
+			viewerClients.mu.Lock()
+			delete(viewerClients.clients, c)
+			viewerClients.mu.Unlock()
+			log.Printf("Viewer disconnected. Total viewers: %d", len(viewerClients.clients))
+			c.Close()
+		}()
+
+		// Send latest game stats from Redis on new connection
+		var latestStats EnhancedStatsMessage
+		err := GetRedisKey("gameStats", &latestStats)
+		if err == nil {
+			data, _ := json.Marshal(latestStats)
+			_ = c.WriteMessage(websocket.TextMessage, data)
+		}
+
+		// Keep connection open
+		for {
+			if _, _, err := c.NextReader(); err != nil {
+				break
 			}
 		}
 	}))

@@ -6,6 +6,7 @@ import (
 
 func main() {
 	InitDB()
+	InitRedis()
 	app := fiber.New()
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/home.html")
@@ -38,6 +39,11 @@ func main() {
 	app.Get("/playerselection", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/playerselection.html")
 	})
+
+	app.Get("/viewer", func(c *fiber.Ctx) error {
+    return c.SendFile("./Static/viewer.html")
+})
+
 
 	setupWebSocket(app)
 

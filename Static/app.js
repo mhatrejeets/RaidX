@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://localhost:3000/ws"); // Adjust your port/path if needed
+const socket = new WebSocket("ws://localhost:3000/ws/scorer"); // Adjust your port/path if needed
 
 socket.onopen = () => {
   console.log("WebSocket connection established");
@@ -8,23 +8,24 @@ socket.onerror = (error) => {
   console.error("WebSocket error:", error);
 };
 
-function sendGameStats() {
+function sendEnhancedStats(raidDetails) {
   if (socket.readyState === WebSocket.OPEN) {
-    const gameStats = {
+    const enhancedStats = {
       type: "gameStats",
       data: {
         teamA: {
           name: teamA.name,
-          score: teamA.score
+          score: teamA.score,
         },
         teamB: {
           name: teamB.name,
-          score: teamB.score
+          score: teamB.score,
         },
-        playerStats: playerStats
-      }
+        playerStats: playerStats,
+        raidDetails: raidDetails, // Include the detailed raid information
+      },
     };
-    socket.send(JSON.stringify(gameStats));
+    socket.send(JSON.stringify(enhancedStats));
   }
 }
 
@@ -70,20 +71,7 @@ function enforceLobbyRule() {
   return true;
 }
 
-// function handleLobbyTouch(player, isRaiderTouchingLobby) {
-//   const raidingTeam = getRaidingTeam();
-//   const defendingTeam = getDefendingTeam();
 
-//   if (isRaiderTouchingLobby) {
-//     defendingTeam.score += 1;
-//     alert(`${raidingTeam.name}'s raider touched the lobby! ${defendingTeam.name} gets 1 point.`);
-//   } else {
-//     raidingTeam.score += 1;
-//     alert(`${defendingTeam.name}'s defender touched the lobby! ${raidingTeam.name} gets 1 point.`);
-//   }
-
-//   nextRaid();
-// }
 function handleLobbyTouch(player, isRaiderTouchingLobby) {
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
@@ -164,32 +152,39 @@ function raidSuccessful() {
   const defendingTeam = getDefendingTeam();
   let raidPoints = selectedDefenders.length;
 
+  // Update scores and stats
   raidingTeam.score += raidPoints;
-
-  // Update player stats
   playerStats[selectedRaider.id].raidPoints += raidPoints;
   playerStats[selectedRaider.id].totalPoints += raidPoints;
+
+  let eliminatedDefenders = [];
+  selectedDefenders.forEach((def) => {
+    def.status = "out";
+    eliminatedDefenders.push(def.name);
+  });
+
+  let raidDetails = {
+    type: "raidSuccess",
+    raider: selectedRaider.name,
+    defendersEliminated: eliminatedDefenders,
+    pointsGained: raidPoints,
+    bonusTaken: bonusTaken,
+  };
 
   if (bonusTaken) {
     raidingTeam.score += 1;
     playerStats[selectedRaider.id].raidPoints += 1;
     playerStats[selectedRaider.id].totalPoints += 1;
+    raidDetails.bonusTaken = true;
   }
-
-  selectedDefenders.forEach(d => d.status = "out");
 
   revivePlayers(raidingTeam, selectedDefenders.length);
-
-  if (defendingTeam.players.filter(p => p.status === "in").length <= 3) {
-    defendingTeam.score += 1;
-  }
-
-  sendGameStats(); // <-- Send updates via WebSocket
-
   resetEmptyRaidCount(raidingTeam);
   checkAllOut();
+  sendEnhancedStats(raidDetails);
   nextRaid();
 }
+
 
 function defenseSuccessful() {
   if (!selectedRaider) {
@@ -201,30 +196,31 @@ function defenseSuccessful() {
   const defendingTeam = getDefendingTeam();
 
   let points = 1;
-
-  if (defendingTeam.players.filter(p => p.status === "in").length <= 3) points += 1;
+  if (defendingTeam.players.filter((p) => p.status === "in").length <= 3) {
+    points += 1; // Super tackle
+  }
 
   selectedRaider.status = "out";
   defendingTeam.score += points;
 
-  // Assign points to defenders
-  selectedDefenders.forEach(def => {
+  let defendingPlayers = selectedDefenders.map((def) => def.name);
+  selectedDefenders.forEach((def) => {
     playerStats[def.id].defencePoints += 1;
     playerStats[def.id].totalPoints += 1;
   });
 
-  if (bonusTaken) {
-    raidingTeam.score += 1;
-    playerStats[selectedRaider.id].raidPoints += 1;
-    playerStats[selectedRaider.id].totalPoints += 1;
-  }
+  let raidDetails = {
+    type: "defenseSuccess",
+    raider: selectedRaider.name,
+    defenders: defendingPlayers,
+    pointsGained: points,
+    superTackle: points > 1,
+  };
 
   revivePlayers(defendingTeam, 1);
-
-  sendPlayerStats(); // <-- Send updates via WebSocket
-
   resetEmptyRaidCount(raidingTeam);
   checkAllOut();
+  sendEnhancedStats(raidDetails);
   nextRaid();
 }
 
@@ -237,10 +233,20 @@ function emptyRaid() {
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
 
-  if (bonusTaken) raidingTeam.score += 1;
+  let raidDetails = {
+    type: "emptyRaid",
+    raider: selectedRaider.name,
+    bonusTaken: bonusTaken,
+  };
+
+  if (bonusTaken) {
+    raidingTeam.score += 1;
+    playerStats[selectedRaider.id].raidPoints += 1;
+    playerStats[selectedRaider.id].totalPoints += 1;
+    raidDetails.bonusTaken = true;
+  }
 
   const isTeamA = raidingTeam === teamA;
-
   if (isTeamA) {
     emptyRaidCountA++;
     isDoOrDieRaid = emptyRaidCountA >= 3;
@@ -252,11 +258,11 @@ function emptyRaid() {
   if (isDoOrDieRaid) {
     selectedRaider.status = "out";
     defendingTeam.score += 1;
-    alert("Do or Die Raid! Raider is out and defending team gets 1 point.");
-    if (isTeamA) emptyRaidCountA = 0;
-    else emptyRaidCountB = 0;
+    raidDetails.type = "doOrDieRaid";
+    emptyRaidCountA = emptyRaidCountB = 0; // Reset counters
   }
 
+  sendEnhancedStats(raidDetails);
   nextRaid();
 }
 
