@@ -28,7 +28,7 @@ func InitDB() {
 
     // Ping to ensure connection
     err = Client.Ping(ctx, nil)
-    if err != nil {
+    if err != nil {     
         log.Fatalf("Failed to ping MongoDB: %v", err)
     }
 

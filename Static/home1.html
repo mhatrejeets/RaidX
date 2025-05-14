@@ -37,19 +37,33 @@
     .info-box h5 {
       font-weight: 600;
     }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Top Right Login/Sign Up Buttons -->
+  <!-- Top Right Profile Section -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold text-orange" href="#">RaidX</a>
-      <div class="ms-auto d-flex gap-2">
-        <a href="Static/login.html" class="btn btn-outline-primary">Login</a>
-        <a href="Static/signup.html" class="btn btn-primary">Sign Up</a>
-      </div>
-    </div>
+      <div class="ms-auto profile">
+     <a href="#" id="profileLink">
+    <img src="/Static/user.png" alt="Profile Icon" />
+    <span id="playerName" class="fw-bold text-primary"></span>
+    </a>
+</div>
+    </div> 
+    
+
   </nav>
 
   <div class="container hero">
@@ -57,10 +71,22 @@
     <p class="lead text-secondary">Real-time Kabaddi scoring system for Kabaddi.</p>
 
     <div class="d-flex justify-content-center gap-3 mt-4">
-      <a href="/login" class="btn btn-orange px-4 py-2">Login For Matches and Tournaments.</a>
+      <a href="#" id="matchestype" class="btn btn-orange px-4 py-2">Matches and Tournaments</a>
       <a href="/vieweridpage" class="btn btn-primary px-4 py-2">Live Score</a>
     </div>
+    <script>
+  // Dynamically set player name and link to profile
+  // Extract 'id' from the URL path
+const playerId = window.location.pathname.split("/").pop();
 
+// Extract 'name' from the query parameters
+const playerName = new URLSearchParams(window.location.search).get("name");
+
+// Set the player's name and profile link dynamically
+document.getElementById("playerName").textContent = playerName || "Player";
+document.getElementById("profileLink").href = `/playerprofile/${playerId}`;
+document.getElementById("matchestype").href = `/matchestype/${playerId}`;
+</script>
     <div class="info-box mt-5">
       <h4 class="mb-4">About RaidX</h4>
       <div class="row text-start">
@@ -87,6 +113,10 @@
     </div>
   </div>
 
+  <script>
+    // Dynamically set player name
+    document.getElementById("playerName").textContent = playerName || "Player";
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

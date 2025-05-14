@@ -51,3 +51,4 @@ func getTeamByID(c *fiber.Ctx) error {
 		"players":   players,
 	})
 }
+

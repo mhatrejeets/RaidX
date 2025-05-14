@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requests</title>
+</head>
+<body>
+    <h1>Team Request</h1>
+    {{ if .Message }}
+        <p>{{ .Message }}</p>
+    {{ else }}
+        <p>You have a request to join the team: {{ .TeamName }}</p>
+        <a href="{{ .YesURL }}">Yes</a>
+        <a href="{{ .NoURL }}">No</a>
+    {{ end }}
+</body>
+</html>

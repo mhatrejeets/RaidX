@@ -9,13 +9,16 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Struct matching MongoDB document
 type Userr struct {
-	Email    string `bson:"email"`
-	Password string `bson:"password"`
+	ID       primitive.ObjectID `bson:"_id"`
+	Email    string             `bson:"email"`
+	Password string             `bson:"password"`
+	Name     string             `bson:"fullName"`
 }
 
 func LoginHandler(c *fiber.Ctx) error {
@@ -45,16 +48,17 @@ func LoginHandler(c *fiber.Ctx) error {
 	}
 
 	// Success
-	return c.Type("html").SendString(`
-		<!DOCTYPE html>
-		<html>
-		<head>
-			<script>
-				alert("✅ Login successful!");
-				window.location.href = "/start";
-			</script>
-		</head>
-		<body></body>
-		</html>
-	`)
+	return c.Type("html").SendString(fmt.Sprintf(`
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<script>
+			alert("✅ Login successful!");
+			window.location.href = "/home1/%s?name=%s";
+		</script>
+	</head>
+	<body></body>
+	</html>
+	`, user.ID.Hex(), user.Name))
+
 }
