@@ -88,7 +88,11 @@
     team2_name: team2.team_name
   });
 
-  window.location.href = `/playerselection?${queryParams.toString()}`;
+  
+
+  const playerId = window.location.pathname.split("/").pop();
+ 
+  window.location.href = `/playerselection/${playerId}?${queryParams.toString()}`;
 });
 
 

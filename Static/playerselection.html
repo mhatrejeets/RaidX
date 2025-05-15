@@ -48,12 +48,12 @@
       }
 
       localStorage.setItem(teamKey, JSON.stringify(selected));
-
+      const playerId = window.location.pathname.split("/").pop();
       // Redirect to next team or scorer page
       if (teamKey === "teamA_selected") {
         // Select team B
         const team2Id = params.get("team2_id");
-        window.location.href = `/playerselection?team_id=${team2Id}&team_key=teamB_selected&team1_id=${params.get("team1_id")}&team2_id=${params.get("team2_id")}`;
+        window.location.href = `/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${params.get("team1_id")}&team2_id=${params.get("team2_id")}`;
       } else {
         // All players selected, go to scorer
         const team1Id = params.get("team1_id");

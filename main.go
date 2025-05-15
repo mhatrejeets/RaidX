@@ -54,7 +54,7 @@ func main() {
 
 	app.Get("/playerprofile/:id", playerprofileHandler)
 
-	app.Get("/playerselection", func(c *fiber.Ctx) error {
+	app.Get("/playerselection/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/playerselection.html")
 	})
 
