@@ -44,6 +44,10 @@ func main() {
 		return c.SendFile("./Static/signup.html")
 	})
 
+	app.Get("/viewer", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/viewer.html")
+	})
+
 	app.Post("/signup", SignupHandler)
 
 	app.Post("/login", LoginHandler)
@@ -71,6 +75,11 @@ func main() {
 			"ID": id,
 		})
 	})
+
+	app.Get("/endgame", EndGameHandler)
+
+	app.Get("/matches", GetAllMatches)
+	app.Get("/matches/:id", GetMatchByID)
 
 	setupWebSocket(app)
 

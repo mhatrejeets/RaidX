@@ -43,7 +43,8 @@ function initializePlayerStats(team) {
       id: player.id,
       totalPoints: 0,
       raidPoints: 0,
-      defencePoints: 0
+      defencePoints: 0,
+      status: player.status,
     };
   });
 }
@@ -96,8 +97,24 @@ function handleLobbyTouch(player, isRaiderTouchingLobby) {
 
 function endGame() {
   game = false;
-  alert("Game Ended");
+  let message = "";
+
+  if (teamA.score > teamB.score) {
+    message = `${teamA.name} wins`;
+  } else if (teamA.score < teamB.score) {
+    message = `${teamB.name} wins`;
+  } else {
+    message = "It was a tie";
+  }
+
+  alert(message);
+
+  // Redirect after the alert is dismissed
+  setTimeout(function() {
+    window.location.href = "/endgame";
+  }, 100); // small delay to allow alert to complete
 }
+
 
 function handlePlayerClick(playerId) {
   const currentTeam = getRaidingTeam();

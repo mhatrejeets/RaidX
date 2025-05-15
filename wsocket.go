@@ -15,6 +15,7 @@ type PlayerStat struct {
 	TotalPoints   int    `json:"totalPoints"`
 	RaidPoints    int    `json:"raidPoints"`
 	DefencePoints int    `json:"defencePoints"`
+	Status        string `json:"status"`
 }
 
 type TeamStats struct {
