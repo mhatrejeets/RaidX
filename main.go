@@ -19,18 +19,14 @@ func main() {
 		return c.SendFile("./Static/login.html")
 	})
 
-	app.Get("/home1", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/home1.html")
-	})
+	
 
 	// Serve scorer.html at /scorer
 	app.Get("/scorer", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/scorer.html")
 	})
 
-	app.Get("/selectteam", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/selectteams.html")
-	})
+	
 
 	app.Get("/api/team/:id", getTeamByID)
 
@@ -80,6 +76,9 @@ func main() {
 
 	app.Get("/matches", GetAllMatches)
 	app.Get("/matches/:id", GetMatchByID)
+	app.Get("/createteam/:id", CreateTeamPage)
+	app.Post("/createteam/:id", SubmitTeam)
+
 
 	setupWebSocket(app)
 

@@ -31,16 +31,16 @@ type RaidDetailss struct {
 
 // Match struct matching your MongoDB document
 type Match struct {
-	ID          primitive.ObjectID       `json:"id" bson:"_id"`
-	Type        string                   `json:"type" bson:"type"`
-	Data        struct {
-		TeamA Teamm `json:"teamA" bson:"teamA"`
-		TeamB Teamm `json:"teamB" bson:"teamB"`
+	ID   primitive.ObjectID `json:"id" bson:"_id"`
+	Type string             `json:"type" bson:"type"`
+	Data struct {
+		TeamA       Teamm                         `json:"teamA" bson:"teamA"`
+		TeamB       Teamm                         `json:"teamB" bson:"teamB"`
+		PlayerStats map[string]PlayerStatt        `json:"playerStats" bson:"playerStats"`
+		RaidDetails RaidDetailss                  `json:"raidDetails" bson:"raidDetails"`
 	} `json:"data" bson:"data"`
-
-	PlayerStats map[string]PlayerStatt `json:"playerStats" bson:"playerStats"`
-	RaidDetails RaidDetailss           `json:"raidDetails" bson:"raidDetails"`
 }
+
 
 
 func GetAllMatches(c *fiber.Ctx) error {
@@ -62,6 +62,11 @@ func GetAllMatches(c *fiber.Ctx) error {
 	})
 }
 
+type PlayerWithID struct {
+	ID   string
+	Stat PlayerStatt
+}
+
 func GetMatchByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
@@ -77,6 +82,20 @@ func GetMatchByID(c *fiber.Ctx) error {
 		return c.Status(404).SendString("Match not found")
 	}
 
-	return c.Render("allmatches", match)
+	// Convert PlayerStats map to slice
+	playerList := []PlayerWithID{}
+	for id, stat := range match.Data.PlayerStats {
+	playerList = append(playerList, PlayerWithID{
+		ID:   id,
+		Stat: stat,
+	})
+}
+
+
+	// Now pass both match data and player list
+	return c.Render("allmatches", fiber.Map{
+		"Match":       match,
+		"PlayerStats": playerList,
+	})
 }
 

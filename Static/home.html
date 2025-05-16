@@ -1,92 +1,579 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RaidX</title>
+  <title>RaidX – Kabaddi Live Platform</title>
+
+  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- AOS Animation CSS -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+
+  <!-- Custom CSS -->
   <style>
     body {
-      background-color: #f3f6f5;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      margin: 0;
+      padding: 0;
     }
-    .hero {
-      text-align: center;
-      margin-top: 50px;
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      padding: 1rem 2rem;
     }
-    .hero h1 span.orange {
-      color: #f97316;
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.8rem;
+      color: #f97316 !important;
     }
-    .hero h1 span.blue {
-      color: #2563eb;
+
+    .nav-link {
+      color: #f1f5f9 !important;
+      margin: 0 0.5rem;
+      transition: color 0.3s;
     }
+
+    .nav-link:hover {
+      color: #f97316 !important;
+    }
+
     .btn-orange {
       background-color: #f97316;
       color: white;
+      border-radius: 30px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 0 15px #f9731690;
+      transition: all 0.3s ease;
     }
+
     .btn-orange:hover {
       background-color: #ea580c;
+      transform: scale(1.05);
+    }
+
+    .btn-outline-light {
+      border-radius: 30px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-light:hover {
+      background-color: #ffffff;
+      color: #0f172a;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 100px 20px 60px;
+      background: url('https://cdn.pixabay.com/photo/2022/01/15/05/45/silhouette-6939270_1280.png') no-repeat center bottom;
+      background-size: contain;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #fbbf24;
+      text-shadow: 2px 2px #000;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    .info-box {
+      background-color: #1e293b;
+      padding: 50px 30px;
+      border-radius: 20px;
+      margin-top: 50px;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+    }
+
+    .info-box h5 {
+      color: #facc15;
+    }
+
+    .highlight {
+      padding: 15px;
+      background-color: #334155;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+    }
+
+    .footer {
+      background: #0f172a;
+      text-align: center;
+      padding: 30px;
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 60px;
+    }
+
+    .floating-bg {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 122, 0, 0.3), transparent);
+      animation: floatAnim 6s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    .circle1 {
+      width: 200px;
+      height: 200px;
+      top: 10%;
+      left: 5%;
+    }
+
+    .circle2 {
+      width: 250px;
+      height: 250px;
+      bottom: 10%;
+      right: 5%;
+    }
+
+    @keyframes floatAnim {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #facc15;
+      margin-bottom: 40px;
+    }
+
+    .social-icon {
+      font-size: 3rem;
+      /* Increased font size */
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .social-icon:hover {
+      transform: scale(1.2);
+    }
+
+    .social-icon i {
+      padding: 15px;
+      border-radius: 50%;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Twitter Color */
+    .twitter {
+      color: #1DA1F2;
+      /* Twitter blue */
+    }
+
+    .twitter:hover i {
+      background-color: #1DA1F2;
+      /* Twitter blue */
       color: white;
     }
-    .info-box {
-      background-color: #f8f9fa;
-      border-radius: 12px;
-      padding: 30px;
-      margin-top: 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+
+    /* YouTube Color */
+    .youtube {
+      color: #FF0000;
+      /* YouTube red */
     }
-    .info-box h5 {
-      font-weight: 600;
+
+    .youtube:hover i {
+      background-color: #FF0000;
+      /* YouTube red */
+      color: white;
+    }
+
+    /* Facebook Color */
+    .facebook {
+      color: #1877F2;
+      /* Facebook blue */
+    }
+
+    .facebook:hover i {
+      background-color: #1877F2;
+      /* Facebook blue */
+      color: white;
+    }
+
+    /* Instagram Color */
+    .instagram {
+      color: #E1306C;
+      /* Instagram pink */
+    }
+
+    .instagram:hover i {
+      background-color: #E1306C;
+      /* Instagram pink */
+      color: white;
+    }
+
+    .social-icon {
+      font-size: 2rem;
+      /* Increased font size */
+      padding: 10px;
+      border-radius: 50%;
+      transition: transform 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .social-icon:hover {
+      transform: scale(1.2);
+    }
+
+    .social-icon i {
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Twitter Color with Glowing Effect */
+    .twitter {
+      color: #1DA1F2;
+      /* Twitter blue */
+    }
+
+    .twitter:hover {
+      box-shadow: 0 0 15px #1DA1F2;
+      /* Glowing effect */
+      background-color: rgba(29, 161, 242, 0.2);
+      /* Subtle light background */
+      color: #1DA1F2;
+    }
+
+    /* YouTube Color with Glowing Effect */
+    .youtube {
+      color: #FF0000;
+      /* YouTube red */
+    }
+
+    .youtube:hover {
+      box-shadow: 0 0 15px #FF0000;
+      /* Glowing effect */
+      background-color: rgba(255, 0, 0, 0.2);
+      /* Subtle light background */
+      color: #FF0000;
+    }
+
+    /* Facebook Color with Glowing Effect */
+    .facebook {
+      color: #1877F2;
+      /* Facebook blue */
+    }
+
+    .facebook:hover {
+      box-shadow: 0 0 15px #1877F2;
+      /* Glowing effect */
+      background-color: rgba(24, 119, 242, 0.2);
+      /* Subtle light background */
+      color: #1877F2;
+    }
+
+    /* Instagram Color with Glowing Effect */
+    .instagram {
+      color: #E1306C;
+      /* Instagram pink */
+    }
+
+    .instagram:hover {
+      box-shadow: 0 0 15px #E1306C;
+      /* Glowing effect */
+      background-color: rgba(225, 48, 108, 0.2);
+      /* Subtle light background */
+      color: #E1306C;
+    }
+
+    .social-icon {
+      font-size: 2rem;
+      /* Increased font size */
+      padding: 10px;
+      /* Ensures the icon has enough space to remain circular */
+      border-radius: 50%;
+      /* Ensures the icon stays circular */
+      transition: transform 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      /* Initial subtle glow effect */
+    }
+
+    /* Remove scaling on hover for a cleaner look */
+    .social-icon:hover {
+      transform: scale(1);
+      /* No scaling effect */
+    }
+
+    /* Twitter Color with Glowing Effect */
+    .twitter {
+      color: #1DA1F2;
+      /* Twitter blue */
+    }
+
+    .twitter:hover {
+      box-shadow: 0 0 15px #1DA1F2;
+      /* Glowing effect on hover */
+      color: #1DA1F2;
+    }
+
+    /* YouTube Color with Glowing Effect */
+    .youtube {
+      color: #FF0000;
+      /* YouTube red */
+    }
+
+    .youtube:hover {
+      box-shadow: 0 0 15px #FF0000;
+      /* Glowing effect on hover */
+      color: #FF0000;
+    }
+
+    /* Facebook Color with Glowing Effect */
+    .facebook {
+      color: #1877F2;
+      /* Facebook blue */
+    }
+
+    .facebook:hover {
+      box-shadow: 0 0 15px #1877F2;
+      /* Glowing effect on hover */
+      color: #1877F2;
+    }
+
+    /* Instagram Color with Glowing Effect */
+    .instagram {
+      color: #E1306C;
+      /* Instagram pink */
+    }
+
+    .instagram:hover {
+      box-shadow: 0 0 15px #E1306C;
+      /* Glowing effect on hover */
+      color: #E1306C;
+    }
+
+    #how-to-use {
+      background-color: #1e293b;
+      padding: 50px 30px;
+      border-radius: 20px;
+      margin-top: 50px;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+    }
+
+    .step-box {
+      background-color: #334155;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .step-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fbbf24;
+      margin-bottom: 10px;
+      border: 2px solid #fbbf24;
+      border-radius: 50%;
+      padding: 15px;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto;
+    }
+
+    .step-box h5 {
+      font-size: 1.3rem;
+      color: #facc15;
+      margin-top: 15px;
+    }
+
+    .step-box p {
+      color: #cbd5e1;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    .step-box:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+    }
+
+    .final-step {
+      background-color: #0f172a;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 40px;
+    }
+
+    .final-step h5 {
+      color: #10b981;
+      font-size: 1.8rem;
+    }
+
+    .final-step p {
+      color: #94a3b8;
+      font-size: 1.1rem;
     }
   </style>
 </head>
-<body>
 
-  <!-- Top Right Login/Sign Up Buttons -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
+<body>
+  <div class="floating-bg circle1"></div>
+  <div class="floating-bg circle2"></div>
+
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold text-orange" href="#">RaidX</a>
-      <div class="ms-auto d-flex gap-2">
-        <a href="Static/login.html" class="btn btn-outline-primary">Login</a>
-        <a href="Static/signup.html" class="btn btn-primary">Sign Up</a>
+      <a class="navbar-brand" href="#">RaidX</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+          <li class="nav-item"><a class="nav-link" href="#scorer">Scorer</a></li>
+          <li class="nav-item"><a class="nav-link" href="#viewer">Viewer</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          <li class="nav-item ms-3">
+            <a href="Static/login.html" class="btn btn-orange btn-sm">Login</a>
+          </li>
+          <li class="nav-item ms-2">
+            <a href="Static/signup.html" class="btn btn-orange btn-sm">Sign Up</a>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container hero">
-    <h1><span class="orange">RaidX</span> <span class="blue">Live Score</span> Streaming</h1>
-    <p class="lead text-secondary">Real-time Kabaddi scoring system for Kabaddi.</p>
-
+  <section id="hero" class="hero" data-aos="fade-up">
+    <h1>Welcome to <span class="text-warning">RaidX</span></h1>
+    <p>India’s Premier Real-Time Kabaddi Scoring & Viewing Platform</p>
     <div class="d-flex justify-content-center gap-3 mt-4">
-      <a href="/login" class="btn btn-orange px-4 py-2">Login For Matches and Tournaments.</a>
-      <a href="/vieweridpage" class="btn btn-primary px-4 py-2">Live Score</a>
+      <a href="/login" class="btn btn-orange">Login For Matches and Tournaments</a>
+      <a href="/viewer" class="btn btn-outline-light">Live Score</a>
     </div>
+  </section>
 
-    <div class="info-box mt-5">
-      <h4 class="mb-4">About RaidX</h4>
-      <div class="row text-start">
-        <div class="col-md-6">
-          <h5 class="text-orange">For Scorers</h5>
-          <ul>
-            <li>Select raiders by clicking on Team A players</li>
-            <li>Select defenders from Team B</li>
-            <li>Toggle bonus points when earned</li>
-            <li>Submit raid results to update scores</li>
-            <li>Review mode to correct mistakes</li>
-          </ul>
+  <section id="about" class="container info-box" data-aos="fade-up">
+    <div class="section-title text-center">About RaidX</div>
+    <p class="text-center">RaidX is a cutting-edge platform for real-time Kabaddi scoring and match streaming. We help
+      players and fans enjoy tournaments digitally — anytime, anywhere.</p>
+    <p class="text-center">RaidX is revolutionizing Kabaddi by providing real-time scoring, live streaming, and player
+      insights, making the sport more accessible and exciting for fans and players alike..</p>
+    <p class="text-center">Raidx – Apna Game, Apni Pehchaan!</p>
+  </section>
+
+  <section id="features" class="container info-box" data-aos="fade-up">
+    <div class="section-title text-center">Features</div>
+    <div class="row">
+      <div class="col-md-6" data-aos="fade-right">
+        <h5>For Scorers</h5>
+        <div class="highlight"><i class="bi bi-person-plus"></i>Select raiders by clicking on Team A</div>
+        <div class="highlight"><i class="bi bi-shield"></i>Select defenders from Team B</div>
+        <div class="highlight"><i class="bi bi-plus-circle"></i>Bonus, Super Tackles, Do or Die logic</div>
+        <div class="highlight"><i class="bi bi-upload"></i>Submit raid result instantly</div>
+        <div class="highlight"><i class="bi bi-tools"></i>Use review mode to fix errors</div>
+      </div>
+      <div class="col-md-6" data-aos="fade-left">
+        <h5>For Viewers</h5>
+        <div class="highlight"><i class="bi bi-tv"></i>Real-time updates on all matches</div>
+        <div class="highlight"><i class="bi bi-person-check"></i>Raider and defenders live status</div>
+        <div class="highlight"><i class="bi bi-bar-chart-line"></i>Track team performance</div>
+        <div class="highlight"><i class="bi bi-clock-history"></i>Replay & timeline features</div>
+        <div class="highlight"><i class="bi bi-clock-history"></i>Live Textual Commentary</div>
+      </div>
+    </div>
+  </section>
+  <section id="how-to-use" class="container info-box" data-aos="fade-up">
+    <div class="section-title text-center">How to Use</div>
+    <div class="row">
+      <div class="col-md-4" data-aos="fade-right">
+        <div class="step-box">
+          <div class="step-number">1</div>
+          <h5>Host a Tournament</h5>
+          <p>Click on the "Host Match" button on the new page to start creating your match.</p>
         </div>
-        <div class="col-md-6">
-          <h5 class="text-primary">For Viewers</h5>
-          <ul>
-            <li>See real-time match updates</li>
-            <li>View current raider and defenders out</li>
-            <li>Track live scores for both teams</li>
-            <li>Monitor player status throughout the match</li>
-          </ul>
+      </div>
+      <div class="col-md-4" data-aos="fade-up">
+        <div class="step-box">
+          <div class="step-number">2</div>
+          <h5>Enter Match Details</h5>
+          <p>Provide the necessary details like name, venue, date, and time of the match.</p>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-left">
+        <div class="step-box">
+          <div class="step-number">3</div>
+          <h5>Host the Match</h5>
+          <p>Click on "Host Now" to make your match visible to teams and viewers.</p>
         </div>
       </div>
     </div>
-  </div>
+    <div class="row">
+      <div class="col-md-12 text-center mt-4" data-aos="fade-up">
+        <div class="step-box final-step">
+          <h5>Your Match is Live!</h5>
+          <p>The match session has been successfully created, and players can join to play!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="contact" class="container info-box" data-aos="fade-up">
+    <div class="section-title text-center">Contact Us</div>
+    <p class="text-center">Have questions or feedback? Reach out to us at <a
+        href="mailto:chandekarsujal884@gmail.com">SujalChandekar(Dev)</a>.</p>
+
+    <div class="text-center mt-4">
+      <p>Follow us on social media:</p>
+      <div class="d-flex justify-content-center gap-5">
+        <a href="https://twitter.com" target="_blank" class="social-icon twitter">
+          <i class="bi bi-twitter"></i>
+        </a>
+        <a href="https://youtube.com" target="_blank" class="social-icon youtube">
+          <i class="bi bi-youtube"></i>
+        </a>
+        <a href="https://facebook.com" target="_blank" class="social-icon facebook">
+          <i class="bi bi-facebook"></i>
+        </a>
+        <a href="https://instagram.com" target="_blank" class="social-icon instagram">
+          <i class="bi bi-instagram"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+
+  <footer class="footer">
+    &copy; 2025 RaidX Kabaddi Platform. Built with dedication to India's sport.
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
 </body>
+
 </html>

@@ -120,13 +120,13 @@ func setupWebSocket(app *fiber.App) {
 		viewerClients.clients[c] = true
 		viewerClients.mu.Unlock()
 
-		log.Printf("Viewer connected. Total viewers: %d", len(viewerClients.clients))
+		
 
 		defer func() {
 			viewerClients.mu.Lock()
 			delete(viewerClients.clients, c)
 			viewerClients.mu.Unlock()
-			log.Printf("Viewer disconnected. Total viewers: %d", len(viewerClients.clients))
+			
 			c.Close()
 		}()
 
