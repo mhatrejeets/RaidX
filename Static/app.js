@@ -1,30 +1,53 @@
-let teamA = {
-  name: "Team A",
-  score: 0,
-  players: [
-    { id: "A1", name: "Player A1", status: "in" },
-    { id: "A2", name: "Player A2", status: "in" },
-    { id: "A3", name: "Player A3", status: "in" },
-    { id: "A4", name: "Player A4", status: "in" },
-    { id: "A5", name: "Player A5", status: "in" },
-    { id: "A6", name: "Player A6", status: "in" },
-    { id: "A7", name: "Player A7", status: "in" },
-  ],
+const socket = new WebSocket("ws://localhost:3000/ws/scorer"); // Adjust your port/path if needed
+
+socket.onopen = () => {
+  console.log("WebSocket connection established");
 };
 
-let teamB = {
-  name: "Team B",
-  score: 0,
-  players: [
-    { id: "B1", name: "Player B1", status: "in" },
-    { id: "B2", name: "Player B2", status: "in" },
-    { id: "B3", name: "Player B3", status: "in" },
-    { id: "B4", name: "Player B4", status: "in" },
-    { id: "B5", name: "Player B5", status: "in" },
-    { id: "B6", name: "Player B6", status: "in" },
-    { id: "B7", name: "Player B7", status: "in" },
-  ],
+socket.onerror = (error) => {
+  console.error("WebSocket error:", error);
 };
+
+function sendEnhancedStats(raidDetails) {
+  if (socket.readyState === WebSocket.OPEN) {
+    const enhancedStats = {
+      type: "gameStats",
+      data: {
+        teamA: {
+          name: teamA.name,
+          score: teamA.score,
+        },
+        teamB: {
+          name: teamB.name,
+          score: teamB.score,
+        },
+        playerStats: playerStats,
+        raidDetails: raidDetails, // Include the detailed raid information
+      },
+    };
+    socket.send(JSON.stringify(enhancedStats));
+  }
+}
+
+
+
+let teamA = { name: "", score: 0, players: [] };
+let teamB = { name: "", score: 0, players: [] };
+
+let playerStats = {};
+
+function initializePlayerStats(team) {
+  team.players.forEach(player => {
+    playerStats[player.id] = {
+      name: player.name,
+      id: player.id,
+      totalPoints: 0,
+      raidPoints: 0,
+      defencePoints: 0,
+      status: player.status,
+    };
+  });
+}
 
 let game = true;
 let raid = 1;
@@ -49,20 +72,7 @@ function enforceLobbyRule() {
   return true;
 }
 
-// function handleLobbyTouch(player, isRaiderTouchingLobby) {
-//   const raidingTeam = getRaidingTeam();
-//   const defendingTeam = getDefendingTeam();
 
-//   if (isRaiderTouchingLobby) {
-//     defendingTeam.score += 1;
-//     alert(`${raidingTeam.name}'s raider touched the lobby! ${defendingTeam.name} gets 1 point.`);
-//   } else {
-//     raidingTeam.score += 1;
-//     alert(`${defendingTeam.name}'s defender touched the lobby! ${raidingTeam.name} gets 1 point.`);
-//   }
-
-//   nextRaid();
-// }
 function handleLobbyTouch(player, isRaiderTouchingLobby) {
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
@@ -87,8 +97,24 @@ function handleLobbyTouch(player, isRaiderTouchingLobby) {
 
 function endGame() {
   game = false;
-  alert("Game Ended");
+  let message = "";
+
+  if (teamA.score > teamB.score) {
+    message = `${teamA.name} wins`;
+  } else if (teamA.score < teamB.score) {
+    message = `${teamB.name} wins`;
+  } else {
+    message = "It was a tie";
+  }
+
+  alert(message);
+
+  // Redirect after the alert is dismissed
+  setTimeout(function() {
+    window.location.href = "/endgame";
+  }, 100); // small delay to allow alert to complete
 }
+
 
 function handlePlayerClick(playerId) {
   const currentTeam = getRaidingTeam();
@@ -141,23 +167,41 @@ function raidSuccessful() {
 
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
+  let raidPoints = selectedDefenders.length;
 
-  raidingTeam.score += selectedDefenders.length;
+  // Update scores and stats
+  raidingTeam.score += raidPoints;
+  playerStats[selectedRaider.id].raidPoints += raidPoints;
+  playerStats[selectedRaider.id].totalPoints += raidPoints;
 
-  if (bonusTaken) raidingTeam.score += 1;
+  let eliminatedDefenders = [];
+  selectedDefenders.forEach((def) => {
+    def.status = "out";
+    eliminatedDefenders.push(def.name);
+  });
 
-  selectedDefenders.forEach(d => d.status = "out");
+  let raidDetails = {
+    type: "raidSuccess",
+    raider: selectedRaider.name,
+    defendersEliminated: eliminatedDefenders,
+    pointsGained: raidPoints,
+    bonusTaken: bonusTaken,
+  };
 
-  revivePlayers(raidingTeam, selectedDefenders.length);
-
-  if (defendingTeam.players.filter(p => p.status === "in").length <= 3) {
-    defendingTeam.score += 1;
+  if (bonusTaken) {
+    raidingTeam.score += 1;
+    playerStats[selectedRaider.id].raidPoints += 1;
+    playerStats[selectedRaider.id].totalPoints += 1;
+    raidDetails.bonusTaken = true;
   }
 
+  revivePlayers(raidingTeam, selectedDefenders.length);
   resetEmptyRaidCount(raidingTeam);
   checkAllOut();
+  sendEnhancedStats(raidDetails);
   nextRaid();
 }
+
 
 function defenseSuccessful() {
   if (!selectedRaider) {
@@ -169,17 +213,31 @@ function defenseSuccessful() {
   const defendingTeam = getDefendingTeam();
 
   let points = 1;
-
-  if (defendingTeam.players.filter(p => p.status === "in").length <= 3) points += 1;
-
+  if (defendingTeam.players.filter((p) => p.status === "in").length <= 3) {
+    points += 1; // Super tackle
+  }
 
   selectedRaider.status = "out";
   defendingTeam.score += points;
-  if (bonusTaken) raidingTeam.score += 1;
+
+  let defendingPlayers = selectedDefenders.map((def) => def.name);
+  selectedDefenders.forEach((def) => {
+    playerStats[def.id].defencePoints += 1;
+    playerStats[def.id].totalPoints += 1;
+  });
+
+  let raidDetails = {
+    type: "defenseSuccess",
+    raider: selectedRaider.name,
+    defenders: defendingPlayers,
+    pointsGained: points,
+    superTackle: points > 1,
+  };
 
   revivePlayers(defendingTeam, 1);
   resetEmptyRaidCount(raidingTeam);
   checkAllOut();
+  sendEnhancedStats(raidDetails);
   nextRaid();
 }
 
@@ -192,10 +250,20 @@ function emptyRaid() {
   const raidingTeam = getRaidingTeam();
   const defendingTeam = getDefendingTeam();
 
-  if (bonusTaken) raidingTeam.score += 1;
+  let raidDetails = {
+    type: "emptyRaid",
+    raider: selectedRaider.name,
+    bonusTaken: bonusTaken,
+  };
+
+  if (bonusTaken) {
+    raidingTeam.score += 1;
+    playerStats[selectedRaider.id].raidPoints += 1;
+    playerStats[selectedRaider.id].totalPoints += 1;
+    raidDetails.bonusTaken = true;
+  }
 
   const isTeamA = raidingTeam === teamA;
-
   if (isTeamA) {
     emptyRaidCountA++;
     isDoOrDieRaid = emptyRaidCountA >= 3;
@@ -207,11 +275,11 @@ function emptyRaid() {
   if (isDoOrDieRaid) {
     selectedRaider.status = "out";
     defendingTeam.score += 1;
-    alert("Do or Die Raid! Raider is out and defending team gets 1 point.");
-    if (isTeamA) emptyRaidCountA = 0;
-    else emptyRaidCountB = 0;
+    raidDetails.type = "doOrDieRaid";
+    emptyRaidCountA = emptyRaidCountB = 0; // Reset counters
   }
 
+  sendEnhancedStats(raidDetails);
   nextRaid();
 }
 
@@ -299,24 +367,6 @@ function renderPlayers() {
   render(teamA, "teamA-players");
   render(teamB, "teamB-players");
 }
-
-// function renderPlayers() {
-//   const render = (team, containerId) => {
-//     const container = document.getElementById(containerId);
-//     container.innerHTML = "";
-//     team.players.forEach(player => {
-//       const btn = document.createElement("button");
-//       btn.className = `player-card btn ${player.status === "in" ? "btn-outline-primary" : "btn-secondary"}`;
-//       btn.textContent = player.name;
-//       btn.onclick = () => handlePlayerClick(player.id);
-//       container.appendChild(btn);
-//     });
-//   };
-
-//   render(teamA, "teamA-players");
-//   render(teamB, "teamB-players");
-// }
-
 function updateBonusToggleVisibility() {
   const bonusToggle = document.getElementById("bonus-toggle");
   const opposingTeam = getDefendingTeam();
@@ -326,16 +376,77 @@ function updateBonusToggleVisibility() {
 }
 
 function updateRaidInfoUI() {
-  document.getElementById("raid-number").textContent = `Raid: ${raid}`;
+  if (document.readyState === "loading") {
+    console.warn("⚠️ DOM not fully loaded");
+    
+    return;
+  }
+
+  const raidElement = document.getElementById("raid-number");
+
+  if (!raidElement) {
+    console.warn("⚠️ 'raid-number' element not found");
+    
+    return;
+  }
+
+  raidElement.textContent = `Raid: ${raid}`;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+
+
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const team1Id = params.get("team1_id");
+  const team2Id = params.get("team2_id");
+  const team1Name = params.get("team1_name");
+  const team2Name = params.get("team2_name");
+  const raidElement = document.getElementById("raid-number");
+  console.log("DOM fully loaded. Raid Element:", raidElement);
+
+  socket.onopen = () => console.log("WebSocket connection established");
+  socket.onerror = (err) => console.error("WebSocket error:", err);
+  socket.onclose = () => console.log("WebSocket closed");
+
+  if (team1Id && team2Id) {
+    try {
+      const [res1, res2] = await Promise.all([
+        fetch(`/api/team/${team1Id}`),
+        fetch(`/api/team/${team2Id}`)
+      ]);
+
+      const data1 = await res1.json();
+      const data2 = await res2.json();
+
+      const selectedA = JSON.parse(localStorage.getItem("teamA_selected"));
+      const selectedB = JSON.parse(localStorage.getItem("teamB_selected"));
+
+      teamA.name = data1.team_name;
+      teamA.players = selectedA.map(p => ({ ...p, status: "in" }));
+      teamB.name = data2.team_name;
+      teamB.players = selectedB.map(p => ({ ...p, status: "in" }));
+
+
+
+    } catch (err) {
+      console.error("Failed to load teams:", err);
+    }
+  }
+
+  // Update UI with names
   document.getElementById("teamA-name").textContent = teamA.name;
   document.getElementById("teamB-name").textContent = teamB.name;
-  document.getElementById("teamA-score").textContent = teamA.score;
-  document.getElementById("teamB-score").textContent = teamB.score;
   document.getElementById("teamA-header").textContent = teamA.name;
   document.getElementById("teamB-header").textContent = teamB.name;
+
+  document.getElementById("teamA-score").textContent = teamA.score;
+  document.getElementById("teamB-score").textContent = teamB.score;
+
+
+    initializePlayerStats(teamA);
+    initializePlayerStats(teamB);
 
   document.getElementById("bonus-toggle").addEventListener("change", () => {
     bonusTaken = document.getElementById("bonus-toggle").checked;

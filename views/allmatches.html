@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Match Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2, h3 { margin-top: 0; }
+    table { border-collapse: collapse; width: 100%; max-width: 700px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h1>{{.Data.TeamA.Name}} vs {{.Data.TeamB.Name}}</h1>
+  <h2>Score: {{.Data.TeamA.Score}} - {{.Data.TeamB.Score}}</h2>
+
+  <h3>Player Stats</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Raid Points</th>
+        <th>Defence Points</th>
+        <th>Total Points</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range $key, $player := .PlayerStats}}
+        <tr>
+          <td>{{$player.Name}}</td>
+          <td>{{$player.RaidPoints}}</td>
+          <td>{{$player.DefencePoints}}</td>
+          <td>{{$player.TotalPoints}}</td>
+          <td>{{$player.Status}}</td>
+        </tr>
+      {{end}}
+    </tbody>
+  </table>
+
+  <h3>Last Raid Details</h3>
+  <p>
+    Type: {{.RaidDetails.Type}}<br />
+    Raider: {{.RaidDetails.Raider}}<br />
+    Points Gained: {{.RaidDetails.PointsGained}}
+  </p>
+</body>
+</html>
