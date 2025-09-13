@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -22,8 +23,7 @@ func CreateTeamPage(c *fiber.Ctx) error {
 	userID := c.Params("id")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	playerColl := Client.Database("raidx").Collection("players")
+	playerColl := db.MongoClient.Database("raidx").Collection("players")
 	cursor, err := playerColl.Find(ctx, bson.M{})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString("Error fetching players")
@@ -63,7 +63,7 @@ func SubmitTeam(c *fiber.Ctx) error {
 		objIDs[i] = oid
 	}
 
-	cursor, err := Client.Database("raidx").Collection("players").Find(ctx, bson.M{"_id": bson.M{"$in": objIDs}})
+	cursor, err := db.MongoClient.Database("raidx").Collection("players").Find(ctx, bson.M{"_id": bson.M{"$in": objIDs}})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString("Failed to fetch players")
 	}
@@ -80,7 +80,7 @@ func SubmitTeam(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = Client.Database("raidx").Collection("teams").InsertOne(ctx, bson.M{
+	_, err = db.MongoClient.Database("raidx").Collection("teams").InsertOne(ctx, bson.M{
 		"team_name": team.TeamName,
 		"players":   teamPlayers,
 	})

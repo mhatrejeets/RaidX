@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jcoene/go-base62"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -50,7 +51,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	}
 
 	// Access MongoDB collection
-	collection := Client.Database("raidx").Collection("players")
+	collection := db.MongoClient.Database("raidx").Collection("players")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

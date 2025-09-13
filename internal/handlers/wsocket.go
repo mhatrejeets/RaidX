@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 )
 
 type PlayerStat struct {
@@ -77,7 +78,7 @@ func BroadcastToViewers(message EnhancedStatsMessage) {
 	broadcastChan <- data
 }
 
-func setupWebSocket(app *fiber.App) {
+func SetupWebSocket(app *fiber.App) {
 	// Start the broadcast worker
 	StartBroadcastWorker()
 
@@ -104,7 +105,7 @@ func setupWebSocket(app *fiber.App) {
 			}
 
 			// Store data in Redis
-			err = SetRedisKey("gameStats", receivedMessage)
+			err = redisImpl.SetRedisKey("gameStats", receivedMessage)
 			if err != nil {
 				log.Println("Error storing data in Redis:", err)
 			}
@@ -132,7 +133,7 @@ func setupWebSocket(app *fiber.App) {
 
 		// Send latest game stats from Redis on new connection
 		var latestStats EnhancedStatsMessage
-		err := GetRedisKey("gameStats", &latestStats)
+		err := redisImpl.GetRedisKey("gameStats", &latestStats)
 		if err == nil {
 			data, _ := json.Marshal(latestStats)
 			_ = c.WriteMessage(websocket.TextMessage, data)

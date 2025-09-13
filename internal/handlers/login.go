@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,7 +30,7 @@ func LoginHandler(c *fiber.Ctx) error {
 
 	fmt.Println("Login Attempt => Email:", email, "EncodedPassword:", encodedPassword)
 
-	collection := Client.Database("raidx").Collection("players")
+	collection := db.MongoClient.Database("raidx").Collection("players")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

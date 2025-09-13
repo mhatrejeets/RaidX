@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -14,8 +15,8 @@ type Team struct {
 	Name string `json:"team_name" bson:"team_name"`
 }
 
-func getTeams(c *fiber.Ctx) error {
-	collection := Client.Database("raidx").Collection("teams")
+func GetTeams(c *fiber.Ctx) error {
+	collection := db.MongoClient.Database("raidx").Collection("teams")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

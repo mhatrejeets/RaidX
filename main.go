@@ -3,11 +3,14 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/handlers"
+	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 )
 
 func main() {
-	InitDB()
-	InitRedis()
+	db.InitDB()
+	redisImpl.InitRedis()
 	app := fiber.New(fiber.Config{
 		Views: html.New("./views", ".html"), // Set the directory and extension for templates
 	})
@@ -19,18 +22,14 @@ func main() {
 		return c.SendFile("./Static/login.html")
 	})
 
-	
-
 	// Serve scorer.html at /scorer
 	app.Get("/scorer", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/scorer.html")
 	})
 
-	
+	app.Get("/api/team/:id", handlers.GetTeamByID)
 
-	app.Get("/api/team/:id", getTeamByID)
-
-	app.Get("/api/teams", getTeams)
+	app.Get("/api/teams", handlers.GetTeams)
 
 	app.Get("/start", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/startscore.html")
@@ -44,15 +43,15 @@ func main() {
 		return c.SendFile("./Static/viewer.html")
 	})
 
-	app.Post("/signup", SignupHandler)
+	app.Post("/signup", handlers.SignupHandler)
 
-	app.Post("/login", LoginHandler)
+	app.Post("/login", handlers.LoginHandler)
 
 	app.Get("/home1/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/home1.html")
 	})
 
-	app.Get("/playerprofile/:id", playerprofileHandler)
+	app.Get("/playerprofile/:id", handlers.PlayerProfileHandler)
 
 	app.Get("/playerselection/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/playerselection.html")
@@ -72,17 +71,16 @@ func main() {
 		})
 	})
 
-	app.Get("/endgame", EndGameHandler)
+	app.Get("/endgame", handlers.EndGameHandler)
 
-	app.Get("/matches", GetAllMatches)
-	app.Get("/matches/:id", GetMatchByID)
-	app.Get("/createteam/:id", CreateTeamPage)
-	app.Post("/createteam/:id", SubmitTeam)
+	app.Get("/matches", handlers.GetAllMatches)
+	app.Get("/matches/:id", handlers.GetMatchByID)
+	app.Get("/createteam/:id", handlers.CreateTeamPage)
+	app.Post("/createteam/:id", handlers.SubmitTeam)
 
+	handlers.SetupWebSocket(app)
 
-	setupWebSocket(app)
-
-	defer CloseDB()
+	defer db.CloseDB()
 	// Serve other static assets like CSS, JS if needed
 	app.Static("/static", "./Static")
 

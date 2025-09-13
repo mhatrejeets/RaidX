@@ -1,4 +1,4 @@
-package main
+package redisImpl
 
 import (
 	"context"
@@ -9,18 +9,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var redisClient *redis.Client
+var RedisClient *redis.Client
+var RedisNull = redis.Nil
 var ctx = context.Background()
 
 func InitRedis() {
-	redisClient = redis.NewClient(&redis.Options{
+	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379", // Redis server address
 		Password: "",               // No password by default
 		DB:       0,                // Default DB
 	})
 
 	// Test connection
-	_, err := redisClient.Ping(ctx).Result()
+	_, err := RedisClient.Ping(ctx).Result()
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
@@ -33,11 +34,11 @@ func SetRedisKey(key string, value interface{}) error {
 		return err
 	}
 
-	return redisClient.Set(ctx, key, jsonData, 10*time.Minute).Err() // Cache for 10 minutes
+	return RedisClient.Set(ctx, key, jsonData, 10*time.Minute).Err() // Cache for 10 minutes
 }
 
 func GetRedisKey(key string, dest interface{}) error {
-	val, err := redisClient.Get(ctx, key).Result()
+	val, err := RedisClient.Get(ctx, key).Result()
 	if err != nil {
 		return err
 	}

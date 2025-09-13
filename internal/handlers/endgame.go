@@ -1,18 +1,21 @@
-package main
+package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
+	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func EndGameHandler(c *fiber.Ctx) error {
+	ctx := context.Background()
 	// 1. Fetch gameStats from Redis
-	val, err := redisClient.Get(ctx, "gameStats").Result()
-	if err == redis.Nil {
+	val, err := redisImpl.RedisClient.Get(ctx, "gameStats").Result()
+	if err == redisImpl.RedisNull {
 		return c.Status(404).SendString("No game data found in Redis")
 	} else if err != nil {
 		return c.Status(500).SendString("Redis error: " + err.Error())
@@ -25,7 +28,7 @@ func EndGameHandler(c *fiber.Ctx) error {
 	}
 
 	// 3. Insert full gameStats into matches collection
-	matchesColl := Client.Database("raidx").Collection("matches")
+	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
 	if _, err := matchesColl.InsertOne(ctx, gameStats); err != nil {
 		return c.Status(500).SendString("Failed to insert into matches: " + err.Error())
 	}
@@ -33,7 +36,7 @@ func EndGameHandler(c *fiber.Ctx) error {
 	// 4. Update each player in players collection
 	data := gameStats["data"].(map[string]interface{})
 	playerStats := data["playerStats"].(map[string]interface{})
-	playersColl := Client.Database("raidx").Collection("players")
+	playersColl := db.MongoClient.Database("raidx").Collection("players")
 
 	for id, raw := range playerStats {
 		player := raw.(map[string]interface{})
@@ -53,7 +56,7 @@ func EndGameHandler(c *fiber.Ctx) error {
 	}
 
 	// 5. Optional: Clean up Redis key
-	if err := redisClient.Del(ctx, "gameStats").Err(); err != nil {
+	if err := redisImpl.RedisClient.Del(ctx, "gameStats").Err(); err != nil {
 		log.Printf("Warning: Failed to delete Redis key: %v", err)
 	}
 

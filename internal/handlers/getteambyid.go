@@ -1,21 +1,22 @@
-package main
+package handlers
 
 import (
 	"context"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func getTeamByID(c *fiber.Ctx) error {
+func GetTeamByID(c *fiber.Ctx) error {
 	teamID := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(teamID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid team ID"})
 	}
 
-	collection := Client.Database("raidx").Collection("teams")
+	collection := db.MongoClient.Database("raidx").Collection("teams")
 
 	var result struct {
 		ID       primitive.ObjectID `bson:"_id" json:"id"`
@@ -51,4 +52,3 @@ func getTeamByID(c *fiber.Ctx) error {
 		"players":   players,
 	})
 }
-

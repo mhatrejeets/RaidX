@@ -1,16 +1,17 @@
-package main
+package handlers
 
 import (
 	"context"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func playerprofileHandler(c *fiber.Ctx) error {
+func PlayerProfileHandler(c *fiber.Ctx) error {
 	// Get the player ID from the URL
 	playerID := c.Params("id")
 
@@ -21,7 +22,7 @@ func playerprofileHandler(c *fiber.Ctx) error {
 	}
 
 	// Define MongoDB collection
-	collection := Client.Database("raidx").Collection("players")
+	collection := db.MongoClient.Database("raidx").Collection("players")
 
 	// Query to find the player by ID
 	var player struct {
@@ -47,7 +48,7 @@ func playerprofileHandler(c *fiber.Ctx) error {
 
 	// Render the player profile HTML with the data
 	return c.Render("playerprofile", fiber.Map{
-		"ID":			playerID,
+		"ID":            playerID,
 		"FullName":      player.FullName,
 		"Email":         player.Email,
 		"UserId":        player.UserId,
