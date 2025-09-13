@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/sirupsen/logrus"
 )
 
 var RedisClient *redis.Client
@@ -31,6 +32,7 @@ func InitRedis() {
 func SetRedisKey(key string, value interface{}) error {
 	jsonData, err := json.Marshal(value)
 	if err != nil {
+		logrus.Error("Error:", "SetRedisKey:", " Failed to marshal value: %v", err)
 		return err
 	}
 
@@ -40,6 +42,7 @@ func SetRedisKey(key string, value interface{}) error {
 func GetRedisKey(key string, dest interface{}) error {
 	val, err := RedisClient.Get(ctx, key).Result()
 	if err != nil {
+		logrus.Error("Error:", "GetRedisKey:", " Failed to get Redis key: %v", err)	
 		return err
 	}
 

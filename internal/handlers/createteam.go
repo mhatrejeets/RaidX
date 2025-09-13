@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -26,11 +27,13 @@ func CreateTeamPage(c *fiber.Ctx) error {
 	playerColl := db.MongoClient.Database("raidx").Collection("players")
 	cursor, err := playerColl.Find(ctx, bson.M{})
 	if err != nil {
+		logrus.Error("Error:", "CreateTeamPage: ", " Failed to fetch players: %v", err)
 		return c.Status(http.StatusInternalServerError).SendString("Error fetching players")
 	}
 
 	var players []Player
 	if err := cursor.All(ctx, &players); err != nil {
+		logrus.Error("Error:", "CreateTeamPage: ", " Failed to parse players: %v", err)
 		return c.Status(http.StatusInternalServerError).SendString("Error parsing players")
 	}
 
@@ -49,6 +52,7 @@ func SubmitTeam(c *fiber.Ctx) error {
 
 	var team TeamRequest
 	if err := c.BodyParser(&team); err != nil {
+		logrus.Error("Error:", "SubmitTeam: ", " Failed to parse request body: %v", err)
 		return c.Status(http.StatusBadRequest).SendString("Invalid payload")
 	}
 
@@ -65,9 +69,11 @@ func SubmitTeam(c *fiber.Ctx) error {
 
 	cursor, err := db.MongoClient.Database("raidx").Collection("players").Find(ctx, bson.M{"_id": bson.M{"$in": objIDs}})
 	if err != nil {
+		logrus.Error("Error:", "SubmitTeam: ", " Failed to fetch players: %v", err)
 		return c.Status(http.StatusInternalServerError).SendString("Failed to fetch players")
 	}
 	if err := cursor.All(ctx, &playerDocs); err != nil {
+		logrus.Error("Error:", "SubmitTeam: ", " Failed to parse players: %v", err)
 		return c.Status(http.StatusInternalServerError).SendString("Failed to parse players")
 	}
 
@@ -85,6 +91,7 @@ func SubmitTeam(c *fiber.Ctx) error {
 		"players":   teamPlayers,
 	})
 	if err != nil {
+		logrus.Error("Error:", "SubmitTeam: ", " Failed to save team: %v", err)
 		return c.Status(http.StatusInternalServerError).SendString("Failed to save team")
 	}
 

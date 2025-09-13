@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
+	"github.com/sirupsen/logrus"
 )
 
 type PlayerStat struct {
@@ -59,7 +59,7 @@ func StartBroadcastWorker() {
 			for conn := range viewerClients.clients {
 				err := conn.WriteMessage(websocket.TextMessage, msg)
 				if err != nil {
-					log.Println("Error sending message to viewer:", err)
+					logrus.Error("Error:", "StartBroadcastWorker:", " Error sending message to viewer: %v", err)
 					conn.Close()
 					delete(viewerClients.clients, conn)
 				}
@@ -72,7 +72,7 @@ func StartBroadcastWorker() {
 func BroadcastToViewers(message EnhancedStatsMessage) {
 	data, err := json.Marshal(message)
 	if err != nil {
-		log.Println("Error marshalling data for viewers:", err)
+		logrus.Error("Error:", "BroadcastToViewers:", " Error marshalling data for viewers: %v", err)
 		return
 	}
 	broadcastChan <- data
@@ -85,14 +85,14 @@ func SetupWebSocket(app *fiber.App) {
 	// Handle scorer WebSocket
 	app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
 		defer func() {
-			log.Println("Scorer connection closed")
+			logrus.Info("Info:", "SetupWebSocket:", " Scorer connection closed")
 			c.Close()
 		}()
 
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {
-				log.Println("Error reading message from scorer:", err)
+				logrus.Error("Error:", "SetupWebSocket:", " Error reading message from scorer: %v", err)
 				break
 			}
 
@@ -100,14 +100,14 @@ func SetupWebSocket(app *fiber.App) {
 			var receivedMessage EnhancedStatsMessage
 			err = json.Unmarshal(msg, &receivedMessage)
 			if err != nil {
-				log.Println("Error unmarshalling scorer message:", err)
+				logrus.Error("Error:", "SetupWebSocket:", " Error unmarshalling scorer message: %v", err)
 				continue
 			}
 
 			// Store data in Redis
 			err = redisImpl.SetRedisKey("gameStats", receivedMessage)
 			if err != nil {
-				log.Println("Error storing data in Redis:", err)
+				logrus.Error("Error:", "SetupWebSocket:", " Error storing data in Redis: %v", err)
 			}
 
 			// Broadcast updated stats to all viewers
@@ -121,13 +121,11 @@ func SetupWebSocket(app *fiber.App) {
 		viewerClients.clients[c] = true
 		viewerClients.mu.Unlock()
 
-		
-
 		defer func() {
 			viewerClients.mu.Lock()
 			delete(viewerClients.clients, c)
 			viewerClients.mu.Unlock()
-			
+
 			c.Close()
 		}()
 

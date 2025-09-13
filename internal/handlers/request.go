@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,6 +20,7 @@ func RequestsHandler(c *fiber.Ctx) error {
 	// Convert the string ID to ObjectId
 	objID, err := primitive.ObjectIDFromHex(playerID)
 	if err != nil {
+		logrus.Warn("Warning:", "RequestsHandler:", " Invalid player ID: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid player ID format")
 	}
 
@@ -37,8 +39,10 @@ func RequestsHandler(c *fiber.Ctx) error {
 	err = playerCollection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&player)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
+			logrus.Info("Info:", "RequestsHandler:", " Player not found: %v", err)
 			return c.Status(fiber.StatusNotFound).SendString("Player not found")
 		}
+		logrus.Error("Error:", "RequestsHandler:", " Error fetching player data: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Error fetching player data")
 	}
 
@@ -65,6 +69,7 @@ func AcceptRequestHandler(c *fiber.Ctx) error {
 	// Convert the string ID to ObjectId
 	objID, err := primitive.ObjectIDFromHex(playerID)
 	if err != nil {
+		logrus.Warn("Warning:", "AcceptRequestHandler:", " Invalid player ID: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid player ID format")
 	}
 
@@ -84,8 +89,10 @@ func AcceptRequestHandler(c *fiber.Ctx) error {
 	err = playerCollection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&player)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
+			logrus.Info("Info:", "AcceptRequestHandler:", " Player not found: %v", err)
 			return c.Status(fiber.StatusNotFound).SendString("Player not found")
 		}
+		logrus.Error("Error:", "AcceptRequestHandler:", " Error fetching player data: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Error fetching player data")
 	}
 
@@ -100,12 +107,14 @@ func AcceptRequestHandler(c *fiber.Ctx) error {
 		bson.M{"$set": bson.M{"teams_enrolled": teamEnrolled}},
 	)
 	if err != nil {
+		logrus.Error("Error:", "AcceptRequestHandler:", " Error updating player data: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Error updating player data")
 	}
 
 	// Convert TeamID to ObjectId
 	teamObjID, err := primitive.ObjectIDFromHex(player.Requests.TeamID)
 	if err != nil {
+		logrus.Warn("Warning:", "AcceptRequestHandler:", " Invalid team ID: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid team ID format")
 	}
 
@@ -120,6 +129,7 @@ func AcceptRequestHandler(c *fiber.Ctx) error {
 		bson.M{"$push": bson.M{"players": playerInfo}},
 	)
 	if err != nil {
+		logrus.Error("Error:", "AcceptRequestHandler:", " Error updating team data: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Error updating team data")
 	}
 
@@ -135,6 +145,7 @@ func RejectRequestHandler(c *fiber.Ctx) error {
 	// Convert the string ID to ObjectId
 	objID, err := primitive.ObjectIDFromHex(playerID)
 	if err != nil {
+		logrus.Warn("Warning:", "RejectRequestHandler:", " Invalid player ID: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid player ID format")
 	}
 
@@ -148,6 +159,7 @@ func RejectRequestHandler(c *fiber.Ctx) error {
 		bson.M{"$set": bson.M{"requests.status": "Rejected"}},
 	)
 	if err != nil {
+		logrus.Error("Error:", "RejectRequestHandler:", " Error updating request status: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Error updating request status")
 	}
 

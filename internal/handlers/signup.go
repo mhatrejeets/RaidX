@@ -4,13 +4,13 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/binary"
-	"log"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jcoene/go-base62"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -42,11 +42,13 @@ func hashAndEncodeBase62(input string) string {
 func SignupHandler(c *fiber.Ctx) error {
 	form := new(User)
 	if err := c.BodyParser(form); err != nil {
+		logrus.Error("Error:", "SignupHandler:", " Failed to parse form data: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString("❌ Failed to parse form data")
 	}
 
 	// Check if the passwords match
 	if strings.TrimSpace(c.FormValue("password")) != strings.TrimSpace(c.FormValue("confirmPassword")) {
+		logrus.Warn("Warning:", "SignupHandler:", " Passwords do not match for email: %s", form.Email)
 		return c.Status(fiber.StatusBadRequest).SendString("❌ Passwords do not match")
 	}
 
@@ -59,6 +61,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	var existing User
 	err := collection.FindOne(ctx, bson.M{"email": form.Email}).Decode(&existing)
 	if err != mongo.ErrNoDocuments {
+		logrus.Info("Info:", "SignupHandler:", " Email already registered: %s", form.Email)
 		return c.Status(fiber.StatusConflict).SendString("❌ Email already registered")
 	}
 
@@ -81,12 +84,12 @@ func SignupHandler(c *fiber.Ctx) error {
 	// Insert the new user into the database
 	_, err = collection.InsertOne(ctx, newUser)
 	if err != nil {
-		log.Printf("DB insert error: %v", err)
+		logrus.Error("Error:", "SignupHandler:", " Failed to insert user: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not store user")
 	}
 
 	// Return success message
-	return c.Type("html").SendString(`
+	strr := `
 	<!DOCTYPE html>
 	<html>
 	<head>
@@ -97,6 +100,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	</head>
 	<body></body>
 	</html>
-`)
+	`
+	return c.Type("html").SendString(strr)
 
 }

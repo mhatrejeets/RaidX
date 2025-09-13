@@ -5,14 +5,17 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetTeamByID(c *fiber.Ctx) error {
 	teamID := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(teamID)
 	if err != nil {
+		logrus.Error("Error:", "GetTeamByID:", " Invalid team ID: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid team ID"})
 	}
 
@@ -29,6 +32,11 @@ func GetTeamByID(c *fiber.Ctx) error {
 
 	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&result)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			logrus.Info("Info:", "GetTeamByID:", " Team not found: %v", err)
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
+		}
+		logrus.Warn("Warning:", "GetTeamByID:", " Failed to fetch team: %v", err)
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Team not found"})
 	}
 

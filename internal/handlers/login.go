@@ -3,12 +3,12 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -38,13 +38,15 @@ func LoginHandler(c *fiber.Ctx) error {
 	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
+			logrus.Info("Info:", "LoginHandler:", " Email not registered: %v", err)
 			return c.Status(fiber.StatusUnauthorized).SendString("❌ Email not registered")
 		}
-		log.Printf("DB error: %v", err)
+		logrus.Error("Error:", "LoginHandler:", " DB error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("❌ Server error")
 	}
 
 	if user.Password != encodedPassword {
+		logrus.Info("Info:", "LoginHandler:", " Incorrect password for email: %s", email)
 		return c.Status(fiber.StatusUnauthorized).SendString("❌ Incorrect password")
 	}
 

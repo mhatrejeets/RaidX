@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -23,14 +23,14 @@ func GetTeams(c *fiber.Ctx) error {
 
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
-		log.Printf("Failed to find teams: %v", err)
+		logrus.Error("Error:", "GetTeams:", " Failed to fetch teams: %v", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch teams"})
 	}
 
 	var teams []Team
 
 	if err = cursor.All(ctx, &teams); err != nil {
-		log.Printf("Failed to decode teams: %v", err)
+		logrus.Error("Error:", "GetTeams:", " Failed to decode teams: %v", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to decode teams"})
 	}
 

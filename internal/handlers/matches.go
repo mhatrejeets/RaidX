@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -48,12 +49,14 @@ func GetAllMatches(c *fiber.Ctx) error {
 
 	cursor, err := matchesCol.Find(context.TODO(), bson.M{})
 	if err != nil {
+		logrus.Error("Error:", "GetAllMatches:", " DB find error: %v", err)
 		return c.Status(500).SendString("DB find error: " + err.Error())
 	}
 	defer cursor.Close(context.TODO())
 
 	var matches []Match
 	if err := cursor.All(context.TODO(), &matches); err != nil {
+		logrus.Error("Error:", "GetAllMatches:", " Cursor decode error: %v", err)
 		return c.Status(500).SendString("Cursor decode error: " + err.Error())
 	}
 
@@ -71,6 +74,7 @@ func GetMatchByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
+		logrus.Warn("Warning:", "GetMatchByID:", " Invalid match ID: %v", err)
 		return c.Status(400).SendString("Invalid match ID")
 	}
 
@@ -79,6 +83,7 @@ func GetMatchByID(c *fiber.Ctx) error {
 	var match Match
 	err = matchesCol.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&match)
 	if err != nil {
+		logrus.Warn("Warning:", "GetMatchByID:", " Match not found: %v", err)
 		return c.Status(404).SendString("Match not found")
 	}
 

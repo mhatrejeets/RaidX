@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,6 +19,7 @@ func PlayerProfileHandler(c *fiber.Ctx) error {
 	// Convert string ID to ObjectId
 	objID, err := primitive.ObjectIDFromHex(playerID)
 	if err != nil {
+		logrus.Warn("Warning:", "PlayerProfileHandler:", " Invalid player ID: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid player ID format")
 	}
 
@@ -41,8 +43,10 @@ func PlayerProfileHandler(c *fiber.Ctx) error {
 	err = collection.FindOne(context.TODO(), filter).Decode(&player)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
+			logrus.Info("Info:", "PlayerProfileHandler:", " Player not found: %v", err)
 			return c.Status(fiber.StatusNotFound).SendString("Player not found")
 		}
+		logrus.Error("Error:", "PlayerProfileHandler:", " Error fetching player data: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Error fetching player data")
 	}
 
