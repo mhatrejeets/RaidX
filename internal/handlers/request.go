@@ -1,10 +1,11 @@
-package main
+package handlers
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,7 +23,7 @@ func RequestsHandler(c *fiber.Ctx) error {
 	}
 
 	// Define MongoDB collection
-	playerCollection := Client.Database("raidx").Collection("players")
+	playerCollection := db.MongoClient.Database("raidx").Collection("players")
 
 	// Query to find the player by ID
 	var player struct {
@@ -68,8 +69,8 @@ func AcceptRequestHandler(c *fiber.Ctx) error {
 	}
 
 	// Define MongoDB collections
-	playerCollection := Client.Database("raidx").Collection("players")
-	teamCollection := Client.Database("raidx").Collection("teams")
+	playerCollection := db.MongoClient.Database("raidx").Collection("players")
+	teamCollection := db.MongoClient.Database("raidx").Collection("teams")
 
 	// Fetch the player document
 	var player struct {
@@ -138,7 +139,7 @@ func RejectRequestHandler(c *fiber.Ctx) error {
 	}
 
 	// Define MongoDB collection
-	playerCollection := Client.Database("raidx").Collection("players")
+	playerCollection := db.MongoClient.Database("raidx").Collection("players")
 
 	// Update the player's request status to "Rejected"
 	_, err = playerCollection.UpdateOne(

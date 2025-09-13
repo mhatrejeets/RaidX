@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -8,18 +8,12 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/jwt"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// Struct matching MongoDB document
-type Userr struct {
-	ID       primitive.ObjectID `bson:"_id"`
-	Email    string             `bson:"email"`
-	Password string             `bson:"password"`
-	Name     string             `bson:"fullName"`
-}
 
 func LoginHandler(c *fiber.Ctx) error {
 	// Get form fields (not JSON!)
@@ -29,11 +23,11 @@ func LoginHandler(c *fiber.Ctx) error {
 
 	fmt.Println("Login Attempt => Email:", email, "EncodedPassword:", encodedPassword)
 
-	collection := Client.Database("raidx").Collection("players")
+	collection := db.MongoClient.Database("raidx").Collection("players")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var user Userr
+	var user models.Userr
 	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -47,18 +41,17 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).SendString("❌ Incorrect password")
 	}
 
-	// Success
-	return c.Type("html").SendString(fmt.Sprintf(`
-	<!DOCTYPE html>
-	<html>
-	<head>
-		<script>
-			alert("✅ Login successful!");
-			window.location.href = "/home1/%s?name=%s";
-		</script>
-	</head>
-	<body></body>
-	</html>
-	`, user.ID.Hex(), user.Name))
+	// Issue JWT token and set as cookie
+	jwtToken, err := jwt.GenerateJWT(user.ID.Hex())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not generate token")
+	}
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    jwtToken,
+		HTTPOnly: true,
+		Path:     "/",
+	})
 
+	return c.Redirect("/home1/" + user.ID.Hex() + "?name=" + user.Name)
 }

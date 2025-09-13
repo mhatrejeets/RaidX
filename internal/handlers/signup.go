@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -10,22 +10,12 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jcoene/go-base62"
+	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/jwt"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// User represents a player document in the DB
-type User struct {
-	FullName      string    `bson:"fullName"`
-	Email         string    `bson:"email"`
-	UserID        string    `bson:"userId"`
-	Password      string    `bson:"password"`
-	Position      string    `bson:"position"`
-	CreatedAt     time.Time `bson:"createdAt"`
-	TotalPoints   int       `bson:"totalPoints"`
-	RaidPoints    int       `bson:"raidPoints"`
-	DefencePoints int       `bson:"defencePoints"`
-}
 
 // hashAndEncodeBase62 hashes the input string and encodes it to base62
 func hashAndEncodeBase62(input string) string {
@@ -39,7 +29,7 @@ func hashAndEncodeBase62(input string) string {
 }
 
 func SignupHandler(c *fiber.Ctx) error {
-	form := new(User)
+	form := new(models.User)
 	if err := c.BodyParser(form); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("❌ Failed to parse form data")
 	}
@@ -50,12 +40,12 @@ func SignupHandler(c *fiber.Ctx) error {
 	}
 
 	// Access MongoDB collection
-	collection := Client.Database("raidx").Collection("players")
+	collection := db.MongoClient.Database("raidx").Collection("players")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Check if the email already exists
-	var existing User
+	var existing models.User
 	err := collection.FindOne(ctx, bson.M{"email": form.Email}).Decode(&existing)
 	if err != mongo.ErrNoDocuments {
 		return c.Status(fiber.StatusConflict).SendString("❌ Email already registered")
@@ -65,7 +55,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	encodedPassword := hashAndEncodeBase62(form.Password)
 
 	// Create a new user entry
-	newUser := User{
+	newUser := models.User{
 		FullName:      form.FullName,
 		Email:         form.Email,
 		UserID:        form.UserID,
@@ -84,18 +74,17 @@ func SignupHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not store user")
 	}
 
-	// Return success message
-	return c.Type("html").SendString(`
-	<!DOCTYPE html>
-	<html>
-	<head>
-		<script>
-			alert("✅ Signup successful!");
-			window.location.href = "/";
-		</script>
-	</head>
-	<body></body>
-	</html>
-`)
+	// Issue JWT token and set as cookie
+	jwtToken, err := jwt.GenerateJWT(newUser.UserID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not generate token")
+	}
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    jwtToken,
+		HTTPOnly: true,
+		Path:     "/",
+	})
 
+	return c.Redirect("/home1/" + newUser.UserID + "?name=" + newUser.FullName)
 }

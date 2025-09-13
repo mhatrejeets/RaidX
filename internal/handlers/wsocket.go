@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -7,40 +7,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/mhatrejeets/RaidX/internal/models"
+	redisC "github.com/mhatrejeets/RaidX/internal/redis"
 )
-
-type PlayerStat struct {
-	Name          string `json:"name"`
-	ID            string `json:"id"`
-	TotalPoints   int    `json:"totalPoints"`
-	RaidPoints    int    `json:"raidPoints"`
-	DefencePoints int    `json:"defencePoints"`
-	Status        string `json:"status"`
-}
-
-type TeamStats struct {
-	Name  string `json:"name"`
-	Score int    `json:"score"`
-}
-
-type RaidDetails struct {
-	Type         string   `json:"type"`
-	Raider       string   `json:"raider"`
-	Defenders    []string `json:"defenders,omitempty"`
-	PointsGained int      `json:"pointsGained,omitempty"`
-	BonusTaken   bool     `json:"bonusTaken,omitempty"`
-	SuperTackle  bool     `json:"superTackle,omitempty"`
-}
-
-type EnhancedStatsMessage struct {
-	Type string `json:"type"`
-	Data struct {
-		TeamA       TeamStats             `json:"teamA"`
-		TeamB       TeamStats             `json:"teamB"`
-		PlayerStats map[string]PlayerStat `json:"playerStats"`
-		RaidDetails RaidDetails           `json:"raidDetails"`
-	} `json:"data"`
-}
 
 var viewerClients = struct {
 	clients map[*websocket.Conn]bool
@@ -49,13 +18,32 @@ var viewerClients = struct {
 	clients: make(map[*websocket.Conn]bool),
 }
 
-var broadcastChan = make(chan []byte)
+// Multi-match support
+var matchBroadcastChans = struct {
+	mu    sync.Mutex
+	chans map[string]chan []byte // matchID -> channel
+}{
+	chans: make(map[string]chan []byte),
+}
 
-func StartBroadcastWorker() {
+func getMatchChan(matchID string) chan []byte {
+	matchBroadcastChans.mu.Lock()
+	defer matchBroadcastChans.mu.Unlock()
+	if ch, ok := matchBroadcastChans.chans[matchID]; ok {
+		return ch
+	}
+	ch := make(chan []byte)
+	matchBroadcastChans.chans[matchID] = ch
+	return ch
+}
+
+func StartMatchBroadcastWorker(matchID string) {
+	ch := getMatchChan(matchID)
 	go func() {
-		for msg := range broadcastChan {
+		for msg := range ch {
 			viewerClients.mu.Lock()
 			for conn := range viewerClients.clients {
+				// Optionally filter by matchID if you track connections per match
 				err := conn.WriteMessage(websocket.TextMessage, msg)
 				if err != nil {
 					log.Println("Error sending message to viewer:", err)
@@ -68,21 +56,21 @@ func StartBroadcastWorker() {
 	}()
 }
 
-func BroadcastToViewers(message EnhancedStatsMessage) {
+func BroadcastToMatchViewers(matchID string, message models.EnhancedStatsMessage) {
 	data, err := json.Marshal(message)
 	if err != nil {
 		log.Println("Error marshalling data for viewers:", err)
 		return
 	}
-	broadcastChan <- data
+	ch := getMatchChan(matchID)
+	ch <- data
 }
 
-func setupWebSocket(app *fiber.App) {
-	// Start the broadcast worker
-	StartBroadcastWorker()
-
+func SetupWebSocket(app *fiber.App) {
 	// Handle scorer WebSocket
 	app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
+		matchID := c.Query("matchID")
+		StartMatchBroadcastWorker(matchID)
 		defer func() {
 			log.Println("Scorer connection closed")
 			c.Close()
@@ -96,26 +84,29 @@ func setupWebSocket(app *fiber.App) {
 			}
 
 			// Parse incoming stats
-			var receivedMessage EnhancedStatsMessage
+			var receivedMessage models.EnhancedStatsMessage
 			err = json.Unmarshal(msg, &receivedMessage)
 			if err != nil {
 				log.Println("Error unmarshalling scorer message:", err)
 				continue
 			}
 
-			// Store data in Redis
-			err = SetRedisKey("gameStats", receivedMessage)
+			// Store data in Redis with matchID as key
+			redisKey := "gameStats:" + matchID
+			err = redisC.SetRedisKey(redisKey, receivedMessage)
 			if err != nil {
 				log.Println("Error storing data in Redis:", err)
 			}
 
 			// Broadcast updated stats to all viewers
-			BroadcastToViewers(receivedMessage)
+			BroadcastToMatchViewers(matchID, receivedMessage)
 		}
 	}))
 
 	// Handle viewer WebSocket
 	app.Get("/ws/viewer", websocket.New(func(c *websocket.Conn) {
+		matchID := c.Query("matchID")
+		StartMatchBroadcastWorker(matchID)
 		viewerClients.mu.Lock()
 		viewerClients.clients[c] = true
 		viewerClients.mu.Unlock()
@@ -130,9 +121,9 @@ func setupWebSocket(app *fiber.App) {
 			c.Close()
 		}()
 
-		// Send latest game stats from Redis on new connection
-		var latestStats EnhancedStatsMessage
-		err := GetRedisKey("gameStats", &latestStats)
+		// Send latest game stats from Redis for this match
+		var latestStats models.EnhancedStatsMessage
+		err := redisC.GetRedisKey("gameStats:"+matchID, &latestStats)
 		if err == nil {
 			data, _ := json.Marshal(latestStats)
 			_ = c.WriteMessage(websocket.TextMessage, data)

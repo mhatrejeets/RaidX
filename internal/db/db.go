@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
     "context"
@@ -9,7 +9,7 @@ import (
     "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
+var MongoClient *mongo.Client
 
 func InitDB() {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -21,14 +21,14 @@ func InitDB() {
     clientOptions := options.Client().ApplyURI(uri)
 
     var err error
-    Client, err = mongo.Connect(ctx, clientOptions)
+    MongoClient, err = mongo.Connect(ctx, clientOptions)
     if err != nil {
         log.Fatalf("Failed to connect to MongoDB: %v", err)
     }
 
     // Ping to ensure connection
-    err = Client.Ping(ctx, nil)
-    if err != nil {     
+    err = MongoClient.Ping(ctx, nil)
+    if err != nil {
         log.Fatalf("Failed to ping MongoDB: %v", err)
     }
 
@@ -39,7 +39,7 @@ func CloseDB() {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
-    if err := Client.Disconnect(ctx); err != nil {
+    if err := MongoClient.Disconnect(ctx); err != nil {
         log.Fatalf("Error disconnecting MongoDB: %v", err)
     }
     log.Println("🛑 MongoDB connection closed")
