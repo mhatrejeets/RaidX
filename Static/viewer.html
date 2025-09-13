@@ -1,34 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Viewer</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RaidX - Live Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
     <style>
         body {
-            background-color: #f8f9fa;
-        }
-        .scoreboard {
-            background-color: #1a1d22;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(145deg, #0f172a, #1e293b);
             color: white;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            text-align: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
+
+        .floating-bg {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 122, 0, 0.25), transparent);
+            animation: floatAnim 6s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        .circle1 {
+            width: 200px;
+            height: 200px;
+            top: 5%;
+            left: 5%;
+        }
+
+        .circle2 {
+            width: 250px;
+            height: 250px;
+            bottom: 10%;
+            right: 5%;
+        }
+
+        @keyframes floatAnim {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        .scoreboard {
+            background-color: rgba(30, 41, 59, 0.95);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(255, 122, 0, 0.4);
+        }
+
+        .scoreboard h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 1px 1px 4px black;
+        }
+
+        .scoreboard h3 {
+            font-size: 1.75rem;
+            color: #facc15;
+        }
+
+        .scoreboard p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
         .commentary {
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: #e9ecef;
-            border-radius: 0.5rem;
+            margin-top: 2.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .commentary h4 {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        .commentary p {
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
+
 <body>
-    <div class="container mt-4">
+    <!-- Animated Background Circles -->
+    <div class="floating-bg circle1"></div>
+    <div class="floating-bg circle2"></div>
+
+    <div class="container">
         <div class="scoreboard">
             <h1>Live Kabaddi Match</h1>
-            <div class="d-flex justify-content-around mt-3">
+            <div class="d-flex justify-content-around mt-4">
                 <div>
                     <h3 id="teamA-name">Team A</h3>
                     <p id="teamA-score">0</p>
@@ -41,10 +128,14 @@
         </div>
 
         <div class="commentary mt-4">
-            <h4>Commentary</h4>
+            <h4>Live Commentary</h4>
             <p id="live-commentary">Waiting for match updates...</p>
         </div>
     </div>
+    
+
     <script src="/static/viewer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

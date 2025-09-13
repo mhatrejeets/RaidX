@@ -1,49 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Match Details</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1, h2, h3 { margin-top: 0; }
-    table { border-collapse: collapse; width: 100%; max-width: 700px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Match Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .floating-bg {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 122, 0, 0.3), transparent);
+            animation: floatAnim 6s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        .circle1 {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 5%;
+        }
+
+        .circle2 {
+            width: 250px;
+            height: 250px;
+            bottom: 10%;
+            right: 5%;
+        }
+
+        @keyframes floatAnim {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(30, 41, 59, 0.95);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 20px rgba(255, 122, 0, 0.4);
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fbbf24;
+            text-shadow: 1px 1px 3px black;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #475569;
+            text-align: left;
+            color: #f1f5f9;
+        }
+
+        th {
+            background-color: #334155;
+            color: #fbbf24;
+        }
+
+        p {
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+        .button-container {
+         margin-top: 40px;
+         display: flex;
+          justify-content: center;
+         gap: 20px;
+}
+
+    </style>
 </head>
+
 <body>
-  <h1>{{.Data.TeamA.Name}} vs {{.Data.TeamB.Name}}</h1>
-  <h2>Score: {{.Data.TeamA.Score}} - {{.Data.TeamB.Score}}</h2>
+    <!-- Animated Background Circles -->
+    <div class="floating-bg circle1"></div>
+    <div class="floating-bg circle2"></div>
 
-  <h3>Player Stats</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Raid Points</th>
-        <th>Defence Points</th>
-        <th>Total Points</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{range $key, $player := .PlayerStats}}
-        <tr>
-          <td>{{$player.Name}}</td>
-          <td>{{$player.RaidPoints}}</td>
-          <td>{{$player.DefencePoints}}</td>
-          <td>{{$player.TotalPoints}}</td>
-          <td>{{$player.Status}}</td>
-        </tr>
-      {{end}}
-    </tbody>
-  </table>
+    <div class="container text-center">
+    <h1>{{.Match.Data.TeamA.Name}} vs {{.Match.Data.TeamB.Name}}</h1>
+    <h2>Score: {{.Match.Data.TeamA.Score}} - {{.Match.Data.TeamB.Score}}</h2>
+    <h4>
+        Winner:
+        {{if gt .Match.Data.TeamA.Score .Match.Data.TeamB.Score}}{{.Match.Data.TeamA.Name}}
+        {{else if gt .Match.Data.TeamB.Score .Match.Data.TeamA.Score}}{{.Match.Data.TeamB.Name}}
+        {{else}}Tie{{end}}
+    </h4>
 
-  <h3>Last Raid Details</h3>
-  <p>
-    Type: {{.RaidDetails.Type}}<br />
-    Raider: {{.RaidDetails.Raider}}<br />
-    Points Gained: {{.RaidDetails.PointsGained}}
-  </p>
+    <h3>Player Stats</h3>
+    
+
+
+      <h3>{{.Match.Data.TeamA.Name}} Players</h3>
+<div class="row mt-3">
+  {{range $index, $p := .PlayerStats}}
+    {{if lt $index 7}}
+    <div class="col-md-4 mb-4">
+      <div class="card bg-dark text-white border-warning h-100 shadow">
+        <div class="card-body">
+          <h5 class="card-title text-warning">{{$p.Stat.Name}}</h5>
+          <p class="card-text">
+            <strong>Raid Points:</strong> {{$p.Stat.RaidPoints}}<br>
+            <strong>Defence Points:</strong> {{$p.Stat.DefencePoints}}<br>
+            <strong>Total Points:</strong> {{$p.Stat.TotalPoints}}<br>
+          </p>
+        </div>
+      </div>
+    </div>
+    {{end}}
+  {{end}}
+</div>
+
+<h3>{{.Match.Data.TeamB.Name}} Players</h3>
+<div class="row mt-3">
+  {{range $index, $p := .PlayerStats}}
+    {{if and (ge $index 7) (lt $index 14)}}
+    <div class="col-md-4 mb-4">
+      <div class="card bg-dark text-white border-warning h-100 shadow">
+        <div class="card-body">
+          <h5 class="card-title text-warning">{{$p.Stat.Name}}</h5>
+          <p class="card-text">
+            <strong>Raid Points:</strong> {{$p.Stat.RaidPoints}}<br>
+            <strong>Defence Points:</strong> {{$p.Stat.DefencePoints}}<br>
+            <strong>Total Points:</strong> {{$p.Stat.TotalPoints}}<br>
+          </p>
+        </div>
+      </div>
+    </div>
+    {{end}}
+  {{end}}
+</div>
+
+
+
+        <!-- <h3 class="mt-4">Last Raid Details</h3>
+        <p>
+            <strong>Type:</strong> {{.RaidDetails.Type}}<br />
+            <strong>Raider:</strong> {{.RaidDetails.Raider}}<br />
+            <strong>Points Gained:</strong> {{.RaidDetails.PointsGained}}
+        </p> -->
+    </div>
+    <div class="button-container">
+    <a href="/home1/68210f2cbb8d4c0998be7295?name=Jeet S Mhatre" class="btn btn-warning">Home</a>
+    <a href="/selectteams/68210f2cbb8d4c0998be7295" class="btn btn-outline-warning">Start Other Match</a>
+</div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

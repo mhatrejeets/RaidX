@@ -1,23 +1,141 @@
 <!-- Static/playerselection.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Select Players</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Select Players</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
   <style>
-    .player-checkbox { margin: 5px; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .floating-bg {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 122, 0, 0.3), transparent);
+      animation: floatAnim 6s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    .circle1 {
+      width: 200px;
+      height: 200px;
+      top: 10%;
+      left: 5%;
+    }
+
+    .circle2 {
+      width: 250px;
+      height: 250px;
+      bottom: 10%;
+      right: 5%;
+    }
+
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .form-container {
+      position: relative;
+      z-index: 1;
+      background-color: rgba(30, 41, 59, 0.95);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(255, 122, 0, 0.4);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #fbbf24;
+      text-shadow: 1px 1px 4px black;
+      margin-bottom: 1.5rem;
+    }
+
+    .player-checkbox {
+      background-color: #1e293b;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .player-checkbox:hover {
+      background-color: #334155;
+    }
+
+    .player-checkbox input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      border: none;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5);
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(45deg, #ea580c, #f97316);
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(255, 140, 0, 0.6);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+      color: #f8fafc;
+    }
   </style>
 </head>
+
 <body>
-  <h2>Select 7 Players for <span id="team-name"></span></h2>
-  <form id="player-form">
-    <div id="player-list"></div>
-    <button type="submit">Confirm Selection</button>
-  </form>
+  <!-- Floating Background Circles -->
+  <div class="floating-bg circle1"></div>
+  <div class="floating-bg circle2"></div>
+
+  <div class="form-container">
+    <h2>Select 7 Players for <span id="team-name"></span></h2>
+    <form id="player-form">
+      <div id="player-list"></div>
+      <button type="submit" class="btn btn-submit">Confirm Selection</button>
+    </form>
+    <a href="/" class="back-link">← Back to Home</a>
+  </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const teamId = params.get("team_id");
-    const teamKey = params.get("team_key"); // "teamA_selected" or "teamB_selected"
+    const teamKey = params.get("team_key");
 
     fetch(`/api/team/${teamId}`)
       .then(res => res.json())
@@ -29,8 +147,10 @@
           const div = document.createElement("div");
           div.classList.add("player-checkbox");
           div.innerHTML = `
-            <input type="checkbox" name="players" value='${JSON.stringify(player)}' />
-            ${player.name}
+            <label>
+              <input type="checkbox" name="players" value='${JSON.stringify(player)}' />
+              ${player.name}
+            </label>
           `;
           list.appendChild(div);
         });
@@ -49,13 +169,11 @@
 
       localStorage.setItem(teamKey, JSON.stringify(selected));
       const playerId = window.location.pathname.split("/").pop();
-      // Redirect to next team or scorer page
+
       if (teamKey === "teamA_selected") {
-        // Select team B
         const team2Id = params.get("team2_id");
         window.location.href = `/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${params.get("team1_id")}&team2_id=${params.get("team2_id")}`;
       } else {
-        // All players selected, go to scorer
         const team1Id = params.get("team1_id");
         const team2Id = params.get("team2_id");
         const team1Name = params.get("team1_name");
@@ -65,5 +183,8 @@
       }
     });
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -57,5 +57,5 @@ func EndGameHandler(c *fiber.Ctx) error {
 		log.Printf("Warning: Failed to delete Redis key: %v", err)
 	}
 
-	return c.Redirect("/viewer") // or return a success message
+	return c.Redirect("/matches") // or return a success message
 }

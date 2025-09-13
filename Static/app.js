@@ -111,7 +111,7 @@ function endGame() {
 
   // Redirect after the alert is dismissed
   setTimeout(function() {
-    window.location.href = "/endgame";
+    window.location.href = "/matches";
   }, 100); // small delay to allow alert to complete
 }
 
