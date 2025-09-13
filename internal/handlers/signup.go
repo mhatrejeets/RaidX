@@ -10,23 +10,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jcoene/go-base62"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// User represents a player document in the DB
-type User struct {
-	FullName      string    `bson:"fullName"`
-	Email         string    `bson:"email"`
-	UserID        string    `bson:"userId"`
-	Password      string    `bson:"password"`
-	Position      string    `bson:"position"`
-	CreatedAt     time.Time `bson:"createdAt"`
-	TotalPoints   int       `bson:"totalPoints"`
-	RaidPoints    int       `bson:"raidPoints"`
-	DefencePoints int       `bson:"defencePoints"`
-}
 
 // hashAndEncodeBase62 hashes the input string and encodes it to base62
 func hashAndEncodeBase62(input string) string {
@@ -40,7 +28,7 @@ func hashAndEncodeBase62(input string) string {
 }
 
 func SignupHandler(c *fiber.Ctx) error {
-	form := new(User)
+	form := new(models.User)
 	if err := c.BodyParser(form); err != nil {
 		logrus.Error("Error:", "SignupHandler:", " Failed to parse form data: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString("❌ Failed to parse form data")
@@ -58,7 +46,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	defer cancel()
 
 	// Check if the email already exists
-	var existing User
+	var existing models.User
 	err := collection.FindOne(ctx, bson.M{"email": form.Email}).Decode(&existing)
 	if err != mongo.ErrNoDocuments {
 		logrus.Info("Info:", "SignupHandler:", " Email already registered: %s", form.Email)
@@ -69,7 +57,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	encodedPassword := hashAndEncodeBase62(form.Password)
 
 	// Create a new user entry
-	newUser := User{
+	newUser := models.User{
 		FullName:      form.FullName,
 		Email:         form.Email,
 		UserID:        form.UserID,

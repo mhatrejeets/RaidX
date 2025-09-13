@@ -8,19 +8,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// Struct matching MongoDB document
-type Userr struct {
-	ID       primitive.ObjectID `bson:"_id"`
-	Email    string             `bson:"email"`
-	Password string             `bson:"password"`
-	Name     string             `bson:"fullName"`
-}
 
 func LoginHandler(c *fiber.Ctx) error {
 	// Get form fields (not JSON!)
@@ -34,7 +26,7 @@ func LoginHandler(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var user Userr
+	var user models.Userr
 	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -51,6 +43,7 @@ func LoginHandler(c *fiber.Ctx) error {
 	}
 
 	// Success
+	logrus.Info("Info:", "LoginHandler:", " User logged in successfully: %s", email)
 	return c.Type("html").SendString(fmt.Sprintf(`
 	<!DOCTYPE html>
 	<html>

@@ -7,17 +7,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-type Player struct {
-	ID          primitive.ObjectID `bson:"_id"`
-	FullName    string             `bson:"fullName"`
-	TotalPoints int                `bson:"totalPoints"`
-	Position    string             `bson:"position"`
-}
 
 // Handler for GET /createteam/:id
 func CreateTeamPage(c *fiber.Ctx) error {
@@ -31,7 +25,7 @@ func CreateTeamPage(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString("Error fetching players")
 	}
 
-	var players []Player
+	var players []models.Player
 	if err := cursor.All(ctx, &players); err != nil {
 		logrus.Error("Error:", "CreateTeamPage: ", " Failed to parse players: %v", err)
 		return c.Status(http.StatusInternalServerError).SendString("Error parsing players")

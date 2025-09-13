@@ -6,14 +6,10 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 )
-
-type Team struct {
-	ID   string `json:"id" bson:"_id"`
-	Name string `json:"team_name" bson:"team_name"`
-}
 
 func GetTeams(c *fiber.Ctx) error {
 	collection := db.MongoClient.Database("raidx").Collection("teams")
@@ -27,7 +23,7 @@ func GetTeams(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch teams"})
 	}
 
-	var teams []Team
+	var teams []models.Team
 
 	if err = cursor.All(ctx, &teams); err != nil {
 		logrus.Error("Error:", "GetTeams:", " Failed to decode teams: %v", err)
