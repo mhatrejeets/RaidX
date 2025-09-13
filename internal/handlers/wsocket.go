@@ -6,42 +6,10 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
 )
-
-type PlayerStat struct {
-	Name          string `json:"name"`
-	ID            string `json:"id"`
-	TotalPoints   int    `json:"totalPoints"`
-	RaidPoints    int    `json:"raidPoints"`
-	DefencePoints int    `json:"defencePoints"`
-	Status        string `json:"status"`
-}
-
-type TeamStats struct {
-	Name  string `json:"name"`
-	Score int    `json:"score"`
-}
-
-type RaidDetails struct {
-	Type         string   `json:"type"`
-	Raider       string   `json:"raider"`
-	Defenders    []string `json:"defenders,omitempty"`
-	PointsGained int      `json:"pointsGained,omitempty"`
-	BonusTaken   bool     `json:"bonusTaken,omitempty"`
-	SuperTackle  bool     `json:"superTackle,omitempty"`
-}
-
-type EnhancedStatsMessage struct {
-	Type string `json:"type"`
-	Data struct {
-		TeamA       TeamStats             `json:"teamA"`
-		TeamB       TeamStats             `json:"teamB"`
-		PlayerStats map[string]PlayerStat `json:"playerStats"`
-		RaidDetails RaidDetails           `json:"raidDetails"`
-	} `json:"data"`
-}
 
 var viewerClients = struct {
 	clients map[*websocket.Conn]bool
@@ -69,7 +37,7 @@ func StartBroadcastWorker() {
 	}()
 }
 
-func BroadcastToViewers(message EnhancedStatsMessage) {
+func BroadcastToViewers(message models.EnhancedStatsMessage) {
 	data, err := json.Marshal(message)
 	if err != nil {
 		logrus.Error("Error:", "BroadcastToViewers:", " Error marshalling data for viewers: %v", err)
@@ -97,7 +65,7 @@ func SetupWebSocket(app *fiber.App) {
 			}
 
 			// Parse incoming stats
-			var receivedMessage EnhancedStatsMessage
+			var receivedMessage models.EnhancedStatsMessage
 			err = json.Unmarshal(msg, &receivedMessage)
 			if err != nil {
 				logrus.Error("Error:", "SetupWebSocket:", " Error unmarshalling scorer message: %v", err)
@@ -130,7 +98,7 @@ func SetupWebSocket(app *fiber.App) {
 		}()
 
 		// Send latest game stats from Redis on new connection
-		var latestStats EnhancedStatsMessage
+		var latestStats models.EnhancedStatsMessage
 		err := redisImpl.GetRedisKey("gameStats", &latestStats)
 		if err == nil {
 			data, _ := json.Marshal(latestStats)

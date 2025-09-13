@@ -5,44 +5,17 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Team structure
-type Teamm struct {
-	Name  string `json:"name" bson:"name"`
-	Score int    `json:"score" bson:"score"`
-}
 
-// PlayerStat represents a player’s stats (dynamic keys in MongoDB)
-type PlayerStatt struct {
-	Name          string `json:"name" bson:"name"`
-	RaidPoints    int    `json:"raidPoints" bson:"raidPoints"`
-	DefencePoints int    `json:"defencePoints" bson:"defencePoints"`
-	TotalPoints   int    `json:"totalPoints" bson:"totalPoints"`
-	Status        string `json:"status" bson:"status"`
-}
 
-// RaidDetails of the last raid
-type RaidDetailss struct {
-	Type         string `json:"type" bson:"type"`
-	Raider       string `json:"raider" bson:"raider"`
-	PointsGained int    `json:"pointsGained" bson:"pointsGained"`
-}
 
-// Match struct matching your MongoDB document
-type Match struct {
-	ID   primitive.ObjectID `json:"id" bson:"_id"`
-	Type string             `json:"type" bson:"type"`
-	Data struct {
-		TeamA       Teamm                  `json:"teamA" bson:"teamA"`
-		TeamB       Teamm                  `json:"teamB" bson:"teamB"`
-		PlayerStats map[string]PlayerStatt `json:"playerStats" bson:"playerStats"`
-		RaidDetails RaidDetailss           `json:"raidDetails" bson:"raidDetails"`
-	} `json:"data" bson:"data"`
-}
+
+
 
 func GetAllMatches(c *fiber.Ctx) error {
 	matchesCol := db.MongoClient.Database("raidx").Collection("matches")
@@ -54,7 +27,7 @@ func GetAllMatches(c *fiber.Ctx) error {
 	}
 	defer cursor.Close(context.TODO())
 
-	var matches []Match
+	var matches []models.Match
 	if err := cursor.All(context.TODO(), &matches); err != nil {
 		logrus.Error("Error:", "GetAllMatches:", " Cursor decode error: %v", err)
 		return c.Status(500).SendString("Cursor decode error: " + err.Error())
@@ -67,7 +40,7 @@ func GetAllMatches(c *fiber.Ctx) error {
 
 type PlayerWithID struct {
 	ID   string
-	Stat PlayerStatt
+	Stat models.PlayerStatt
 }
 
 func GetMatchByID(c *fiber.Ctx) error {
@@ -80,7 +53,7 @@ func GetMatchByID(c *fiber.Ctx) error {
 
 	matchesCol := db.MongoClient.Database("raidx").Collection("matches")
 
-	var match Match
+	var match models.Match
 	err = matchesCol.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&match)
 	if err != nil {
 		logrus.Warn("Warning:", "GetMatchByID:", " Match not found: %v", err)
