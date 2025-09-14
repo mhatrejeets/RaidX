@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mhatrejeets/RaidX/internal/auth"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/sirupsen/logrus"
@@ -44,17 +45,27 @@ func LoginHandler(c *fiber.Ctx) error {
 
 	// Success
 	logrus.Info("Info:", "LoginHandler:", " User logged in successfully: %s", email)
+	// Generate JWT token
+	token, err := auth.GenerateJWT(user.ID.Hex(), "player")
+	if err != nil {
+		logrus.Error("Error:", "LoginHandler:", " JWT generation failed: %v", err)
+		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not generate token")
+	}
+	// Return HTML with redirect and store JWT in localStorage
 	return c.Type("html").SendString(fmt.Sprintf(`
-	<!DOCTYPE html>
-	<html>
-	<head>
-		<script>
-			alert("✅ Login successful!");
-			window.location.href = "/home1/%s?name=%s";
-		</script>
-	</head>
-	<body></body>
-	</html>
-	`, user.ID.Hex(), user.Name))
+	   <!DOCTYPE html>
+	   <html>
+	   <head>
+	   <script>
+		   localStorage.setItem('jwt', '%s');
+		   // Optionally set a cookie for server-side auth if needed
+		   document.cookie = "jwt=%s; path=/";
+		   alert("✅ Login successful!");
+		   window.location.href = "/home1/%s?name=%s";
+	   </script>
+	   </head>
+	   <body></body>
+	   </html>
+	   `, token, token, user.ID.Hex(), user.Name))
 
 }

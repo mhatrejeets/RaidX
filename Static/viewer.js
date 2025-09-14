@@ -14,12 +14,15 @@ ws.onmessage = (event) => {
         document.getElementById("teamB-name").textContent = data.data.teamB.name;
         document.getElementById("teamB-score").textContent = data.data.teamB.score;
 
-        // Update commentary
-        const raid = data.data.raidDetails;
-        const commentary = `Raid by ${raid.raider}: ${raid.pointsGained} points ${
-            raid.bonusTaken ? "(Bonus taken)" : ""
-        } ${raid.superTackle ? "(Super Tackle)" : ""}`;
-        document.getElementById("live-commentary").textContent = commentary;
+        // Update commentary list
+            // Commentary is now handled by the commentary list below
+            const commentaryList = data.extra && data.extra.commentaryList ? data.extra.commentaryList : [];
+            const commentaryDiv = document.getElementById("live-commentary-list");
+            if (commentaryList.length > 0) {
+                commentaryDiv.innerHTML = commentaryList.map(comment => `<p>${comment}</p>`).join("");
+            } else {
+                commentaryDiv.innerHTML = `<p>Waiting for match updates...</p>`;
+            }
     }
 };
 

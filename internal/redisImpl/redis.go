@@ -10,6 +10,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// ListMatchKeys returns all Redis keys for ongoing matches with the given prefix
+func ListMatchKeys(prefix string) ([]string, error) {
+	if RedisClient == nil {
+		return nil, nil
+	}
+	keys, err := RedisClient.Keys(ctx, prefix+"*").Result()
+	return keys, err
+}
+
 var RedisClient *redis.Client
 var RedisNull = redis.Nil
 var ctx = context.Background()
@@ -42,7 +51,7 @@ func SetRedisKey(key string, value interface{}) error {
 func GetRedisKey(key string, dest interface{}) error {
 	val, err := RedisClient.Get(ctx, key).Result()
 	if err != nil {
-		logrus.Error("Error:", "GetRedisKey:", " Failed to get Redis key: %v", err)	
+		logrus.Error("Error:", "GetRedisKey:", " Failed to get Redis key: %v", err)
 		return err
 	}
 

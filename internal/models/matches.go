@@ -52,4 +52,5 @@ type EnhancedStatsMessage struct {
 		PlayerStats map[string]PlayerStat `json:"playerStats"`
 		RaidDetails RaidDetails           `json:"raidDetails"`
 	} `json:"data"`
+	Extra map[string]interface{} `json:"extra,omitempty"`
 }

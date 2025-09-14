@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jcoene/go-base62"
+	"github.com/mhatrejeets/RaidX/internal/auth"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/sirupsen/logrus"
@@ -77,18 +78,17 @@ func SignupHandler(c *fiber.Ctx) error {
 	}
 
 	// Return success message
-	strr := `
-	<!DOCTYPE html>
-	<html>
-	<head>
-		<script>
-			alert("✅ Signup successful!");
-			window.location.href = "/";
-		</script>
-	</head>
-	<body></body>
-	</html>
-	`
-	return c.Type("html").SendString(strr)
+	// Generate JWT token for new user
+	token, err := auth.GenerateJWT(newUser.Email, "player")
+	if err != nil {
+		logrus.Error("Error:", "SignupHandler:", " JWT generation failed: %v", err)
+		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not generate token")
+	}
+	return c.JSON(fiber.Map{
+		"message": "✅ Signup successful!",
+		"token":   token,
+		"user_id": newUser.Email,
+		"name":    newUser.FullName,
+	})
 
 }

@@ -79,6 +79,7 @@ func main() {
 	app.Post("/createteam/:id", handlers.SubmitTeam)
 
 	handlers.SetupWebSocket(app)
+	app.Get("/api/matches/ongoing", handlers.GetOngoingMatches)
 
 	defer db.CloseDB()
 	// Serve other static assets like CSS, JS if needed

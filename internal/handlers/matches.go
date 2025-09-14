@@ -6,16 +6,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/models"
+	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-
-
-
-
-
 
 func GetAllMatches(c *fiber.Ctx) error {
 	matchesCol := db.MongoClient.Database("raidx").Collection("matches")
@@ -74,4 +69,28 @@ func GetMatchByID(c *fiber.Ctx) error {
 		"Match":       match,
 		"PlayerStats": playerList,
 	})
+}
+
+// GetOngoingMatches lists ongoing matches for viewers
+func GetOngoingMatches(c *fiber.Ctx) error {
+	keys, err := redisImpl.ListMatchKeys("gameStats:")
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch matches"})
+	}
+	var matches []fiber.Map
+	for _, key := range keys {
+		var stats models.EnhancedStatsMessage
+		err := redisImpl.GetRedisKey(key, &stats)
+		if err == nil {
+			matchID := key[len("gameStats:"):]
+			matches = append(matches, fiber.Map{
+				"matchID": matchID,
+				"teamA":   stats.Data.TeamA.Name,
+				"teamB":   stats.Data.TeamB.Name,
+				"scoreA":  stats.Data.TeamA.Score,
+				"scoreB":  stats.Data.TeamB.Score,
+			})
+		}
+	}
+	return c.JSON(matches)
 }
