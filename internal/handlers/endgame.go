@@ -9,12 +9,14 @@ import (
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func EndGameHandler(c *fiber.Ctx) error {
 	ctx := context.Background()
 	// 1. Fetch gameStats from Redis
 	val, err := redisImpl.RedisClient.Get(ctx, "gameStats").Result()
+	logrus.Info("EndGame Handler is invoked")
 	if err == redisImpl.RedisNull {
 		logrus.Warn("Warning:", "EndGameHandler:", " No game data found in Redis")
 		return c.Status(404).SendString("No game data found in Redis")
@@ -22,6 +24,8 @@ func EndGameHandler(c *fiber.Ctx) error {
 		logrus.Error("Error:", "EndGameHandler:", " Redis error: %v", err)
 		return c.Status(500).SendString("Redis error: " + err.Error())
 	}
+
+	logrus.Debug("EndGame Handler will delete ", val)
 
 	// 2. Parse JSON into generic map
 	var gameStats map[string]interface{}
@@ -32,6 +36,7 @@ func EndGameHandler(c *fiber.Ctx) error {
 
 	// 3. Insert full gameStats into matches collection
 	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
+	logrus.Debug("EndGame Handler will insert ", gameStats)
 	if _, err := matchesColl.InsertOne(ctx, gameStats); err != nil {
 		logrus.Error("Error:", "EndGameHandler:", " Failed to insert into matches: %v", err)
 		return c.Status(500).SendString("Failed to insert into matches: " + err.Error())
@@ -53,10 +58,17 @@ func EndGameHandler(c *fiber.Ctx) error {
 			},
 		}
 
-		_, err := playersColl.UpdateByID(ctx, id, update)
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			logrus.Error("Error:", "EndGameHandler:", " Invalid player ID: %v", err)
+			continue
+		}
+
+		_, err = playersColl.UpdateByID(ctx, objID, update)
 		if err != nil {
 			logrus.Error("Error:", "EndGameHandler:", " Failed to update player %s: %v", id, err)
 		}
+
 	}
 
 	// 5. Optional: Clean up Redis key
