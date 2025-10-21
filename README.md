@@ -1,7 +1,7 @@
 
 ---
 
-# 🏏 RaidX – Live Score Streaming System
+# RaidX – Live Score Streaming System for Kabaddi
 
 ## 📘 Overview
 
