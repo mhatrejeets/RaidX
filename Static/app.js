@@ -460,6 +460,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                         teamA: { name: teamA.name, score: teamA.score },
                         teamB: { name: teamB.name, score: teamB.score },
                         playerStats: playerStats,
+                        teamAPlayerIds: teamA.players.map(p => p.id),
+                        teamBPlayerIds: teamB.players.map(p => p.id),
                         raidNumber: currentRaidNumber
                     }
                 };

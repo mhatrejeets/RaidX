@@ -222,11 +222,19 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 		match.Data.PlayerStats[defID] = d
 	}
 
+	// revival: for each point gained by raiding team, revive one out player from raiding team (if any)
+	pointsGained := raidPoints + boolToInt(raid.BonusTaken)
+	if raid.RaidingTeam == "A" {
+		revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, pointsGained)
+	} else {
+		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, pointsGained)
+	}
+
 	// record last raid and increment raid number
 	match.Data.RaidDetails = models.RaidDetails{
 		Type:         "raidSuccess",
 		Raider:       raiderStat.Name,
-		PointsGained: raidPoints + boolToInt(raid.BonusTaken),
+		PointsGained: pointsGained,
 		BonusTaken:   raid.BonusTaken,
 	}
 	match.Data.RaidNumber++
@@ -272,6 +280,12 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 		PointsGained: points,
 		SuperTackle:  points > 1,
 	}
+	// revival: defenders' team gets revived players equal to points
+	if defendingTeam == "A" {
+		revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, points)
+	} else {
+		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, points)
+	}
 	match.Data.RaidNumber++
 }
 
@@ -312,7 +326,51 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 		Raider:     r.Name,
 		BonusTaken: raid.BonusTaken,
 	}
+	// If bonusTaken gave a point, revive for the raiding team
+	if raid.BonusTaken {
+		if raid.RaidingTeam == "A" {
+			revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, 1)
+		} else {
+			revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, 1)
+		}
+	}
+	// If do-or-die resulted in raider out, defending team gets 1 point and revival
+	if emptyCount >= 3 {
+		defending := "A"
+		if raid.RaidingTeam == "A" {
+			defending = "B"
+		}
+		if defending == "A" {
+			revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, 1)
+		} else {
+			revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, 1)
+		}
+	}
 	match.Data.RaidNumber++
+}
+
+// revivePlayersByIDs revives up to count players from the given playerID list by
+// setting their status to "in" in match.Data.PlayerStats. It revives the earliest
+// out players found in the provided order.
+func revivePlayersByIDs(match *models.EnhancedStatsMessage, playerIDs []string, count int) {
+	if count <= 0 || playerIDs == nil {
+		return
+	}
+	revived := 0
+	for _, pid := range playerIDs {
+		if revived >= count {
+			break
+		}
+		p, ok := match.Data.PlayerStats[pid]
+		if !ok {
+			continue
+		}
+		if p.Status == "out" {
+			p.Status = "in"
+			match.Data.PlayerStats[pid] = p
+			revived++
+		}
+	}
 }
 
 func boolToInt(b bool) int {

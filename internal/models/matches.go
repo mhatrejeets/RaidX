@@ -33,6 +33,8 @@ type EnhancedStatsMessage struct {
 		PlayerStats     map[string]PlayerStat `json:"playerStats"`
 		RaidDetails     RaidDetails           `json:"raidDetails"`
 		RaidNumber      int                   `json:"raidNumber"`
+		TeamAPlayerIDs  []string              `json:"teamAPlayerIds" bson:"teamAPlayerIds"`
+		TeamBPlayerIDs  []string              `json:"teamBPlayerIds" bson:"teamBPlayerIds"`
 		EmptyRaidCounts struct {
 			TeamA int `json:"teamA"`
 			TeamB int `json:"teamB"`
