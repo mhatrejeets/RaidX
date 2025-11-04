@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -14,18 +15,22 @@ var RedisNull = redis.Nil
 var ctx = context.Background()
 
 func InitRedis() {
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Redis server address
-		Password: "",               // No password by default
-		DB:       0,                // Default DB
-	})
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379" // fallback default
+	}
+	opts, err := redis.ParseURL(redisURL)
+	if err != nil {
+		log.Fatalf("Failed to parse Redis URL: %v", err)
+	}
+	RedisClient = redis.NewClient(opts)
 
 	// Test connection
-	_, err := RedisClient.Ping(ctx).Result()
+	pong, err := RedisClient.Ping(ctx).Result()
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
-	log.Println("Connected to Redis")
+	log.Println("Connected to Redis", pong)
 }
 
 func SetRedisKey(key string, value interface{}) error {
