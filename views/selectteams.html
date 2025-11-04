@@ -12,6 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <!-- AOS Animation CSS -->
   <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
 
   <style>
     body {
@@ -185,9 +186,13 @@
 
     let teams = [];
 
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
+    });
+
     async function loadTeams() {
       try {
-        const res = await fetch("/api/teams");
+        const res = await apiRequest("/api/teams");
         teams = await res.json();
 
         const team1 = document.getElementById("team1");
@@ -241,6 +246,68 @@
 
       const playerId = window.location.pathname.split("/").pop();
       window.location.href = `/playerselection/${playerId}?${queryParams.toString()}`;
+    });
+
+    // Add JWT token handling
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check for JWT token
+      const token = localStorage.getItem('jwtToken');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // Setup global auth headers
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options = {}) {
+        options.headers = options.headers || {};
+        options.headers['Authorization'] = `Bearer ${token}`;
+        return originalFetch(url, options);
+      };
+
+      // Add token to all links
+      const addTokenToUrl = (url) => {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}token=${token}`;
+      };
+
+      document.querySelectorAll('a[href^="/"]').forEach(link => {
+        if (!link.href.includes('/login') && !link.href.includes('/signup')) {
+          link.href = addTokenToUrl(link.getAttribute('href'));
+        }
+      });
+
+      // Add token to form submissions
+      document.getElementById("startMatchBtn").addEventListener("click", () => {
+        const team1Id = document.getElementById("team1").value;
+        const team2Id = document.getElementById("team2").value;
+
+        console.log("Selected IDs:", { team1Id, team2Id });
+        console.log("Teams array:", teams);
+
+        const team1 = teams.find(t => String(t.id) === team1Id);
+        const team2 = teams.find(t => String(t.id) === team2Id);
+
+        console.log("Found teams:", { team1, team2 });
+
+        if (!team1 || !team2) {
+          alert("One or both selected teams could not be found.");
+          return;
+        }
+
+        const queryParams = new URLSearchParams({
+          team_id: team1.id,
+          team_key: "teamA_selected",
+          team1_id: team1.id,
+          team1_name: team1.team_name,
+          team2_id: team2.id,
+          team2_name: team2.team_name,
+          token: token
+        });
+
+        const playerId = window.location.pathname.split("/").pop();
+        window.location.href = `/playerselection/${playerId}?${queryParams.toString()}`;
+      });
     });
 
     loadTeams();

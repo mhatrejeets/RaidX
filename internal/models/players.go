@@ -12,11 +12,11 @@ type Player struct {
 }
 
 // PlayerStat represents a player’s stats (dynamic keys in MongoDB)
-type PlayerStatt struct {
+type PlayerStat struct {
 	Name          string `json:"name" bson:"name"`
+	ID            string `json:"id" bson:"id"`
 	RaidPoints    int    `json:"raidPoints" bson:"raidPoints"`
 	DefencePoints int    `json:"defencePoints" bson:"defencePoints"`
 	TotalPoints   int    `json:"totalPoints" bson:"totalPoints"`
 	Status        string `json:"status" bson:"status"`
 }
-

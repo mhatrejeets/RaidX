@@ -15,6 +15,9 @@
     <!-- AOS Animation CSS -->
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
 
+    <!-- Auth helper -->
+    <script src="/static/auth.js"></script>
+
     <!-- Custom CSS -->
     <style>
         body {
@@ -270,6 +273,9 @@
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script>
         AOS.init();
+        document.addEventListener('DOMContentLoaded', () => {
+            requireAuth();
+        });
     </script>
 </body>
 

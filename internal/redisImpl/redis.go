@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"time"
+	"os"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -15,18 +15,22 @@ var RedisNull = redis.Nil
 var ctx = context.Background()
 
 func InitRedis() {
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Redis server address
-		Password: "",               // No password by default
-		DB:       0,                // Default DB
-	})
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379" // fallback default
+	}
+	opts, err := redis.ParseURL(redisURL)
+	if err != nil {
+		log.Fatalf("Failed to parse Redis URL: %v", err)
+	}
+	RedisClient = redis.NewClient(opts)
 
 	// Test connection
-	_, err := RedisClient.Ping(ctx).Result()
+	pong, err := RedisClient.Ping(ctx).Result()
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
-	log.Println("Connected to Redis")
+	log.Println("Connected to Redis", pong)
 }
 
 func SetRedisKey(key string, value interface{}) error {
@@ -36,13 +40,18 @@ func SetRedisKey(key string, value interface{}) error {
 		return err
 	}
 
-	return RedisClient.Set(ctx, key, jsonData, 10*time.Minute).Err() // Cache for 10 minutes
+	// Persist the game state without an expiry so it survives client refreshes.
+	return RedisClient.Set(ctx, key, jsonData, 0).Err()
 }
 
 func GetRedisKey(key string, dest interface{}) error {
 	val, err := RedisClient.Get(ctx, key).Result()
 	if err != nil {
-		logrus.Error("Error:", "GetRedisKey:", " Failed to get Redis key: %v", err)	
+		// Don't flood logs for the common 'key not found' case (redis.Nil)
+		if err == RedisNull {
+			return err
+		}
+		logrus.Error("Error:", "GetRedisKey:", " Failed to get Redis key: %v", err)
 		return err
 	}
 

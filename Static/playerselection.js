@@ -10,9 +10,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!team1Id || !team2Id) return;
 
+  const token = localStorage.getItem('token');
+  const fetchOptions = {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  };
+  
   const [res1, res2] = await Promise.all([
-    fetch(`/api/team/${team1Id}`),
-    fetch(`/api/team/${team2Id}`)
+    fetch(`/api/team/${team1Id}`, fetchOptions),
+    fetch(`/api/team/${team2Id}`, fetchOptions)
   ]);
 
   const team1 = await res1.json();

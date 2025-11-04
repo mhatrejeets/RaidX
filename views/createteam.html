@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Create Team</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/static/auth.js"></script>
     <style>
         body {
             padding: 2rem;
@@ -72,21 +73,44 @@
                 return;
             }
 
+            // Get token from auth.js
+            const token = getValidToken && getValidToken();
+            console.log("Token being sent:", token);
+            if (!token) {
+                alert("You are not authenticated. Please log in again.");
+                window.location.href = "/login";
+                return;
+            }
+
             fetch(window.location.pathname, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     team_name: teamName,
                     players: [...selected]
                 })
             }).then(res => {
                 if (res.redirected) {
-                    window.location.href = res.url;
+                    // Get token again
+                    const token = getValidToken && getValidToken();
+                    // Append token as query param if not already present
+                    let url = new URL(res.url, window.location.origin);
+                    if (!url.searchParams.has('token') && token) {
+                        url.searchParams.set('token', token);
+                    }
+                    window.location.href = url.toString();
                 } else {
                     alert("Failed to create team.");
                 }
             });
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            requireAuth();
+        });
     </script>
 </body>
 

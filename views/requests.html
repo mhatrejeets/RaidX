@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Requests</title>
+    <script src="/static/auth.js"></script>
 </head>
 <body>
     <h1>Team Request</h1>
@@ -14,5 +15,11 @@
         <a href="{{ .YesURL }}">Yes</a>
         <a href="{{ .NoURL }}">No</a>
     {{ end }}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            requireAuth();
+        });
+    </script>
 </body>
 </html>

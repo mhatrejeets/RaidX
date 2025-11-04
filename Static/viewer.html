@@ -113,6 +113,21 @@
     <div class="floating-bg circle2"></div>
 
     <div class="container">
+        <div id="viewer-join" style="max-width:600px;margin:0 auto 1rem;">
+            <div class="input-group mb-3">
+                <input id="viewer-match-id-input" class="form-control" placeholder="Enter match id to view" />
+                <button id="viewer-join-btn" class="btn btn-primary">Join</button>
+            </div>
+            <div id="viewer-info" style="color:#facc15;margin-bottom:1rem"></div>
+        </div>
+
+        <div id="viewer-status" style="position:fixed;top:12px;right:12px;z-index:9999;color:#fff">
+            <div style="background:rgba(0,0,0,0.6);padding:8px 10px;border-radius:8px;display:flex;gap:10px;align-items:center">
+                <div id="viewer-matchid">Match: —</div>
+                <div id="viewer-conn" style="padding:4px 8px;border-radius:6px;background:#6b7280;font-weight:600">Disconnected</div>
+            </div>
+        </div>
+
         <div class="scoreboard">
             <h1>Live Kabaddi Match</h1>
             <div class="d-flex justify-content-around mt-4">
