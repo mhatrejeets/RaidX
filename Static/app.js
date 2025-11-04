@@ -460,6 +460,18 @@ function updateRaidInfoUI() {
  * Initialization (Runs when the HTML document is fully loaded)
  */
 document.addEventListener("DOMContentLoaded", async () => {
+    // Wire Copy Match ID button
+    const copyMatchIdBtn = document.getElementById('copy-matchid-btn');
+    if (copyMatchIdBtn) {
+        copyMatchIdBtn.addEventListener('click', () => {
+            const id = matchId || '';
+            if (!id) return;
+            navigator.clipboard?.writeText(id).then(() => {
+                copyMatchIdBtn.textContent = 'Copied!';
+                setTimeout(() => (copyMatchIdBtn.textContent = 'Copy Match ID'), 1200);
+            }).catch(() => alert('Copy failed - please copy manually'));
+        });
+    }
     const params = new URLSearchParams(window.location.search);
     const team1Id = params.get("team1_id");
     const team2Id = params.get("team2_id");
