@@ -57,6 +57,16 @@ func SetupWebSocket(app *fiber.App) {
 			c.Close()
 		}()
 
+		// On new scorer connection, send the authoritative game state from Redis so
+		// the client doesn't overwrite server state on connect. This mirrors the
+		// behavior used for viewer connections.
+		var currentMatch models.EnhancedStatsMessage
+		if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err == nil {
+			if data, err := json.Marshal(currentMatch); err == nil {
+				_ = c.WriteMessage(websocket.TextMessage, data)
+			}
+		}
+
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {

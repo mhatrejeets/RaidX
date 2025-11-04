@@ -452,24 +452,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             setupWebSocket();
 
             // 5. Define onopen handler (Guaranteed to have team data now)
+            // Do NOT send full local initial state to server here. The server is
+            // authoritative and will push the saved `gameStats` from Redis to the
+            // client on connect. This avoids overwriting server state when the
+            // front-end refreshes.
             socket.onopen = () => {
-                console.log("WebSocket connection established (sending initial state)");
-                const initialState = {
-                    type: "gameStats",
-                    data: {
-                        teamA: { name: teamA.name, score: teamA.score },
-                        teamB: { name: teamB.name, score: teamB.score },
-                        playerStats: playerStats,
-                        teamAPlayerIds: teamA.players.map(p => p.id),
-                        teamBPlayerIds: teamB.players.map(p => p.id),
-                        raidNumber: currentRaidNumber
-                    }
-                };
-                socket.send(JSON.stringify(initialState));
-
-                // Final UI Update after successful connection/data load
-                updateDisplay();
-                updateRaidInfoUI();
+                console.log("WebSocket connection established (awaiting server state)");
+                // UI will be updated when the server sends the authoritative state
             };
 
         } catch (err) {
