@@ -1,12 +1,13 @@
-let socket = null;
-let matchId = null;
+// Constants
 const MATCH_STORAGE_KEY = 'currentMatchId';
 
+// State variables
+let socket = null;
+let matchId = null;
+let jwtToken = getValidToken(); // Use getValidToken from auth.js
 let teamA = { name: "", score: 0, players: [] };
 let teamB = { name: "", score: 0, players: [] };
-
 let playerStats = {};
-
 let game = true;
 let selectedRaider = null;
 let selectedDefenders = [];
@@ -19,6 +20,12 @@ let currentRaidNumber = 1;
 /**
  * WebSocket Connection Management
  */
+// Only allow /scorer access if authenticated
+if (!isAuthenticated()) {
+    const currentUrl = encodeURIComponent(window.location.href);
+    window.location.href = `/login?returnUrl=${currentUrl}`;
+}
+
 function setupWebSocket() {
     if (socket !== null) {
         console.log("WebSocket already exists");
@@ -27,9 +34,19 @@ function setupWebSocket() {
 
     // Use current hostname for WebSocket connection
     const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProto}//${location.host}/ws/scorer`;
+    const wsUrl = `${wsProto}//${location.host}/ws/scorer?token=${jwtToken}`;
     socket = new WebSocket(wsUrl);
-    console.log("Setting up WebSocket connection...");
+    console.log("Setting up WebSocket connection with auth token...");
+
+    socket.onerror = (error) => {
+        if (!jwtToken) {
+            console.error("No JWT token found, redirecting to login...");
+            window.location.href = "/login";
+            return;
+        }
+        console.error("WebSocket error:", error);
+        updateConnectionStatus('error');
+    };
 
     // The 'onopen' handler is set later in DOMContentLoaded after teams are loaded.
 
@@ -196,19 +213,57 @@ function endGame() {
     game = false;
     let message = "";
 
+    // Check if teams are properly initialized
+    if (!teamA || !teamB || typeof teamA.score === 'undefined' || typeof teamB.score === 'undefined') {
+        console.error('Teams not properly initialized');
+        return;
+    }
+
     if (teamA.score > teamB.score) {
-        message = `${teamA.name} wins`;
+        message = `${teamA.name || 'Team A'} wins`;
     } else if (teamA.score < teamB.score) {
-        message = `${teamB.name} wins`;
+        message = `${teamB.name || 'Team B'} wins`;
     } else {
         message = "It was a tie";
     }
 
     alert(message);
+
+    // Get token for authentication
+    const token = getValidToken();
+    if (!token) {
+        console.error('No authentication token found');
+        window.location.href = '/login';
+        return;
+    }
+
+    // Derive playerId from token payload (use helper) and fall back to URL path
+    let playerId = (typeof getUserIdFromToken === 'function') ? getUserIdFromToken() : null;
+    if (!playerId) {
+        // fallback: try to extract from URL path (legacy flows)
+        playerId = window.location.pathname.split("/").pop();
+    }
+
     // Clear stored match id so refresh won't attempt to rejoin a finished match
     try { localStorage.removeItem(MATCH_STORAGE_KEY); } catch (e) { /* ignore */ }
-    // Include match_id so server can find the right match data
-    window.location.href = `/endgame?match_id=${encodeURIComponent(matchId)}`;
+
+    // Send API request to end game with authentication
+    fetch(`/endgame?match_id=${encodeURIComponent(matchId)}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    }).then(response => {
+        if (response.ok) {
+            // Successfully ended game, redirect to matches page
+            window.location.href = `/matches?token=${encodeURIComponent(token)}`;
+        } else {
+            throw new Error('Failed to end game');
+        }
+    }).catch(error => {
+        console.error('Error ending game:', error);
+        alert('Failed to end game. Please try again.');
+    });
 }
 
 function nextRaid() {
@@ -496,11 +551,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             const selectedB = JSON.parse(localStorage.getItem("teamB_selected"));
 
             // 2. Initialize Teams and Players
-            teamA.name = data1.team_name;
+            const team1Name = params.get("team1_name");
+            const team2Name = params.get("team2_name");
+            
+            teamA.name = team1Name || data1.team_name || "Team A";
             // Ensure players array contains the required 'status' field
             teamA.players = selectedA ? selectedA.map(p => ({ ...p, status: "in" })) : [];
-            teamB.name = data2.team_name;
+            teamB.name = team2Name || data2.team_name || "Team B";
             teamB.players = selectedB ? selectedB.map(p => ({ ...p, status: "in" })) : [];
+            
+            // Update the UI with team names immediately
+            document.getElementById("teamA-name").textContent = teamA.name;
+            document.getElementById("teamB-name").textContent = teamB.name;
+            document.getElementById("teamA-header").textContent = teamA.name;
+            document.getElementById("teamB-header").textContent = teamB.name;
+            
+            // Log team initialization for debugging
+            console.log('Teams initialized:', { 
+                teamA: { name: teamA.name, playerCount: teamA.players.length },
+                teamB: { name: teamB.name, playerCount: teamB.players.length }
+            });
 
             // 3. Initialize Player Stats
             initializePlayerStats(teamA);

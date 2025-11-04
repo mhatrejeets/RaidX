@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/mhatrejeets/RaidX/internal/middleware"
 	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
@@ -52,11 +53,15 @@ func SetupWebSocket(app *fiber.App) {
 
 	// Handle scorer WebSocket
 	app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
-		defer func() {
-			logrus.Info("Info:", "SetupWebSocket:", " Scorer connection closed")
+		// JWT token must be present in query param
+		token := c.Query("token")
+		_, err := middleware.AuthWebSocket(token)
+		if err != nil {
+			logrus.Warn("WebSocket scorer: JWT invalid or missing")
+			c.WriteMessage(websocket.TextMessage, []byte(`{"error":"Unauthorized: Invalid JWT"}`))
 			c.Close()
-		}()
-
+			return
+		}
 		// Expect first message from client to be a join with matchId
 		_, joinMsg, err := c.ReadMessage()
 		if err != nil {
@@ -79,6 +84,12 @@ func SetupWebSocket(app *fiber.App) {
 		matchID := join.MatchID
 		room := GetRoom(matchID)
 		room.AddScorer(c)
+		defer func() {
+			logrus.Info("Info:", "SetupWebSocket:", " Scorer connection closed")
+			c.Close()
+		}()
+
+		// ...existing code...
 
 		// send current match state from Redis (per-match key)
 		var currentMatch models.EnhancedStatsMessage
@@ -295,6 +306,17 @@ func SetupWebSocket(app *fiber.App) {
 			logrus.Info("Info:", "SetupWebSocket:", " Viewer connection closed")
 			c.Close()
 		}()
+
+		// --- JWT Auth for Viewer WebSocket ---
+		token := c.Query("token")
+		_, err := middleware.AuthWebSocket(token)
+		if err != nil {
+			resp := map[string]string{"type": "error", "message": "Unauthorized: Invalid or missing JWT token"}
+			if data, e := json.Marshal(resp); e == nil {
+				_ = c.WriteMessage(websocket.TextMessage, data)
+			}
+			return
+		}
 
 		// Expect a join message with matchId
 		_, joinMsg, err := c.ReadMessage()

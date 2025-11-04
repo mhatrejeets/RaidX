@@ -68,6 +68,9 @@
 
   <!-- AOS Animation CSS -->
   <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  
+  <!-- Auth helper -->
+  <script src="/static/auth.js"></script>
 
   <!-- Custom CSS -->
   <style>
@@ -522,6 +525,7 @@
     <div class="d-flex justify-content-center gap-3 mt-4">
       <a href="#" id="matchestype" class="btn btn-orange">Matches and Tournaments</a>
       <a href="/viewer" class="btn btn-outline-light">Live Score</a>
+      <a href="/matches" class="btn btn-outline-warning">All Matches Scores</a>
     </div>
   </section>
 
@@ -627,20 +631,48 @@
     AOS.init();
   </script>
 </body>
-<script>
-  // Dynamically set player name and link to profile
-  // Extract 'id' from the URL path
-const playerId = window.location.pathname.split("/").pop();
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Use requireAuth from auth.js
+      if (!requireAuth()) return;
 
-// Extract 'name' from the query parameters
-const playerName = new URLSearchParams(window.location.search).get("name");
+      // Get user ID from URL path
+      const playerId = window.location.pathname.split("/").pop();
+      if (!playerId) {
+        window.location.href = '/login';
+        return;
+      }
 
-// Set the player's name and profile link dynamically
-document.getElementById("playerName").textContent = playerName || "Player";
-document.getElementById("profileLink").href = `/playerprofile/${playerId}`;
-document.getElementById("matchestype").href = `/matchestype/${playerId}`;
-</script>
+      // Extract 'name' from query parameters
+      const playerName = new URLSearchParams(window.location.search).get("name") || "Player Profile";
 
-</html>
+      // Ensure profile and matches links point to the correct pages and include token for server-side auth
+      const token = getValidToken() || localStorage.getItem('jwtToken') || localStorage.getItem('token');
+      const profileLinkEl = document.getElementById("profileLink");
+      const matchesTypeEl = document.getElementById("matchestype");
+      
+      // Add click handler for the matches scores link
+      const matchesScoresLink = document.querySelector('a[href="/matches"]');
+      if (matchesScoresLink) {
+        matchesScoresLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          const url = `/matches?token=${encodeURIComponent(token)}`;
+          window.location.href = url;
+        });
+      }
+      if (profileLinkEl) {
+        const profHref = `/playerprofile/${playerId}?name=${encodeURIComponent(playerName)}` + (token ? `&token=${encodeURIComponent(token)}` : '');
+        profileLinkEl.href = profHref;
+      }
+      if (matchesTypeEl) {
+        const matchHref = `/matchestype/${playerId}` + (token ? `?token=${encodeURIComponent(token)}` : '');
+        matchesTypeEl.href = matchHref;
+      }
 
- 
+      // Set player name in UI
+      const playerNameEl = document.getElementById("playerName");
+      if (playerNameEl) playerNameEl.textContent = playerName;
+    });
+  </script>
+
+</html> 

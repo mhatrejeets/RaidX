@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Match Types</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -100,6 +101,23 @@
       </div>
     </a>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Use the requireAuth function from auth.js
+      if (!requireAuth()) return;
+
+      const token = getValidToken() || localStorage.getItem('jwtToken') || localStorage.getItem('token');
+      
+      // Add token to all protected page URLs
+      document.querySelectorAll('.container a').forEach(link => {
+        const originalHref = link.getAttribute('href');
+        // Add token as query parameter
+        const newHref = originalHref + (originalHref.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(token);
+        link.setAttribute('href', newHref);
+      });
+    });
+  </script>
 </body>
 
 </html>

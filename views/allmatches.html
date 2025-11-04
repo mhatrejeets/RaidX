@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <title>Match Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="/static/auth.js"></script>
     <style>
         body {
             margin: 0;
@@ -112,11 +113,24 @@
     <div class="container text-center">
     <h1>{{.Match.Data.TeamA.Name}} vs {{.Match.Data.TeamB.Name}}</h1>
     <h2>Score: {{.Match.Data.TeamA.Score}} - {{.Match.Data.TeamB.Score}}</h2>
+    <!-- Debug info -->
+    <div style="display: none">
+        TeamA Score Type: {{printf "%T" .Match.Data.TeamA.Score}}
+        TeamA Score Value: {{printf "%v" .Match.Data.TeamA.Score}}
+        TeamB Score Type: {{printf "%T" .Match.Data.TeamB.Score}}
+        TeamB Score Value: {{printf "%v" .Match.Data.TeamB.Score}}
+    </div>
     <h4>
         Winner:
-        {{if gt .Match.Data.TeamA.Score .Match.Data.TeamB.Score}}{{.Match.Data.TeamA.Name}}
-        {{else if gt .Match.Data.TeamB.Score .Match.Data.TeamA.Score}}{{.Match.Data.TeamB.Name}}
-        {{else}}Tie{{end}}
+        {{$teamAScore := .Match.Data.TeamA.Score}}
+        {{$teamBScore := .Match.Data.TeamB.Score}}
+        {{if eq $teamAScore $teamBScore}}
+            Tie
+        {{else if gt (printf "%d" $teamAScore) (printf "%d" $teamBScore)}}
+            {{.Match.Data.TeamA.Name}}
+        {{else}}
+            {{.Match.Data.TeamB.Name}}
+        {{end}}
     </h4>
 
     <h3>Player Stats</h3>
@@ -173,12 +187,46 @@
         </p> -->
     </div>
     <div class="button-container">
-    <a href="/home1/68210f2cbb8d4c0998be7295?name=Jeet S Mhatre" class="btn btn-warning">Home</a>
-    <a href="/selectteams/68210f2cbb8d4c0998be7295" class="btn btn-outline-warning">Start Other Match</a>
+    <a href="#" id="homeBtn" class="btn btn-warning">Home</a>
+    <a href="#" id="startOtherMatch" class="btn btn-outline-warning">Start Other Match</a>
 </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            function getUserInfo() {
+                const token = getValidToken();
+                if (!token) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                const userId = getUserIdFromToken();
+                const playerName = localStorage.getItem('playerName') || 'Player';
+                return { token, userId, playerName };
+            }
+
+            const homeBtn = document.getElementById('homeBtn');
+            if (homeBtn) {
+                homeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const userInfo = getUserInfo();
+                    if (!userInfo) return;
+                    window.location.href = `/home1/${userInfo.userId}?name=${encodeURIComponent(userInfo.playerName)}&token=${encodeURIComponent(userInfo.token)}`;
+                });
+            }
+
+            const startOtherMatchBtn = document.getElementById('startOtherMatch');
+            if (startOtherMatchBtn) {
+                startOtherMatchBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const userInfo = getUserInfo();
+                    if (!userInfo) return;
+                    window.location.href = `/selectteams/${userInfo.userId}?token=${encodeURIComponent(userInfo.token)}`;
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

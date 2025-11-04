@@ -2,25 +2,43 @@ package handlers
 
 import (
 	"context"
-	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/models"
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func LoginHandler(c *fiber.Ctx) error {
-	// Get form fields (not JSON!)
-	email := strings.ToLower(strings.TrimSpace(c.FormValue("email")))
-	password := strings.TrimSpace(c.FormValue("password"))
-	encodedPassword := hashAndEncodeBase62(password)
+	// Support both JSON and form data
+	var loginData struct {
+		Email    string `json:"email" form:"email"`
+		Password string `json:"password" form:"password"`
+	}
 
-	fmt.Println("Login Attempt => Email:", email, "EncodedPassword:", encodedPassword)
+	// Try parsing JSON first
+	if err := c.BodyParser(&loginData); err != nil {
+		// If JSON parsing fails, try form data
+		loginData.Email = c.FormValue("email")
+		loginData.Password = c.FormValue("password")
+	}
+
+	// Validate required fields
+	if loginData.Email == "" || loginData.Password == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Email and password are required",
+		})
+	}
+
+	email := strings.ToLower(strings.TrimSpace(loginData.Email))
+	password := strings.TrimSpace(loginData.Password)
+	encodedPassword := hashAndEncodeBase62(password)
 
 	collection := db.MongoClient.Database("raidx").Collection("players")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -30,31 +48,51 @@ func LoginHandler(c *fiber.Ctx) error {
 	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logrus.Info("Info:", "LoginHandler:", " Email not registered: %v", err)
-			return c.Status(fiber.StatusUnauthorized).SendString("❌ Email not registered")
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Email not registered"})
 		}
-		logrus.Error("Error:", "LoginHandler:", " DB error: %v", err)
-		return c.Status(fiber.StatusInternalServerError).SendString("❌ Server error")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Server error"})
 	}
-
 	if user.Password != encodedPassword {
-		logrus.Info("Info:", "LoginHandler:", " Incorrect password for email: %s", email)
-		return c.Status(fiber.StatusUnauthorized).SendString("❌ Incorrect password")
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Incorrect password"})
 	}
 
-	// Success
-	logrus.Info("Info:", "LoginHandler:", " User logged in successfully: %s", email)
-	return c.Type("html").SendString(fmt.Sprintf(`
-	<!DOCTYPE html>
-	<html>
-	<head>
-		<script>
-			alert("✅ Login successful!");
-			window.location.href = "/home1/%s?name=%s";
-		</script>
-	</head>
-	<body></body>
-	</html>
-	`, user.ID.Hex(), user.Name))
+	// Generate JWT
+	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+	sessionID := primitive.NewObjectID().Hex()
+	expiry := time.Now().Add(time.Hour)
+	claims := jwt.MapClaims{
+		"user_id":    user.ID.Hex(),
+		"role":       "user",
+		"session_id": sessionID,
+		"exp":        expiry.Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStr, err := token.SignedString(jwtSecret)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate JWT"})
+	}
+
+	// Store session in MongoDB
+	sessionColl := db.MongoClient.Database("raidx").Collection("sessions")
+	session := models.Session{
+		SessionID:  sessionID,
+		UserID:     user.ID.Hex(),
+		JWTToken:   tokenStr,
+		LoginTime:  time.Now(),
+		ExpiryTime: expiry,
+		Active:     true,
+	}
+	_, err = sessionColl.InsertOne(ctx, session)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to store session"})
+	}
+
+	// Success: send JWT to frontend
+	return c.JSON(fiber.Map{
+		"token":   tokenStr,
+		"user_id": user.ID.Hex(),
+		"name":    user.Name,
+		"expires": expiry.Unix(),
+	})
 
 }

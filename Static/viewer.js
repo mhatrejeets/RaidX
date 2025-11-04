@@ -1,17 +1,27 @@
-// Viewer client that can join a match via URL param or manual input
+// Constants
+const JWT_STORAGE_KEY = 'jwtToken';
+
+// State variables
 let ws = null;
 let matchId = null;
+let jwtToken = localStorage.getItem(JWT_STORAGE_KEY);
 
 function joinMatch(id) {
     if (!id) return;
+    if (!jwtToken) {
+        const currentUrl = encodeURIComponent(window.location.href);
+        window.location.href = `/login?returnUrl=${currentUrl}`;
+        return;
+    }
+    
     matchId = id;
     // hide join UI
     const joinDiv = document.getElementById('viewer-join');
     if (joinDiv) joinDiv.style.display = 'none';
 
-    // Use current hostname for WebSocket connection
+    // Use current hostname for WebSocket connection with JWT token
     const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProto}//${location.host}/ws/viewer`;
+    const wsUrl = `${wsProto}//${location.host}/ws/viewer?token=${jwtToken}`;
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -42,7 +52,27 @@ function joinMatch(id) {
         } catch (e) { console.error('Invalid WS message', e); }
     };
 
-    ws.onclose = () => { console.log("Disconnected from WebSocket server."); const conn = document.getElementById('viewer-conn'); if (conn) { conn.textContent = 'Disconnected'; conn.style.background = '#6b7280'; } };
+    ws.onclose = () => { 
+        console.log("Disconnected from WebSocket server."); 
+        const conn = document.getElementById('viewer-conn'); 
+        if (conn) { 
+            conn.textContent = 'Disconnected'; 
+            conn.style.background = '#6b7280'; 
+        } 
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        const conn = document.getElementById('viewer-conn'); 
+        if (conn) { 
+            conn.textContent = 'Error'; 
+            conn.style.background = '#ef4444'; 
+        }
+        if (!jwtToken) {
+            const currentUrl = encodeURIComponent(window.location.href);
+            window.location.href = `/login?returnUrl=${currentUrl}`;
+        }
+    };
 }
 
 document.addEventListener('DOMContentLoaded', () => {

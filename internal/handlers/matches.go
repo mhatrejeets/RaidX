@@ -29,6 +29,11 @@ func GetAllMatches(c *fiber.Ctx) error {
 		return c.Status(500).SendString("Cursor decode error: " + err.Error())
 	}
 
+	//reverse matches to show latest first
+	for i, j := 0, len(matches)-1; i < j; i, j = i+1, j-1 {
+		matches[i], matches[j] = matches[j], matches[i]
+	}
+
 	return c.Render("matches", fiber.Map{
 		"Matches": matches,
 	})
