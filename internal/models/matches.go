@@ -23,6 +23,8 @@ type RaidDetails struct {
 	PointsGained int      `json:"pointsGained,omitempty"`
 	BonusTaken   bool     `json:"bonusTaken,omitempty"`
 	SuperTackle  bool     `json:"superTackle,omitempty"`
+	AllOut       bool     `json:"allOut,omitempty"`     // Indicates if this raid resulted in an all-out
+	AllOutTeam   string   `json:"allOutTeam,omitempty"` // Which team got all-out (A or B)
 }
 
 type EnhancedStatsMessage struct {

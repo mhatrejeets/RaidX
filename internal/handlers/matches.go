@@ -215,6 +215,13 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 	}
 	match.Data.PlayerStats[raid.RaiderID] = raiderStat
 
+	// Reset empty raid count for the raiding team on a successful raid
+	if raid.RaidingTeam == "A" {
+		match.Data.EmptyRaidCounts.TeamA = 0
+	} else {
+		match.Data.EmptyRaidCounts.TeamB = 0
+	}
+
 	// mark defenders out and keep their stats
 	for _, defID := range raid.DefenderIDs {
 		d := match.Data.PlayerStats[defID]
@@ -223,44 +230,88 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 	}
 
 	// revival: for each point gained by raiding team, revive one out player from raiding team (if any)
-	pointsGained := raidPoints + boolToInt(raid.BonusTaken)
+	// Only revive players based on defenders out, not bonus points
+	revivals := raidPoints                                  // number of defenders out determines revival count
+	pointsGained := raidPoints + boolToInt(raid.BonusTaken) // total points includes bonus
 	if raid.RaidingTeam == "A" {
-		revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, pointsGained)
+		revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, revivals)
 	} else {
-		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, pointsGained)
+		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, revivals)
 	}
 
-	// record last raid and increment raid number
+	// record last raid and check for all out
 	match.Data.RaidDetails = models.RaidDetails{
 		Type:         "raidSuccess",
 		Raider:       raiderStat.Name,
 		PointsGained: pointsGained,
 		BonusTaken:   raid.BonusTaken,
 	}
+
+	// Check for all out before incrementing raid number
+	checkAndHandleAllOut(match)
+
 	match.Data.RaidNumber++
 }
 
 func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload) {
-	// Determine defending team
+	// Determine defending team by id (A/B)
 	defendingTeam := "A"
 	if raid.RaidingTeam == "A" {
 		defendingTeam = "B"
 	}
 
-	// Simple super tackle check based on provided defenderIDs length
+	// Base defense/tackle points
 	points := 1
-	if len(raid.DefenderIDs) <= 3 {
+	// Determine super tackle based on defending team's active players (players with status "in").
+	// Super tackle occurs when the defending team has 3 or fewer active players on the mat.
+	var activeDefenders int
+	if defendingTeam == "A" {
+		for _, pid := range match.Data.TeamAPlayerIDs {
+			if match.Data.PlayerStats[pid].Status == "in" {
+				activeDefenders++
+			}
+		}
+	} else {
+		for _, pid := range match.Data.TeamBPlayerIDs {
+			if match.Data.PlayerStats[pid].Status == "in" {
+				activeDefenders++
+			}
+		}
+	}
+
+	isSuperTackle := activeDefenders <= 3
+	if isSuperTackle {
 		points = 2
 	}
 
-	// award points to defending team
+	// If raider had taken a bonus, the raiding team ALWAYS gets the bonus point.
+	// Update raider stats accordingly. When a raider with bonus is tackled, defenders
+	// should only be awarded the normal tackle point (1), not the super tackle bonus.
+	if raid.BonusTaken {
+		if raid.RaidingTeam == "A" {
+			match.Data.TeamA.Score++
+		} else {
+			match.Data.TeamB.Score++
+		}
+		// update raider stats for the bonus
+		rr := match.Data.PlayerStats[raid.RaiderID]
+		rr.RaidPoints++
+		rr.TotalPoints++
+		match.Data.PlayerStats[raid.RaiderID] = rr
+		// If it looked like a super tackle, reduce it to a normal tackle when bonus was taken
+		if isSuperTackle {
+			points = 1
+		}
+	}
+
+	// Award points to defending team (points already adjusted above)
 	if defendingTeam == "A" {
 		match.Data.TeamA.Score += points
 	} else {
 		match.Data.TeamB.Score += points
 	}
 
-	// mark raider out
+	// Mark raider out
 	r := match.Data.PlayerStats[raid.RaiderID]
 	r.Status = "out"
 	match.Data.PlayerStats[raid.RaiderID] = r
@@ -273,25 +324,41 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 		match.Data.PlayerStats[defID] = d
 	}
 
+	// PointsGained should reflect total points awarded this raid: defender points + bonus (if any)
 	match.Data.RaidDetails = models.RaidDetails{
 		Type:         "defenseSuccess",
 		Raider:       r.Name,
 		Defenders:    getDefenderNames(match, raid.DefenderIDs),
-		PointsGained: points,
+		PointsGained: points + boolToInt(raid.BonusTaken),
 		SuperTackle:  points > 1,
+		BonusTaken:   raid.BonusTaken,
 	}
-	// revival: defenders' team gets revived players equal to points
-	if defendingTeam == "A" {
-		revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, points)
+
+	// Check for all out before revival (will add all-out points to RaidDetails if any)
+	checkAndHandleAllOut(match)
+	// Revive exactly 1 player for the defending team (super tackle revives 1 as per rules)
+
+	// Reset empty raid count for the raiding team on a defense success
+	if raid.RaidingTeam == "A" {
+		match.Data.EmptyRaidCounts.TeamA = 0
 	} else {
-		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, points)
+		match.Data.EmptyRaidCounts.TeamB = 0
 	}
+
+	// Revive exactly 1 player for the defending team (super tackle revives 1 as per rules)
+	if defendingTeam == "A" {
+		revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, 1)
+	} else {
+		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, 1)
+	}
+
 	match.Data.RaidNumber++
 }
 
 func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	r := match.Data.PlayerStats[raid.RaiderID]
 
+	// Award bonus point to raiding team if taken (no revival for bonus points)
 	if raid.BonusTaken {
 		if raid.RaidingTeam == "A" {
 			match.Data.TeamA.Score++
@@ -303,6 +370,10 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	}
 
 	// do-or-die handling
+	// Persist the incoming empty raid counts from the client so server and UI stay in sync.
+	match.Data.EmptyRaidCounts.TeamA = raid.EmptyRaidCounts.TeamA
+	match.Data.EmptyRaidCounts.TeamB = raid.EmptyRaidCounts.TeamB
+
 	emptyCount := 0
 	if raid.RaidingTeam == "A" {
 		emptyCount = raid.EmptyRaidCounts.TeamA
@@ -311,31 +382,36 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	}
 
 	if emptyCount >= 3 {
-		// failure: raider out, opponent gets 1 point
-		r.Status = "out"
-		if raid.RaidingTeam == "A" {
-			match.Data.TeamB.Score++
+		// Do-or-die: on the 3rd consecutive empty raid by the same team.
+		// Kabaddi rule: if the raider takes a bonus on the do-or-die raid, the raider is safe
+		// (bonus already awarded above). Otherwise, raider is out, opponent gets 1 point
+		// and opponent revives 1 player.
+		if raid.BonusTaken {
+			// Raider took bonus on do-or-die -> safe. No out, no opponent point.
+			// Reset the empty raid count for that raiding team.
+			if raid.RaidingTeam == "A" {
+				match.Data.EmptyRaidCounts.TeamA = 0
+			} else {
+				match.Data.EmptyRaidCounts.TeamB = 0
+			}
 		} else {
-			match.Data.TeamA.Score++
+			// failure: raider out, opponent gets 1 point
+			r.Status = "out"
+			if raid.RaidingTeam == "A" {
+				match.Data.TeamB.Score++
+			} else {
+				match.Data.TeamA.Score++
+			}
 		}
 	}
-
 	match.Data.PlayerStats[raid.RaiderID] = r
 	match.Data.RaidDetails = models.RaidDetails{
 		Type:       ternaryString(emptyCount >= 3, "doOrDieRaid", "emptyRaid"),
 		Raider:     r.Name,
 		BonusTaken: raid.BonusTaken,
 	}
-	// If bonusTaken gave a point, revive for the raiding team
-	if raid.BonusTaken {
-		if raid.RaidingTeam == "A" {
-			revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, 1)
-		} else {
-			revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, 1)
-		}
-	}
-	// If do-or-die resulted in raider out, defending team gets 1 point and revival
-	if emptyCount >= 3 {
+	// If do-or-die resulted in raider out (i.e., no bonus taken), defending team gets 1 point and revival
+	if emptyCount >= 3 && !raid.BonusTaken {
 		defending := "A"
 		if raid.RaidingTeam == "A" {
 			defending = "B"
@@ -344,6 +420,12 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 			revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, 1)
 		} else {
 			revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, 1)
+		}
+		// After a do-or-die failure, reset that team's empty count (already reset above for bonus case)
+		if raid.RaidingTeam == "A" {
+			match.Data.EmptyRaidCounts.TeamA = 0
+		} else {
+			match.Data.EmptyRaidCounts.TeamB = 0
 		}
 	}
 	match.Data.RaidNumber++
@@ -393,4 +475,64 @@ func ternaryString(cond bool, a, b string) string {
 		return a
 	}
 	return b
+}
+
+// checkAndHandleAllOut checks if a team is all out and handles the scoring and revival
+// Returns true if an all-out occurred, false otherwise
+func checkAndHandleAllOut(match *models.EnhancedStatsMessage) bool {
+	// Check Team A
+	allOutA := true
+	activePlayersA := 0
+	for _, pid := range match.Data.TeamAPlayerIDs {
+		if match.Data.PlayerStats[pid].Status == "in" {
+			allOutA = false
+			activePlayersA++
+		}
+	}
+
+	// Check Team B
+	allOutB := true
+	activePlayersB := 0
+	for _, pid := range match.Data.TeamBPlayerIDs {
+		if match.Data.PlayerStats[pid].Status == "in" {
+			allOutB = false
+			activePlayersB++
+		}
+	}
+
+	// Handle Team A all out (only if they actually have players)
+	if allOutA && len(match.Data.TeamAPlayerIDs) > 0 {
+		// Award 2 extra points to Team B (all-out bonus)
+		match.Data.TeamB.Score += 2
+		// Revive all Team A players
+		for _, pid := range match.Data.TeamAPlayerIDs {
+			p := match.Data.PlayerStats[pid]
+			p.Status = "in"
+			match.Data.PlayerStats[pid] = p
+		}
+		// Update raid details
+		match.Data.RaidDetails.AllOut = true
+		match.Data.RaidDetails.AllOutTeam = "A"
+		match.Data.RaidDetails.PointsGained += 2 // Add all-out points to total points gained
+		return true
+	}
+
+	// Handle Team B all out (only if they actually have players)
+	if allOutB && len(match.Data.TeamBPlayerIDs) > 0 {
+		// Award 2 extra points to Team A (all-out bonus)
+		match.Data.TeamA.Score += 2
+		// Revive all Team B players
+		for _, pid := range match.Data.TeamBPlayerIDs {
+			p := match.Data.PlayerStats[pid]
+			p.Status = "in"
+			match.Data.PlayerStats[pid] = p
+		}
+		// Update raid details
+		match.Data.RaidDetails.AllOut = true
+		match.Data.RaidDetails.AllOutTeam = "B"
+		match.Data.RaidDetails.PointsGained += 2 // Add all-out points to total points gained
+		return true
+	}
+
+	return false
 }

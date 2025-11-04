@@ -266,7 +266,7 @@ function defenseSuccessful() {
         raiderId: selectedRaider.id,
         defenderIds: selectedDefenders.map(d => d.id),
         raidingTeam: currentRaidNumber % 2 !== 0 ? "A" : "B",
-        bonusTaken: false,
+        bonusTaken: bonusTaken,
         emptyRaidCounts: {
             teamA: emptyRaidCountA,
             teamB: emptyRaidCountB

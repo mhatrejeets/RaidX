@@ -159,6 +159,15 @@ func SetupWebSocket(app *fiber.App) {
 					raiderName = p.Name
 				}
 
+				// Update touched player's status to "out" so viewers/scorer UI stay in sync.
+				// We don't attempt to infer who the raider/defender was beyond the touched id here;
+				// this ensures the UI reflects the out status immediately and lets higher-level
+				// raid handlers manage more detailed stat updates when available.
+				if p, ok := currentMatch.Data.PlayerStats[lobbyPayload.Data.TouchedPlayerId]; ok {
+					p.Status = "out"
+					currentMatch.Data.PlayerStats[lobbyPayload.Data.TouchedPlayerId] = p
+				}
+
 				// Record raid detail
 				currentMatch.Data.RaidDetails = models.RaidDetails{
 					Type:         "lobbyTouch",
@@ -168,6 +177,9 @@ func SetupWebSocket(app *fiber.App) {
 
 				// Increment raid number
 				currentMatch.Data.RaidNumber++
+
+				// Check for all-out and handle revivals/extra points if necessary
+				checkAndHandleAllOut(&currentMatch)
 
 				// persist updated state and broadcast
 				if err := redisImpl.SetRedisKey("gameStats", currentMatch); err != nil {
