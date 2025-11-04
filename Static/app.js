@@ -1,4 +1,6 @@
 let socket = null;
+let matchId = null;
+const MATCH_STORAGE_KEY = 'currentMatchId';
 
 let teamA = { name: "", score: 0, players: [] };
 let teamB = { name: "", score: 0, players: [] };
@@ -23,7 +25,10 @@ function setupWebSocket() {
         return;
     }
 
-    socket = new WebSocket("ws://localhost:3000/ws/scorer");
+    // Use current hostname for WebSocket connection
+    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProto}//${location.host}/ws/scorer`;
+    socket = new WebSocket(wsUrl);
     console.log("Setting up WebSocket connection...");
 
     // The 'onopen' handler is set later in DOMContentLoaded after teams are loaded.
@@ -77,14 +82,33 @@ function setupWebSocket() {
             console.error('Invalid WS message', e);
         }
     };
-
     socket.onerror = (error) => {
         console.error("WebSocket error:", error);
+        setConnectionStatus('Error');
     };
     
     socket.onclose = () => {
         console.log("WebSocket connection closed.");
+        setConnectionStatus('Disconnected');
     };
+}
+
+// UI helpers for match status
+function setConnectionStatus(status) {
+    try {
+        const el = document.getElementById('match-status-conn');
+        if (!el) return;
+        el.textContent = status;
+        el.style.background = status === 'Connected' ? '#10b981' : status === 'Error' ? '#ef4444' : '#6b7280';
+    } catch (e) { /* ignore */ }
+}
+
+function setMatchIdDisplay(id) {
+    try {
+        const el = document.getElementById('match-status-id');
+        if (!el) return;
+        el.textContent = `Match: ${id || '—'}`;
+    } catch (e) { /* ignore */ }
 }
 
 /**
@@ -181,7 +205,10 @@ function endGame() {
     }
 
     alert(message);
-    window.location.href = `/endgame`;
+    // Clear stored match id so refresh won't attempt to rejoin a finished match
+    try { localStorage.removeItem(MATCH_STORAGE_KEY); } catch (e) { /* ignore */ }
+    // Include match_id so server can find the right match data
+    window.location.href = `/endgame?match_id=${encodeURIComponent(matchId)}`;
 }
 
 function nextRaid() {
@@ -436,6 +463,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams(window.location.search);
     const team1Id = params.get("team1_id");
     const team2Id = params.get("team2_id");
+    // Allow prefilled match id via URL (scorer could open /scorer?match_id=xxx)
+    const prefillMatchId = params.get("match_id");
 
     console.log("DOM fully loaded. Starting initialization.");
 
@@ -465,18 +494,89 @@ document.addEventListener("DOMContentLoaded", async () => {
             initializePlayerStats(teamA);
             initializePlayerStats(teamB);
 
-            // 4. Setup WebSocket Connection
-            setupWebSocket();
+            // 4. If a match id was provided via URL, prefill it into the match setup input
+            if (prefillMatchId) {
+                const el = document.getElementById('match-id-input');
+                if (el) el.value = prefillMatchId;
+            } else {
+                // generate a friendly short id and prefill the input
+                const shortId = 'm-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+                const el = document.getElementById('match-id-input');
+                if (el) el.value = shortId;
+            }
 
-            // 5. Define onopen handler (Guaranteed to have team data now)
-            // Do NOT send full local initial state to server here. The server is
-            // authoritative and will push the saved `gameStats` from Redis to the
-            // client on connect. This avoids overwriting server state when the
-            // front-end refreshes.
-            socket.onopen = () => {
-                console.log("WebSocket connection established (awaiting server state)");
-                // UI will be updated when the server sends the authoritative state
-            };
+            // Wire UI for match setup actions
+            const copyBtn = document.getElementById('copy-match-link');
+            const startBtn = document.getElementById('start-match-btn');
+            const matchInput = document.getElementById('match-id-input');
+            const viewerLinkEl = document.getElementById('viewer-link');
+
+            function updateViewerLink() {
+                if (!matchInput || !viewerLinkEl) return;
+                // Prefer the server route /viewer so route-level rendering is used
+                const link = `${location.origin}/viewer?match_id=${encodeURIComponent(matchInput.value)}`;
+                viewerLinkEl.textContent = link;
+            }
+
+            if (matchInput) {
+                matchInput.addEventListener('input', updateViewerLink);
+                updateViewerLink();
+            }
+
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    updateViewerLink();
+                    const link = viewerLinkEl ? viewerLinkEl.textContent : '';
+                    if (!link) return;
+                    navigator.clipboard?.writeText(link).then(() => {
+                        copyBtn.textContent = 'Copied';
+                        setTimeout(() => (copyBtn.textContent = 'Copy Link'), 1500);
+                    }).catch(() => alert('Copy failed - please copy manually'));
+                });
+            }
+
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    if (!matchInput || !matchInput.value) return alert('Please enter a match ID');
+                    matchId = matchInput.value.trim();
+                    // persist match id so refreshes keep the same match
+                    try { localStorage.setItem(MATCH_STORAGE_KEY, matchId); } catch (e) { console.warn('Failed to persist match id', e); }
+                    // update UI
+                    setMatchIdDisplay(matchId);
+                    // hide setup overlay
+                    const overlay = document.getElementById('match-setup');
+                    if (overlay) overlay.style.display = 'none';
+                    // initialize websocket and join
+                    setupWebSocket();
+                    if (socket) {
+                        socket.onopen = () => {
+                            socket.send(JSON.stringify({ type: 'join', matchId }));
+                            setConnectionStatus('Connected');
+                            console.log('Joined match:', matchId);
+                        };
+                    }
+                });
+            }
+
+            // If a match id was previously stored, auto-join that match (persistence across refreshes)
+            const stored = (() => { try { return localStorage.getItem(MATCH_STORAGE_KEY); } catch (e) { return null; } })();
+            if (stored && stored.trim() !== '') {
+                matchId = stored.trim();
+                if (matchInput) matchInput.value = matchId;
+                // hide overlay immediately and auto-join
+                const overlay = document.getElementById('match-setup');
+                if (overlay) overlay.style.display = 'none';
+                // update UI
+                setMatchIdDisplay(matchId);
+                setupWebSocket();
+                if (socket) {
+                    socket.onopen = () => {
+                        socket.send(JSON.stringify({ type: 'join', matchId }));
+                        setConnectionStatus('Connected');
+                        console.log('Auto-joined stored match:', matchId);
+                    };
+                }
+            }
 
         } catch (err) {
             console.error("Failed to load teams:", err);

@@ -57,25 +57,50 @@ func SetupWebSocket(app *fiber.App) {
 			c.Close()
 		}()
 
-		// On new scorer connection, try to fetch authoritative game state from Redis.
-		// If it's missing, ask the client to send its initial state (requestInit).
+		// Expect first message from client to be a join with matchId
+		_, joinMsg, err := c.ReadMessage()
+		if err != nil {
+			logrus.Error("Error:", "SetupWebSocket:", " Failed to read join message: %v", err)
+			return
+		}
+		var join struct {
+			Type    string `json:"type"`
+			MatchID string `json:"matchId"`
+		}
+		if err := json.Unmarshal(joinMsg, &join); err != nil || join.Type != "join" || join.MatchID == "" {
+			// ask client to send proper join
+			req := map[string]string{"type": "requestJoin"}
+			if data, e := json.Marshal(req); e == nil {
+				_ = c.WriteMessage(websocket.TextMessage, data)
+			}
+			return
+		}
+
+		matchID := join.MatchID
+		room := GetRoom(matchID)
+		room.AddScorer(c)
+
+		// send current match state from Redis (per-match key)
 		var currentMatch models.EnhancedStatsMessage
-		if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+		redisKey := "gameStats:" + matchID
+		if err := redisImpl.GetRedisKey(redisKey, &currentMatch); err != nil {
 			if err == redisImpl.RedisNull {
-				// Tell client to send initial state
+				// Ask client to send initial state
 				req := map[string]string{"type": "requestInit"}
 				if data, e := json.Marshal(req); e == nil {
 					_ = c.WriteMessage(websocket.TextMessage, data)
 				}
 			} else {
-				logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats: %v", err)
+				logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats for match %s: %v", matchID, err)
 			}
 		} else {
 			if data, err := json.Marshal(currentMatch); err == nil {
+				// send to connecting scorer only
 				_ = c.WriteMessage(websocket.TextMessage, data)
 			}
 		}
 
+		// main read loop for this scorer
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {
@@ -86,9 +111,24 @@ func SetupWebSocket(app *fiber.App) {
 			// First probe if this is a raid payload (from scorer UI) or a full state update
 			var probe struct {
 				RaidType string `json:"raidType"`
+				Type     string `json:"type"`
 			}
-			err = json.Unmarshal(msg, &probe)
-			if err == nil && probe.RaidType != "" {
+			_ = json.Unmarshal(msg, &probe)
+			if probe.Type == "initialState" {
+				// client sent initial full state for this match - persist
+				var received models.EnhancedStatsMessage
+				if err := json.Unmarshal(msg, &received); err == nil {
+					if err := redisImpl.SetRedisKey(redisKey, received); err == nil {
+						// broadcast to room
+						if data, e := json.Marshal(received); e == nil {
+							room.BroadcastBytes(data)
+						}
+					}
+				}
+				continue
+			}
+
+			if probe.RaidType != "" {
 				// It's a raid action. Unmarshal into a raid struct and process on backend
 				var payload RaidPayload
 				if err := json.Unmarshal(msg, &payload); err != nil {
@@ -96,9 +136,9 @@ func SetupWebSocket(app *fiber.App) {
 					continue
 				}
 
-				// Load current match state
+				// Load current match state (per-match key)
 				var currentMatch models.EnhancedStatsMessage
-				if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+				if err := redisImpl.GetRedisKey(redisKey, &currentMatch); err != nil {
 					if err == redisImpl.RedisNull {
 						// Ask client to initialize server state
 						errMsg := map[string]string{"error": "server: game state not initialized. Please send initial state"}
@@ -132,20 +172,20 @@ func SetupWebSocket(app *fiber.App) {
 					logrus.Warn("Warning:", "SetupWebSocket:", " Unknown raid type from scorer: %v", payload.RaidType)
 				}
 
-				// persist updated state and broadcast
-				if err := redisImpl.SetRedisKey("gameStats", currentMatch); err != nil {
+				// persist updated state and broadcast to this room
+				if err := redisImpl.SetRedisKey(redisKey, currentMatch); err != nil {
 					logrus.Error("Error:", "SetupWebSocket:", " Failed to set gameStats: %v", err)
 					continue
 				}
-				BroadcastToViewers(currentMatch)
-				// also send updated state back to scorer who initiated the action
 				if data, err := json.Marshal(currentMatch); err == nil {
+					room.BroadcastBytes(data)
+					// also send updated state back to scorer who initiated the action
 					_ = c.WriteMessage(websocket.TextMessage, data)
 				}
 				continue
 			}
 
-			// Probe for custom non-raid message types (e.g., lobby touch)
+			// Probe for custom non-raid message types (e.g., lobbyTouch)
 			var typeProbe struct {
 				Type string `json:"type"`
 			}
@@ -168,7 +208,7 @@ func SetupWebSocket(app *fiber.App) {
 
 				// Load current match state
 				var currentMatch models.EnhancedStatsMessage
-				if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+				if err := redisImpl.GetRedisKey(redisKey, &currentMatch); err != nil {
 					if err == redisImpl.RedisNull {
 						// Ask client to initialize server state
 						errMsg := map[string]string{"error": "server: game state not initialized. Please send initial state"}
@@ -195,9 +235,6 @@ func SetupWebSocket(app *fiber.App) {
 				}
 
 				// Update touched player's status to "out" so viewers/scorer UI stay in sync.
-				// We don't attempt to infer who the raider/defender was beyond the touched id here;
-				// this ensures the UI reflects the out status immediately and lets higher-level
-				// raid handlers manage more detailed stat updates when available.
 				if p, ok := currentMatch.Data.PlayerStats[lobbyPayload.Data.TouchedPlayerId]; ok {
 					p.Status = "out"
 					currentMatch.Data.PlayerStats[lobbyPayload.Data.TouchedPlayerId] = p
@@ -217,14 +254,12 @@ func SetupWebSocket(app *fiber.App) {
 				checkAndHandleAllOut(&currentMatch)
 
 				// persist updated state and broadcast
-				if err := redisImpl.SetRedisKey("gameStats", currentMatch); err != nil {
+				if err := redisImpl.SetRedisKey(redisKey, currentMatch); err != nil {
 					logrus.Error("Error:", "SetupWebSocket:", " Failed to set gameStats for lobbyTouch: %v", err)
 					continue
 				}
-				BroadcastToViewers(currentMatch)
-
-				// also send updated state back to scorer who initiated the action
 				if data, err := json.Marshal(currentMatch); err == nil {
+					room.BroadcastBytes(data)
 					_ = c.WriteMessage(websocket.TextMessage, data)
 				}
 				continue
@@ -239,33 +274,54 @@ func SetupWebSocket(app *fiber.App) {
 			}
 
 			// Store data in Redis
-			err = redisImpl.SetRedisKey("gameStats", receivedMessage)
+			err = redisImpl.SetRedisKey(redisKey, receivedMessage)
 			if err != nil {
 				logrus.Error("Error:", "SetupWebSocket:", " Error storing data in Redis: %v", err)
 			}
 
-			// Broadcast updated stats to all viewers
-			BroadcastToViewers(receivedMessage)
+			// Broadcast updated stats to all viewers in this room
+			if data, err := json.Marshal(receivedMessage); err == nil {
+				room.BroadcastBytes(data)
+			}
 		}
+
+		// cleanup
+		room.RemoveScorer(c)
 	}))
 
 	// Handle viewer WebSocket
 	app.Get("/ws/viewer", websocket.New(func(c *websocket.Conn) {
-		viewerClients.mu.Lock()
-		viewerClients.clients[c] = true
-		viewerClients.mu.Unlock()
-
 		defer func() {
-			viewerClients.mu.Lock()
-			delete(viewerClients.clients, c)
-			viewerClients.mu.Unlock()
-
+			logrus.Info("Info:", "SetupWebSocket:", " Viewer connection closed")
 			c.Close()
 		}()
 
-		// Send latest game stats from Redis on new connection
+		// Expect a join message with matchId
+		_, joinMsg, err := c.ReadMessage()
+		if err != nil {
+			logrus.Error("Error:", "SetupWebSocket:", " Failed to read join message from viewer: %v", err)
+			return
+		}
+		var join struct {
+			Type    string `json:"type"`
+			MatchID string `json:"matchId"`
+		}
+		if err := json.Unmarshal(joinMsg, &join); err != nil || join.Type != "join" || join.MatchID == "" {
+			req := map[string]string{"type": "requestJoin"}
+			if data, e := json.Marshal(req); e == nil {
+				_ = c.WriteMessage(websocket.TextMessage, data)
+			}
+			return
+		}
+
+		matchID := join.MatchID
+		room := GetRoom(matchID)
+		room.AddViewer(c)
+
+		// send latest game stats from Redis for this match
 		var latestStats models.EnhancedStatsMessage
-		err := redisImpl.GetRedisKey("gameStats", &latestStats)
+		redisKey := "gameStats:" + matchID
+		err = redisImpl.GetRedisKey(redisKey, &latestStats)
 		if err == nil {
 			data, _ := json.Marshal(latestStats)
 			_ = c.WriteMessage(websocket.TextMessage, data)
@@ -277,5 +333,7 @@ func SetupWebSocket(app *fiber.App) {
 				break
 			}
 		}
+
+		room.RemoveViewer(c)
 	}))
 }

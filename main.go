@@ -88,7 +88,8 @@ func main() {
 	app.Static("/static", "./Static")
 
 	// Start server on port 3000
-	err := app.Listen(":3000")
+	err := app.Listen("0.0.0.0:3000")
+
 	if err != nil {
 		panic(err)
 	}

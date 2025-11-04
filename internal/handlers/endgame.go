@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
@@ -14,11 +15,22 @@ import (
 
 func EndGameHandler(c *fiber.Ctx) error {
 	ctx := context.Background()
-	// 1. Fetch gameStats from Redis
-	val, err := redisImpl.RedisClient.Get(ctx, "gameStats").Result()
-	logrus.Info("EndGame Handler is invoked")
+
+	// Get match_id from query param
+	matchId := c.Query("match_id")
+	if matchId == "" {
+		logrus.Warn("Warning:", "EndGameHandler:", " No match_id provided")
+		return c.Status(400).SendString("No match_id provided")
+	}
+
+	// Use per-match Redis key format
+	redisKey := fmt.Sprintf("gameStats:%s", matchId)
+
+	// 1. Fetch gameStats from Redis for this match
+	val, err := redisImpl.RedisClient.Get(ctx, redisKey).Result()
+	logrus.Info("EndGame Handler is invoked for match:", matchId)
 	if err == redisImpl.RedisNull {
-		logrus.Warn("Warning:", "EndGameHandler:", " No game data found in Redis")
+		logrus.Warn("Warning:", "EndGameHandler:", " No game data found in Redis for match:", matchId)
 		return c.Status(404).SendString("No game data found in Redis")
 	} else if err != nil {
 		logrus.Error("Error:", "EndGameHandler:", " Redis error: %v", err)
@@ -71,9 +83,9 @@ func EndGameHandler(c *fiber.Ctx) error {
 
 	}
 
-	// 5. Optional: Clean up Redis key
-	if err := redisImpl.RedisClient.Del(ctx, "gameStats").Err(); err != nil {
-		logrus.Error("Error:", "EndGameHandler:", " Failed to delete Redis key: %v", err)
+	// 5. Clean up Redis key for this match
+	if err := redisImpl.RedisClient.Del(ctx, redisKey).Err(); err != nil {
+		logrus.Error("Error:", "EndGameHandler:", " Failed to delete Redis key for match %s: %v", matchId, err)
 	}
 
 	return c.Redirect("/matches") // or return a success message
