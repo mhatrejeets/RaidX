@@ -57,11 +57,20 @@ func SetupWebSocket(app *fiber.App) {
 			c.Close()
 		}()
 
-		// On new scorer connection, send the authoritative game state from Redis so
-		// the client doesn't overwrite server state on connect. This mirrors the
-		// behavior used for viewer connections.
+		// On new scorer connection, try to fetch authoritative game state from Redis.
+		// If it's missing, ask the client to send its initial state (requestInit).
 		var currentMatch models.EnhancedStatsMessage
-		if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err == nil {
+		if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+			if err == redisImpl.RedisNull {
+				// Tell client to send initial state
+				req := map[string]string{"type": "requestInit"}
+				if data, e := json.Marshal(req); e == nil {
+					_ = c.WriteMessage(websocket.TextMessage, data)
+				}
+			} else {
+				logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats: %v", err)
+			}
+		} else {
 			if data, err := json.Marshal(currentMatch); err == nil {
 				_ = c.WriteMessage(websocket.TextMessage, data)
 			}
@@ -90,6 +99,14 @@ func SetupWebSocket(app *fiber.App) {
 				// Load current match state
 				var currentMatch models.EnhancedStatsMessage
 				if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+					if err == redisImpl.RedisNull {
+						// Ask client to initialize server state
+						errMsg := map[string]string{"error": "server: game state not initialized. Please send initial state"}
+						if b, e := json.Marshal(errMsg); e == nil {
+							_ = c.WriteMessage(websocket.TextMessage, b)
+						}
+						continue
+					}
 					logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats: %v", err)
 					continue
 				}
@@ -152,6 +169,14 @@ func SetupWebSocket(app *fiber.App) {
 				// Load current match state
 				var currentMatch models.EnhancedStatsMessage
 				if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+					if err == redisImpl.RedisNull {
+						// Ask client to initialize server state
+						errMsg := map[string]string{"error": "server: game state not initialized. Please send initial state"}
+						if b, e := json.Marshal(errMsg); e == nil {
+							_ = c.WriteMessage(websocket.TextMessage, b)
+						}
+						continue
+					}
 					logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats for lobbyTouch: %v", err)
 					continue
 				}

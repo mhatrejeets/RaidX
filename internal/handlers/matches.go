@@ -142,6 +142,43 @@ func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) e
 	}
 	raider, ok := match.Data.PlayerStats[raid.RaiderID]
 	if !ok {
+		// If the raider id exists in the team player id lists but missing from
+		// the PlayerStats map (possible if client initialized player lists but
+		// didn't populate stats), create a default PlayerStat entry so validation
+		// can proceed. This avoids spurious "raider not found" errors when the
+		// authoritative PlayerStats map is missing entries.
+		foundInTeam := false
+		for _, pid := range match.Data.TeamAPlayerIDs {
+			if pid == raid.RaiderID {
+				foundInTeam = true
+				break
+			}
+		}
+		if !foundInTeam {
+			for _, pid := range match.Data.TeamBPlayerIDs {
+				if pid == raid.RaiderID {
+					foundInTeam = true
+					break
+				}
+			}
+		}
+		if foundInTeam {
+			// initialize minimal PlayerStat
+			ps := models.PlayerStat{
+				Name:          raid.RaiderID,
+				ID:            raid.RaiderID,
+				RaidPoints:    0,
+				DefencePoints: 0,
+				TotalPoints:   0,
+				Status:        "in",
+			}
+			match.Data.PlayerStats[raid.RaiderID] = ps
+			raider = ps
+			ok = true
+			logrus.Info("Info:", "validateRaidPayload:", " Initialized missing PlayerStat for raider: %s", raid.RaiderID)
+		}
+	}
+	if !ok {
 		return fmt.Errorf("raider not found: %s", raid.RaiderID)
 	}
 	if raider.Status != "in" {
@@ -172,6 +209,38 @@ func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) e
 				return fmt.Errorf("defenderId equals raiderId: %s", defID)
 			}
 			d, ok := match.Data.PlayerStats[defID]
+			if !ok {
+				// Try to initialize missing defender stat if the id exists in team lists
+				foundInTeam := false
+				for _, pid := range match.Data.TeamAPlayerIDs {
+					if pid == defID {
+						foundInTeam = true
+						break
+					}
+				}
+				if !foundInTeam {
+					for _, pid := range match.Data.TeamBPlayerIDs {
+						if pid == defID {
+							foundInTeam = true
+							break
+						}
+					}
+				}
+				if foundInTeam {
+					ps := models.PlayerStat{
+						Name:          defID,
+						ID:            defID,
+						RaidPoints:    0,
+						DefencePoints: 0,
+						TotalPoints:   0,
+						Status:        "in",
+					}
+					match.Data.PlayerStats[defID] = ps
+					d = ps
+					ok = true
+					logrus.Info("Info:", "validateRaidPayload:", " Initialized missing PlayerStat for defender: %s", defID)
+				}
+			}
 			if !ok {
 				return fmt.Errorf("defender not found: %s", defID)
 			}

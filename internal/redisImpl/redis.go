@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -36,13 +35,18 @@ func SetRedisKey(key string, value interface{}) error {
 		return err
 	}
 
-	return RedisClient.Set(ctx, key, jsonData, 10*time.Minute).Err() // Cache for 10 minutes
+	// Persist the game state without an expiry so it survives client refreshes.
+	return RedisClient.Set(ctx, key, jsonData, 0).Err()
 }
 
 func GetRedisKey(key string, dest interface{}) error {
 	val, err := RedisClient.Get(ctx, key).Result()
 	if err != nil {
-		logrus.Error("Error:", "GetRedisKey:", " Failed to get Redis key: %v", err)	
+		// Don't flood logs for the common 'key not found' case (redis.Nil)
+		if err == RedisNull {
+			return err
+		}
+		logrus.Error("Error:", "GetRedisKey:", " Failed to get Redis key: %v", err)
 		return err
 	}
 

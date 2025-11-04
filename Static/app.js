@@ -31,6 +31,23 @@ function setupWebSocket() {
     socket.onmessage = (event) => {
         try {
             const msg = JSON.parse(event.data);
+            // Server requests client to initialize game state on first connection
+            if (msg.type === 'requestInit') {
+                const initialState = {
+                    type: 'gameStats',
+                    data: {
+                        teamA: { name: teamA.name, score: teamA.score },
+                        teamB: { name: teamB.name, score: teamB.score },
+                        playerStats: playerStats,
+                        teamAPlayerIds: teamA.players.map(p => p.id),
+                        teamBPlayerIds: teamB.players.map(p => p.id),
+                        raidNumber: currentRaidNumber,
+                        emptyRaidCounts: { teamA: emptyRaidCountA, teamB: emptyRaidCountB }
+                    }
+                };
+                socket.send(JSON.stringify(initialState));
+                return;
+            }
             if (msg.error) {
                 alert(`Server error: ${msg.error}`);
                 return;
