@@ -75,6 +75,9 @@ func main() {
 
 	app.Get("/matches", handlers.GetAllMatches)
 	app.Get("/matches/:id", handlers.GetMatchByID)
+
+	// API endpoint for processing raid results (scorer -> backend)
+	app.Post("/api/matches/raid", handlers.ProcessRaidResult)
 	app.Get("/createteam/:id", handlers.CreateTeamPage)
 	app.Post("/createteam/:id", handlers.SubmitTeam)
 

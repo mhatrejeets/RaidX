@@ -1,0 +1,415 @@
+// WebSocket setup
+let socket = null;
+
+function setupWebSocket() {
+  if (socket !== null) {
+    console.log("WebSocket already exists");
+    return;
+  }
+
+  socket = new WebSocket("ws://localhost:3000/ws/scorer");
+  console.log("Setting up WebSocket connection...");
+  
+  socket.onopen = () => {
+    console.log("WebSocket connection established");
+    console.log("Current playerStats:", playerStats);
+    // Send initial game state when connection is established
+    const initialState = {
+      type: "gameStats",
+      data: {
+        teamA: {
+          name: teamA.name,
+          score: teamA.score,
+        },
+        teamB: {
+          name: teamB.name,
+          score: teamB.score,
+        },
+        playerStats: playerStats,
+        raidNumber: currentRaidNumber
+      }
+    };
+    socket.send(JSON.stringify(initialState));
+  };
+
+  socket.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.error) {
+        alert(`Server error: ${msg.error}`);
+        return;
+      }
+      if (msg.data) {
+        if (msg.data.teamA) teamA.score = msg.data.teamA.score;
+        if (msg.data.teamB) teamB.score = msg.data.teamB.score;
+        if (msg.data.playerStats) playerStats = msg.data.playerStats;
+        if (msg.data.raidNumber) currentRaidNumber = msg.data.raidNumber;
+        updateDisplay();
+      }
+    } catch (e) {
+      console.error('Invalid WS message', e);
+    }
+  };
+
+  socket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+
+  socket.onclose = () => {
+    console.log("WebSocket closed");
+    socket = null;
+  };
+}
+
+// Game state
+let teamA = { name: "", score: 0, players: [] };
+let teamB = { name: "", score: 0, players: [] };
+let playerStats = {};
+let game = true;
+let selectedRaider = null;
+let selectedDefenders = [];
+let bonusTaken = false;
+let emptyRaidCountA = 0;
+let emptyRaidCountB = 0;
+let isDoOrDieRaid = false;
+let currentRaidNumber = 1;
+
+// Helper functions
+function initializePlayerStats(team) {
+  team.players.forEach(player => {
+    playerStats[player.id] = {
+      name: player.name,
+      id: player.id,
+      totalPoints: 0,
+      raidPoints: 0,
+      defencePoints: 0,
+      status: player.status,
+    };
+  });
+}
+
+function canRaid(team) {
+  const activePlayers = team.players.filter(player => player.status === "in").length;
+  return activePlayers >= 1 && activePlayers <= 7;
+}
+
+function enforceLobbyRule() {
+  const raidingTeam = getRaidingTeam();
+  if (!canRaid(raidingTeam)) {
+    alert(`${raidingTeam.name} does not have enough players to raid!`);
+    return false;
+  }
+  return true;
+}
+
+function getDefendingTeam() {
+  return currentRaidNumber % 2 !== 0 ? teamB : teamA;
+}
+
+function getRaidingTeam() {
+  return currentRaidNumber % 2 !== 0 ? teamA : teamB;
+}
+
+// Raid actions
+function raidSuccessful() {
+  if (!selectedRaider || selectedDefenders.length === 0) {
+    alert("Select a raider and at least one defender.");
+    return;
+  }
+
+  const payload = {
+    raidType: "successful",
+    raiderId: selectedRaider.id,
+    defenderIds: selectedDefenders.map(d => d.id),
+    raidingTeam: currentRaidNumber % 2 !== 0 ? "A" : "B",
+    bonusTaken: bonusTaken,
+    emptyRaidCounts: {
+      teamA: emptyRaidCountA,
+      teamB: emptyRaidCountB
+    }
+  };
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    console.log("Sending raid payload:", payload);
+    socket.send(JSON.stringify(payload));
+  } else {
+    alert('Socket not connected');
+  }
+}
+
+function defenseSuccessful() {
+  if (!selectedRaider) {
+    alert("Select a raider.");
+    return;
+  }
+
+  const payload = {
+    raidType: "defense",
+    raiderId: selectedRaider.id,
+    defenderIds: selectedDefenders.map(d => d.id),
+    raidingTeam: currentRaidNumber % 2 !== 0 ? "A" : "B",
+    bonusTaken: false,
+    emptyRaidCounts: {
+      teamA: emptyRaidCountA,
+      teamB: emptyRaidCountB
+    }
+  };
+  
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    console.log("Sending defense payload:", payload);
+    socket.send(JSON.stringify(payload));
+  } else {
+    alert('Socket not connected');
+  }
+}
+
+function emptyRaid() {
+  if (!selectedRaider) {
+    alert("Select a raider.");
+    return;
+  }
+
+  const isTeamA = currentRaidNumber % 2 !== 0;
+  if (isTeamA) {
+    emptyRaidCountA++;
+  } else {
+    emptyRaidCountB++;
+  }
+
+  const payload = {
+    raidType: "empty",
+    raiderId: selectedRaider.id,
+    defenderIds: [],
+    raidingTeam: isTeamA ? "A" : "B",
+    bonusTaken: bonusTaken,
+    emptyRaidCounts: {
+      teamA: emptyRaidCountA,
+      teamB: emptyRaidCountB
+    }
+  };
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    console.log("Sending empty raid payload:", payload);
+    socket.send(JSON.stringify(payload));
+  } else {
+    alert('Socket not connected');
+  }
+}
+
+// Player management
+function handlePlayerClick(playerId) {
+  const currentTeam = getRaidingTeam();
+  const opposingTeam = getDefendingTeam();
+
+  let player = [...currentTeam.players, ...opposingTeam.players].find(p => p.id === playerId);
+
+  if (!player || player.status !== "in") return;
+
+  if (currentTeam.players.includes(player)) {
+    selectedRaider = player;
+  } else {
+    toggleDefenderSelection(player);
+  }
+
+  updateCurrentRaidDisplay();
+  updateBonusToggleVisibility();
+}
+
+function toggleDefenderSelection(player) {
+  if (selectedDefenders.some(p => p.id === player.id)) {
+    selectedDefenders = selectedDefenders.filter(p => p.id !== player.id);
+  } else {
+    selectedDefenders.push(player);
+  }
+}
+
+function revivePlayers(team, count) {
+  let outPlayers = team.players.filter(p => p.status === "out");
+  for (let i = 0; i < count && i < outPlayers.length; i++) {
+    outPlayers[i].status = "in";
+  }
+}
+
+function checkAllOut() {
+  [teamA, teamB].forEach(team => {
+    if (team.players.every(p => p.status === "out")) {
+      team.players.forEach(p => p.status = "in");
+      const opponent = team === teamA ? teamB : teamA;
+      opponent.score += 2;
+    }
+  });
+}
+
+// UI updates
+function updateCurrentRaidDisplay() {
+  let display = document.getElementById("current-raid");
+  if (!selectedRaider) {
+    display.textContent = "Select a raider.";
+  } else {
+    display.textContent = `Raider: ${selectedRaider.name}, Defenders: ${selectedDefenders.map(p => p.name).join(", ")}`;
+  }
+}
+
+function updateDisplay() {
+  document.getElementById("teamA-score").textContent = teamA.score;
+  document.getElementById("teamB-score").textContent = teamB.score;
+  renderPlayers();
+}
+
+function renderPlayers() {
+  const render = (team, containerId) => {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    team.players.forEach(player => {
+      const btn = document.createElement("button");
+      btn.className = `player-card btn`;
+
+      if (player.status === "in") {
+        btn.classList.add("btn-outline-primary");
+      } else {
+        btn.classList.add("btn-secondary");
+        btn.style.textDecoration = "line-through";
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+      }
+
+      btn.textContent = player.name;
+      btn.onclick = () => handlePlayerClick(player.id);
+      container.appendChild(btn);
+    });
+  };
+
+  render(teamA, "teamA-players");
+  render(teamB, "teamB-players");
+}
+
+function updateBonusToggleVisibility() {
+  const bonusToggle = document.getElementById("bonus-toggle");
+  const opposingTeam = getDefendingTeam();
+  const inPlayers = opposingTeam.players.filter(p => p.status === "in").length;
+  bonusToggle.disabled = inPlayers < 6;
+}
+
+function updateRaidInfoUI() {
+  if (document.readyState === "loading") {
+    console.warn("⚠️ DOM not fully loaded");
+    return;
+  }
+
+  const raidElement = document.getElementById("raid-number");
+  if (!raidElement) {
+    console.warn("⚠️ 'raid-number' element not found");
+    return;
+  }
+
+  raidElement.textContent = `Raid: ${currentRaidNumber}`;
+}
+
+function nextRaid() {
+  selectedRaider = null;
+  selectedDefenders = [];
+  bonusTaken = false;
+  isDoOrDieRaid = false;
+
+  document.getElementById("bonus-toggle").checked = false;
+  document.getElementById("bonus-toggle").disabled = true;
+
+  updateDisplay();
+  updateCurrentRaidDisplay();
+  updateBonusToggleVisibility();
+  updateRaidInfoUI();
+}
+
+// Lobby handlers
+function handleLobbyTouch(player, isRaiderTouchingLobby) {
+  const raidingTeam = getRaidingTeam();
+  const defendingTeam = getDefendingTeam();
+
+  if (isRaiderTouchingLobby) {
+    defendingTeam.score += 1;
+    player.status = "out";
+    alert(`${raidingTeam.name}'s raider touched the lobby! ${defendingTeam.name} gets 1 point.`);
+  } else {
+    raidingTeam.score += 1;
+    player.status = "out";
+    alert(`${defendingTeam.name}'s defender touched the lobby! ${raidingTeam.name} gets 1 point.`);
+  }
+
+  checkAllOut();
+  renderPlayers();
+  nextRaid();
+}
+
+// Game initialization
+async function initializeGame() {
+  const params = new URLSearchParams(window.location.search);
+  const team1Id = params.get("team1_id");
+  const team2Id = params.get("team2_id");
+
+  if (team1Id && team2Id) {
+    console.log("Loading teams...");
+    try {
+      const [res1, res2] = await Promise.all([
+        fetch(`/api/team/${team1Id}`),
+        fetch(`/api/team/${team2Id}`)
+      ]);
+
+      const data1 = await res1.json();
+      const data2 = await res2.json();
+
+      const selectedA = JSON.parse(localStorage.getItem("teamA_selected"));
+      const selectedB = JSON.parse(localStorage.getItem("teamB_selected"));
+
+      console.log("Team data loaded:", { data1, data2, selectedA, selectedB });
+
+      teamA.name = data1.team_name;
+      teamA.players = selectedA.map(p => ({ ...p, status: "in" }));
+      teamB.name = data2.team_name;
+      teamB.players = selectedB.map(p => ({ ...p, status: "in" }));
+
+      // Initialize player stats
+      initializePlayerStats(teamA);
+      initializePlayerStats(teamB);
+
+      console.log("Teams initialized:", { teamA, teamB, playerStats });
+
+      // Update UI
+      document.getElementById("teamA-name").textContent = teamA.name;
+      document.getElementById("teamB-name").textContent = teamB.name;
+      document.getElementById("teamA-header").textContent = teamA.name;
+      document.getElementById("teamB-header").textContent = teamB.name;
+      document.getElementById("teamA-score").textContent = teamA.score;
+      document.getElementById("teamB-score").textContent = teamB.score;
+
+      // Set up initial UI state
+      renderPlayers();
+      updateBonusToggleVisibility();
+      updateRaidInfoUI();
+
+      // Finally, set up WebSocket after everything is initialized
+      setupWebSocket();
+    } catch (err) {
+      console.error("Failed to initialize game:", err);
+    }
+  }
+}
+
+// Event Listeners
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM loaded, initializing game...");
+  initializeGame();
+
+  document.getElementById("bonus-toggle").addEventListener("change", () => {
+    bonusTaken = document.getElementById("bonus-toggle").checked;
+  });
+
+  document.getElementById("raider-lobby-entry").addEventListener("click", () => {
+    handleLobbyTouch(selectedRaider, true);
+  });
+
+  document.getElementById("defender-lobby-entry").addEventListener("click", () => {
+    if (selectedDefenders.length > 0) {
+      handleLobbyTouch(selectedDefenders[0], false);
+    }
+  });
+});

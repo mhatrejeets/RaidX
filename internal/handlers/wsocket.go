@@ -64,7 +64,126 @@ func SetupWebSocket(app *fiber.App) {
 				break
 			}
 
-			// Parse incoming stats
+			// First probe if this is a raid payload (from scorer UI) or a full state update
+			var probe struct {
+				RaidType string `json:"raidType"`
+			}
+			err = json.Unmarshal(msg, &probe)
+			if err == nil && probe.RaidType != "" {
+				// It's a raid action. Unmarshal into a raid struct and process on backend
+				var payload RaidPayload
+				if err := json.Unmarshal(msg, &payload); err != nil {
+					logrus.Error("Error:", "SetupWebSocket:", " Error unmarshalling raid payload: %v", err)
+					continue
+				}
+
+				// Load current match state
+				var currentMatch models.EnhancedStatsMessage
+				if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+					logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats: %v", err)
+					continue
+				}
+
+				// Validate payload against current match
+				if err := validateRaidPayload(payload, &currentMatch); err != nil {
+					errMsg := map[string]string{"error": err.Error()}
+					if b, e := json.Marshal(errMsg); e == nil {
+						_ = c.WriteMessage(websocket.TextMessage, b)
+					}
+					continue
+				}
+
+				// Process raid using backend logic in matches.go
+				switch payload.RaidType {
+				case "successful":
+					processSuccessfulRaid(&currentMatch, payload)
+				case "defense":
+					processDefenseSuccess(&currentMatch, payload)
+				case "empty":
+					processEmptyRaid(&currentMatch, payload)
+				default:
+					logrus.Warn("Warning:", "SetupWebSocket:", " Unknown raid type from scorer: %v", payload.RaidType)
+				}
+
+				// persist updated state and broadcast
+				if err := redisImpl.SetRedisKey("gameStats", currentMatch); err != nil {
+					logrus.Error("Error:", "SetupWebSocket:", " Failed to set gameStats: %v", err)
+					continue
+				}
+				BroadcastToViewers(currentMatch)
+				// also send updated state back to scorer who initiated the action
+				if data, err := json.Marshal(currentMatch); err == nil {
+					_ = c.WriteMessage(websocket.TextMessage, data)
+				}
+				continue
+			}
+
+			// Probe for custom non-raid message types (e.g., lobby touch)
+			var typeProbe struct {
+				Type string `json:"type"`
+			}
+			_ = json.Unmarshal(msg, &typeProbe)
+
+			if typeProbe.Type == "lobbyTouch" {
+				// handle lobby touch events (scorer UI -> backend)
+				var lobbyPayload struct {
+					Type string `json:"type"`
+					Data struct {
+						TouchedPlayerId string `json:"touchedPlayerId"`
+						IsRaider        bool   `json:"isRaider"`
+						ScoringTeam     string `json:"scoringTeam"`
+					} `json:"data"`
+				}
+				if err := json.Unmarshal(msg, &lobbyPayload); err != nil {
+					logrus.Error("Error:", "SetupWebSocket:", " Error unmarshalling lobby payload: %v", err)
+					continue
+				}
+
+				// Load current match state
+				var currentMatch models.EnhancedStatsMessage
+				if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+					logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats for lobbyTouch: %v", err)
+					continue
+				}
+
+				// Award a single point to the scoring team (frontend determines which team)
+				if lobbyPayload.Data.ScoringTeam == "A" {
+					currentMatch.Data.TeamA.Score++
+				} else {
+					currentMatch.Data.TeamB.Score++
+				}
+
+				// Try to resolve player name from playerStats map for clarity
+				raiderName := ""
+				if p, ok := currentMatch.Data.PlayerStats[lobbyPayload.Data.TouchedPlayerId]; ok {
+					raiderName = p.Name
+				}
+
+				// Record raid detail
+				currentMatch.Data.RaidDetails = models.RaidDetails{
+					Type:         "lobbyTouch",
+					Raider:       raiderName,
+					PointsGained: 1,
+				}
+
+				// Increment raid number
+				currentMatch.Data.RaidNumber++
+
+				// persist updated state and broadcast
+				if err := redisImpl.SetRedisKey("gameStats", currentMatch); err != nil {
+					logrus.Error("Error:", "SetupWebSocket:", " Failed to set gameStats for lobbyTouch: %v", err)
+					continue
+				}
+				BroadcastToViewers(currentMatch)
+
+				// also send updated state back to scorer who initiated the action
+				if data, err := json.Marshal(currentMatch); err == nil {
+					_ = c.WriteMessage(websocket.TextMessage, data)
+				}
+				continue
+			}
+
+			// Otherwise treat as a full state update (legacy behavior)
 			var receivedMessage models.EnhancedStatsMessage
 			err = json.Unmarshal(msg, &receivedMessage)
 			if err != nil {

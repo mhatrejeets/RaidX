@@ -2,20 +2,16 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/models"
+	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-
-
-
-
-
 
 func GetAllMatches(c *fiber.Ctx) error {
 	matchesCol := db.MongoClient.Database("raidx").Collection("matches")
@@ -40,7 +36,7 @@ func GetAllMatches(c *fiber.Ctx) error {
 
 type PlayerWithID struct {
 	ID   string
-	Stat models.PlayerStatt
+	Stat models.PlayerStat
 }
 
 func GetMatchByID(c *fiber.Ctx) error {
@@ -74,4 +70,269 @@ func GetMatchByID(c *fiber.Ctx) error {
 		"Match":       match,
 		"PlayerStats": playerList,
 	})
+}
+
+// RaidPayload represents the payload expected from frontend when submitting a raid
+type RaidPayload struct {
+	RaidType        string   `json:"raidType"`
+	RaiderID        string   `json:"raiderId"`
+	DefenderIDs     []string `json:"defenderIds"`
+	RaidingTeam     string   `json:"raidingTeam"`
+	BonusTaken      bool     `json:"bonusTaken"`
+	EmptyRaidCounts struct {
+		TeamA int `json:"teamA"`
+		TeamB int `json:"teamB"`
+	} `json:"emptyRaidCounts"`
+}
+
+// ProcessRaidResult handles raid outcomes and updates scores/state in Redis and broadcasts updates
+func ProcessRaidResult(c *fiber.Ctx) error {
+	var raidData RaidPayload
+	if err := c.BodyParser(&raidData); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid request data"})
+	}
+
+	// Read current match state from Redis
+	var currentMatch models.EnhancedStatsMessage
+	if err := redisImpl.GetRedisKey("gameStats", &currentMatch); err != nil {
+		logrus.Error("Error: ProcessRaidResult: Failed to read gameStats from Redis:", err)
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to read game state"})
+	}
+
+	// Process based on raid type
+	switch raidData.RaidType {
+	case "successful":
+		processSuccessfulRaid(&currentMatch, raidData)
+	case "defense":
+		processDefenseSuccess(&currentMatch, raidData)
+	case "empty":
+		processEmptyRaid(&currentMatch, raidData)
+	default:
+		return c.Status(400).JSON(fiber.Map{"error": "unknown raid type"})
+	}
+
+	// Increment raid number after processing
+	currentMatch.Data.RaidNumber++
+
+	// Save back to Redis
+	if err := redisImpl.SetRedisKey("gameStats", currentMatch); err != nil {
+		logrus.Error("Error: ProcessRaidResult: Failed to save gameStats to Redis:", err)
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to persist game state"})
+	}
+
+	// Broadcast to viewers
+	BroadcastToViewers(currentMatch)
+
+	// respond with updated state
+	// Use a simple wrapper with Data field to match frontend expectation
+	resp := map[string]interface{}{"data": currentMatch.Data}
+	return c.JSON(resp)
+}
+
+// validateRaidPayload performs server-side validation of incoming raid data
+func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) error {
+	// raid type
+	if raid.RaidType != "successful" && raid.RaidType != "defense" && raid.RaidType != "empty" {
+		return fmt.Errorf("invalid raidType: %s", raid.RaidType)
+	}
+
+	// raider exists
+	if raid.RaiderID == "" {
+		return fmt.Errorf("missing raiderId")
+	}
+	raider, ok := match.Data.PlayerStats[raid.RaiderID]
+	if !ok {
+		return fmt.Errorf("raider not found: %s", raid.RaiderID)
+	}
+	if raider.Status != "in" {
+		return fmt.Errorf("raider is not active: %s", raid.RaiderID)
+	}
+
+	// raidingTeam
+	if raid.RaidingTeam != "A" && raid.RaidingTeam != "B" {
+		return fmt.Errorf("invalid raidingTeam: %s", raid.RaidingTeam)
+	}
+
+	// Verify alternating raid rule
+	expectedRaidingTeam := "A"
+	if match.Data.RaidNumber%2 == 0 {
+		expectedRaidingTeam = "B"
+	}
+	if raid.RaidingTeam != expectedRaidingTeam {
+		return fmt.Errorf("incorrect raiding team. Expected team %s to raid", expectedRaidingTeam)
+	}
+
+	// defenders validation for types that require defenders
+	if raid.RaidType == "successful" || raid.RaidType == "defense" {
+		if len(raid.DefenderIDs) == 0 {
+			return fmt.Errorf("defenderIds required for raidType %s", raid.RaidType)
+		}
+		for _, defID := range raid.DefenderIDs {
+			if defID == raid.RaiderID {
+				return fmt.Errorf("defenderId equals raiderId: %s", defID)
+			}
+			d, ok := match.Data.PlayerStats[defID]
+			if !ok {
+				return fmt.Errorf("defender not found: %s", defID)
+			}
+			if d.Status != "in" {
+				return fmt.Errorf("defender is not active: %s", defID)
+			}
+		}
+	}
+
+	// empty raid counts non-negative
+	if raid.EmptyRaidCounts.TeamA < 0 || raid.EmptyRaidCounts.TeamB < 0 {
+		return fmt.Errorf("emptyRaidCounts must be non-negative")
+	}
+
+	return nil
+}
+
+func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
+	raidPoints := len(raid.DefenderIDs)
+
+	// update team score
+	if raid.RaidingTeam == "A" {
+		match.Data.TeamA.Score += raidPoints
+		if raid.BonusTaken {
+			match.Data.TeamA.Score++
+		}
+	} else {
+		match.Data.TeamB.Score += raidPoints
+		if raid.BonusTaken {
+			match.Data.TeamB.Score++
+		}
+	}
+
+	// update raider stats
+	raiderStat := match.Data.PlayerStats[raid.RaiderID]
+	raiderStat.RaidPoints += raidPoints
+	raiderStat.TotalPoints += raidPoints
+	if raid.BonusTaken {
+		raiderStat.RaidPoints++
+		raiderStat.TotalPoints++
+	}
+	match.Data.PlayerStats[raid.RaiderID] = raiderStat
+
+	// mark defenders out and keep their stats
+	for _, defID := range raid.DefenderIDs {
+		d := match.Data.PlayerStats[defID]
+		d.Status = "out"
+		match.Data.PlayerStats[defID] = d
+	}
+
+	// record last raid and increment raid number
+	match.Data.RaidDetails = models.RaidDetails{
+		Type:         "raidSuccess",
+		Raider:       raiderStat.Name,
+		PointsGained: raidPoints + boolToInt(raid.BonusTaken),
+		BonusTaken:   raid.BonusTaken,
+	}
+	match.Data.RaidNumber++
+}
+
+func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload) {
+	// Determine defending team
+	defendingTeam := "A"
+	if raid.RaidingTeam == "A" {
+		defendingTeam = "B"
+	}
+
+	// Simple super tackle check based on provided defenderIDs length
+	points := 1
+	if len(raid.DefenderIDs) <= 3 {
+		points = 2
+	}
+
+	// award points to defending team
+	if defendingTeam == "A" {
+		match.Data.TeamA.Score += points
+	} else {
+		match.Data.TeamB.Score += points
+	}
+
+	// mark raider out
+	r := match.Data.PlayerStats[raid.RaiderID]
+	r.Status = "out"
+	match.Data.PlayerStats[raid.RaiderID] = r
+
+	// update defender stats
+	for _, defID := range raid.DefenderIDs {
+		d := match.Data.PlayerStats[defID]
+		d.DefencePoints++
+		d.TotalPoints++
+		match.Data.PlayerStats[defID] = d
+	}
+
+	match.Data.RaidDetails = models.RaidDetails{
+		Type:         "defenseSuccess",
+		Raider:       r.Name,
+		Defenders:    getDefenderNames(match, raid.DefenderIDs),
+		PointsGained: points,
+		SuperTackle:  points > 1,
+	}
+	match.Data.RaidNumber++
+}
+
+func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
+	r := match.Data.PlayerStats[raid.RaiderID]
+
+	if raid.BonusTaken {
+		if raid.RaidingTeam == "A" {
+			match.Data.TeamA.Score++
+		} else {
+			match.Data.TeamB.Score++
+		}
+		r.RaidPoints++
+		r.TotalPoints++
+	}
+
+	// do-or-die handling
+	emptyCount := 0
+	if raid.RaidingTeam == "A" {
+		emptyCount = raid.EmptyRaidCounts.TeamA
+	} else {
+		emptyCount = raid.EmptyRaidCounts.TeamB
+	}
+
+	if emptyCount >= 3 {
+		// failure: raider out, opponent gets 1 point
+		r.Status = "out"
+		if raid.RaidingTeam == "A" {
+			match.Data.TeamB.Score++
+		} else {
+			match.Data.TeamA.Score++
+		}
+	}
+
+	match.Data.PlayerStats[raid.RaiderID] = r
+	match.Data.RaidDetails = models.RaidDetails{
+		Type:       ternaryString(emptyCount >= 3, "doOrDieRaid", "emptyRaid"),
+		Raider:     r.Name,
+		BonusTaken: raid.BonusTaken,
+	}
+	match.Data.RaidNumber++
+}
+
+func boolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func getDefenderNames(match *models.EnhancedStatsMessage, defenderIDs []string) []string {
+	names := make([]string, len(defenderIDs))
+	for i, id := range defenderIDs {
+		names[i] = match.Data.PlayerStats[id].Name
+	}
+	return names
+}
+
+func ternaryString(cond bool, a, b string) string {
+	if cond {
+		return a
+	}
+	return b
 }
