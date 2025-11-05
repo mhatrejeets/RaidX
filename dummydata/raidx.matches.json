@@ -1,0 +1,4787 @@
+[{
+  "_id": {
+    "$oid": "68266885eee53dbb5151e0f0"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamA": {
+      "name": "New York Titans",
+      "score": 4
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "68239496a5d8b0b9893f6223": {
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6224": {
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6225": {
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "68238fcca5d8b0b9893f620f": {
+        "name": "Emily Davis",
+        "id": "68238fcca5d8b0b9893f620f",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "68238fcca5d8b0b9893f6211": {
+        "id": "68238fcca5d8b0b9893f6211",
+        "totalPoints": 3,
+        "raidPoints": 2,
+        "defencePoints": 1,
+        "status": "in",
+        "name": "Sophia Moore"
+      },
+      "68238fcca5d8b0b9893f6213": {
+        "name": "Jessica Anderson",
+        "id": "68238fcca5d8b0b9893f6213",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "68239496a5d8b0b9893f6227": {
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238fcca5d8b0b9893f620d": {
+        "status": "in",
+        "name": "James Carter",
+        "id": "68238fcca5d8b0b9893f620d",
+        "totalPoints": 1,
+        "raidPoints": 1,
+        "defencePoints": 0
+      },
+      "68238fcca5d8b0b9893f620e": {
+        "id": "68238fcca5d8b0b9893f620e",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Michael Johnson"
+      },
+      "68238fcca5d8b0b9893f6210": {
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "status": "in",
+        "name": "Daniel Wilson",
+        "id": "68238fcca5d8b0b9893f6210",
+        "totalPoints": 1
+      },
+      "68238fcca5d8b0b9893f6212": {
+        "name": "David Taylor",
+        "id": "68238fcca5d8b0b9893f6212",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Sophia Moore",
+      "pointsGained": 2
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68c6d3895c41a9c035db8402"
+  },
+  "type": "gameStats",
+  "data": {
+    "playerStats": {
+      "682388cca5d8b0b9893f61f9": {
+        "name": "Lukas Müller",
+        "id": "682388cca5d8b0b9893f61f9",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fa": {
+        "name": "Maximilian Fischer",
+        "id": "682388cca5d8b0b9893f61fa",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fd": {
+        "name": "Leon Weber",
+        "id": "682388cca5d8b0b9893f61fd",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fe": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Lara Schulz",
+        "id": "682388cca5d8b0b9893f61fe",
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593254": {
+        "status": "in",
+        "name": "Aditya Deshmukh",
+        "id": "6822182c07ccc1d959593254",
+        "totalPoints": 2,
+        "raidPoints": 2,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593255": {
+        "status": "in",
+        "name": "Saurabh Yadav",
+        "id": "6822182c07ccc1d959593255",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593258": {
+        "status": "in",
+        "name": "Ashutosh Kale",
+        "id": "6822182c07ccc1d959593258",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593259": {
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Yogesh Pawar",
+        "id": "6822182c07ccc1d959593259"
+      },
+      "682388cca5d8b0b9893f61fb": {
+        "name": "Sophie Wagner",
+        "id": "682388cca5d8b0b9893f61fb",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fc": {
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Felix Schmidt",
+        "id": "682388cca5d8b0b9893f61fc",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "682388cca5d8b0b9893f61ff": {
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Paul Hofmann",
+        "id": "682388cca5d8b0b9893f61ff"
+      },
+      "6822182c07ccc1d959593256": {
+        "id": "6822182c07ccc1d959593256",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Manish Rathod"
+      },
+      "6822182c07ccc1d959593257": {
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Rohit Raut",
+        "id": "6822182c07ccc1d959593257",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959325a": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Mayur Chaudhari",
+        "id": "6822182c07ccc1d95959325a",
+        "totalPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Aditya Deshmukh",
+      "pointsGained": 2
+    },
+    "teamA": {
+      "name": "Nagpur Nights",
+      "score": 2
+    },
+    "teamB": {
+      "score": 0,
+      "name": "Bayern Blitz"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68c6d47f5c41a9c035db8403"
+  },
+  "type": "gameStats",
+  "data": {
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Jeet S Mhatre",
+      "pointsGained": 4
+    },
+    "teamA": {
+      "name": "Sahayadri Fighters",
+      "score": 7
+    },
+    "teamB": {
+      "name": "Jaipur Royals",
+      "score": 3
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324f": {
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593251": {
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "6823966ea5d8b0b9893f6235": {
+        "name": "Lakhan Singh",
+        "id": "6823966ea5d8b0b9893f6235",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6237": {
+        "name": "Bhavani Singh",
+        "id": "6823966ea5d8b0b9893f6237",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324c": {
+        "id": "6822182c07ccc1d95959324c",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Amit Pawar"
+      },
+      "6822182c07ccc1d95959324e": {
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593250": {
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "6823966ea5d8b0b9893f6236": {
+        "id": "6823966ea5d8b0b9893f6236",
+        "totalPoints": 2,
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Suraj Rathore"
+      },
+      "6823966ea5d8b0b9893f6238": {
+        "name": "Jaidev Chouhan",
+        "id": "6823966ea5d8b0b9893f6238",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6239": {
+        "name": "Tejpal Singh",
+        "id": "6823966ea5d8b0b9893f6239",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f623a": {
+        "totalPoints": 1,
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "status": "in",
+        "name": "Rana Singh",
+        "id": "6823966ea5d8b0b9893f623a"
+      },
+      "6823966ea5d8b0b9893f623b": {
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Manohar Singh",
+        "id": "6823966ea5d8b0b9893f623b",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959324b": {
+        "totalPoints": 7,
+        "raidPoints": 6,
+        "defencePoints": 1,
+        "status": "in",
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b"
+      },
+      "6822182c07ccc1d95959324d": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "totalPoints": 0
+      }
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68f0701f444c315af1943d8b"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamA": {
+      "name": "Sahayadri Fighters",
+      "score": 2
+    },
+    "teamB": {
+      "name": "RaidX",
+      "score": 0
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324c": {
+        "status": "in",
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "totalPoints": 2,
+        "raidPoints": 2,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d95959324d": {
+        "status": "in",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593251": {
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251"
+      },
+      "6822182c07ccc1d959593255": {
+        "name": "Saurabh Yadav",
+        "id": "6822182c07ccc1d959593255",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "682116ff024256d93dba09ae": {
+        "name": "Paddy",
+        "id": "682116ff024256d93dba09ae",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324e": {
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324f": {
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593250": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593252": {
+        "name": "Swapnil Jagtap",
+        "id": "6822182c07ccc1d959593252",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593253": {
+        "name": "Omkar Sawant",
+        "id": "6822182c07ccc1d959593253",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593254": {
+        "id": "6822182c07ccc1d959593254",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Aditya Deshmukh"
+      },
+      "682120097a347f5508a0978e": {
+        "name": "Darshan Patil",
+        "id": "682120097a347f5508a0978e",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324b": {
+        "id": "6822182c07ccc1d95959324b",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Jeet S Mhatre"
+      }
+    },
+    "raidDetails": {
+      "type": "emptyRaid",
+      "raider": "Prathamesh Shinde"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "6909b417c006ba84b4679466"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamA": {
+      "name": "Sahayadri Fighters",
+      "score": 2
+    },
+    "raidNumber": 1,
+    "teamB": {
+      "name": "Nagpur Nights",
+      "score": 2
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324f": {
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593251": {
+        "status": "in",
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593254": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Aditya Deshmukh",
+        "id": "6822182c07ccc1d959593254",
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593255": {
+        "name": "Saurabh Yadav",
+        "id": "6822182c07ccc1d959593255",
+        "totalPoints": 1,
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593256": {
+        "defencePoints": 0,
+        "status": "out",
+        "name": "Manish Rathod",
+        "id": "6822182c07ccc1d959593256",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959324d": {
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d"
+      },
+      "6822182c07ccc1d959593250": {
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593257": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "out",
+        "name": "Rohit Raut",
+        "id": "6822182c07ccc1d959593257",
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593258": {
+        "status": "in",
+        "name": "Ashutosh Kale",
+        "id": "6822182c07ccc1d959593258",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593259": {
+        "name": "Yogesh Pawar",
+        "id": "6822182c07ccc1d959593259",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959325a": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Mayur Chaudhari",
+        "id": "6822182c07ccc1d95959325a",
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d95959324b": {
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "status": "in",
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b",
+        "totalPoints": 2
+      },
+      "6822182c07ccc1d95959324c": {
+        "defencePoints": 0,
+        "status": "out",
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "totalPoints": 0,
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959324e": {
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "totalPoints": 0,
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "status": "in"
+      }
+    },
+    "raidDetails": {
+      "type": "emptyRaid",
+      "raider": "Nikhil More"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "6909be6774ae10b350c5b637"
+  },
+  "type": "gameStats",
+  "data": {
+    "raidDetails": {
+      "raider": "Aditya Deshmukh",
+      "pointsGained": 2,
+      "bonusTaken": true,
+      "type": "raidSuccess"
+    },
+    "raidNumber": 7,
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Sahayadri Fighters",
+      "score": 2
+    },
+    "teamB": {
+      "name": "Nagpur Nights",
+      "score": 5
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324d": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d95959324e": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e"
+      },
+      "6822182c07ccc1d959593254": {
+        "name": "Aditya Deshmukh",
+        "id": "6822182c07ccc1d959593254",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593255": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Saurabh Yadav",
+        "id": "6822182c07ccc1d959593255",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593257": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Rohit Raut",
+        "id": "6822182c07ccc1d959593257"
+      },
+      "6822182c07ccc1d959593258": {
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "out",
+        "name": "Ashutosh Kale",
+        "id": "6822182c07ccc1d959593258",
+        "raidPoints": 1
+      },
+      "6822182c07ccc1d959593259": {
+        "id": "6822182c07ccc1d959593259",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Yogesh Pawar"
+      },
+      "6822182c07ccc1d95959324b": {
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b"
+      },
+      "6822182c07ccc1d95959324c": {
+        "status": "out",
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d95959324f": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d959593250": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d959593251": {
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593256": {
+        "name": "Manish Rathod",
+        "id": "6822182c07ccc1d959593256",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959325a": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Mayur Chaudhari",
+        "id": "6822182c07ccc1d95959325a",
+        "raidPoints": 0
+      }
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "6909e39130e382cbaf6334c1"
+  },
+  "type": "gameStats",
+  "data": {
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "TESTP01",
+      "score": 4
+    },
+    "teamB": {
+      "name": "Sahayadri Fighters",
+      "score": 3
+    },
+    "playerStats": {
+      "6822182c07ccc1d959593250": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d959593251": {
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6237": {
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Bhavani Singh",
+        "id": "6823966ea5d8b0b9893f6237"
+      },
+      "6823966ea5d8b0b9893f6238": {
+        "name": "Jaidev Chouhan",
+        "id": "6823966ea5d8b0b9893f6238",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "682684738f2844121c572299": {
+        "name": "sss",
+        "id": "682684738f2844121c572299",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324d": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d"
+      },
+      "6822182c07ccc1d95959324e": {
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6239": {
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "out",
+        "name": "Tejpal Singh",
+        "id": "6823966ea5d8b0b9893f6239"
+      },
+      "6823966ea5d8b0b9893f623a": {
+        "status": "in",
+        "name": "Rana Singh",
+        "id": "6823966ea5d8b0b9893f623a",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68c71e09b5c88b8acb2de437": {
+        "name": "kettu",
+        "id": "68c71e09b5c88b8acb2de437",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "68c8f5e276f3c49253804d99": {
+        "status": "in",
+        "name": "Preeti",
+        "id": "68c8f5e276f3c49253804d99",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d95959324b": {
+        "id": "6822182c07ccc1d95959324b",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Jeet S Mhatre"
+      },
+      "6822182c07ccc1d95959324c": {
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324f": {
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      }
+    },
+    "raidDetails": {
+      "raider": "Tejpal Singh",
+      "defenders": [
+        "Jeet S Mhatre",
+        "Sanket Patil"
+      ],
+      "pointsGained": 2,
+      "superTackle": true,
+      "type": "defenseSuccess"
+    },
+    "raidNumber": 8,
+    "teamAPlayerIds": [
+      "6823966ea5d8b0b9893f6237",
+      "6823966ea5d8b0b9893f6238",
+      "6823966ea5d8b0b9893f6239",
+      "6823966ea5d8b0b9893f623a",
+      "682684738f2844121c572299",
+      "68c71e09b5c88b8acb2de437",
+      "68c8f5e276f3c49253804d99"
+    ],
+    "teamBPlayerIds": [
+      "6822182c07ccc1d95959324b",
+      "6822182c07ccc1d95959324c",
+      "6822182c07ccc1d95959324d",
+      "6822182c07ccc1d95959324e",
+      "6822182c07ccc1d95959324f",
+      "6822182c07ccc1d959593250",
+      "6822182c07ccc1d959593251"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "6909e7172d1939ae7e2953e9"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamBPlayerIds": [
+      "6822182c07ccc1d95959324b",
+      "6822182c07ccc1d95959324c",
+      "6822182c07ccc1d95959324d",
+      "6822182c07ccc1d95959324e",
+      "6822182c07ccc1d95959324f",
+      "6822182c07ccc1d959593250",
+      "6822182c07ccc1d959593251"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "score": 3,
+      "name": "TESTP01"
+    },
+    "teamB": {
+      "name": "Sahayadri Fighters",
+      "score": 1
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324e": {
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593250": {
+        "id": "6822182c07ccc1d959593250",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ritesh Gaikwad"
+      },
+      "6823966ea5d8b0b9893f6237": {
+        "id": "6823966ea5d8b0b9893f6237",
+        "raidPoints": 3,
+        "defencePoints": 0,
+        "totalPoints": 3,
+        "status": "in",
+        "name": "Bhavani Singh"
+      },
+      "6823966ea5d8b0b9893f6239": {
+        "status": "in",
+        "name": "Tejpal Singh",
+        "id": "6823966ea5d8b0b9893f6239",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6823966ea5d8b0b9893f623a": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Rana Singh",
+        "id": "6823966ea5d8b0b9893f623a",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959324f": {
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f"
+      },
+      "6822182c07ccc1d959593251": {
+        "id": "6822182c07ccc1d959593251",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prathamesh Shinde"
+      },
+      "6823966ea5d8b0b9893f6238": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Jaidev Chouhan",
+        "id": "6823966ea5d8b0b9893f6238",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682684738f2844121c572299": {
+        "status": "in",
+        "name": "sss",
+        "id": "682684738f2844121c572299",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68c71e09b5c88b8acb2de437": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "kettu",
+        "id": "68c71e09b5c88b8acb2de437"
+      },
+      "68c8f5e276f3c49253804d99": {
+        "name": "Preeti",
+        "id": "68c8f5e276f3c49253804d99",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324b": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959324c": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d95959324d": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "raidPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Nikhil More",
+      "pointsGained": 1
+    },
+    "raidNumber": 3,
+    "teamAPlayerIds": [
+      "6823966ea5d8b0b9893f6237",
+      "6823966ea5d8b0b9893f6238",
+      "6823966ea5d8b0b9893f6239",
+      "6823966ea5d8b0b9893f623a",
+      "682684738f2844121c572299",
+      "68c71e09b5c88b8acb2de437",
+      "68c8f5e276f3c49253804d99"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "6909eea064ae626369adb22d"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamBPlayerIds": [
+      "6823966ea5d8b0b9893f6235",
+      "6823966ea5d8b0b9893f6236",
+      "6823966ea5d8b0b9893f6237",
+      "6823966ea5d8b0b9893f6238",
+      "6823966ea5d8b0b9893f6239",
+      "6823966ea5d8b0b9893f623a",
+      "6823966ea5d8b0b9893f623b"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Punjab Panthers",
+      "score": 3
+    },
+    "teamB": {
+      "name": "Jaipur Royals",
+      "score": 0
+    },
+    "playerStats": {
+      "6823951fa5d8b0b9893f6231": {
+        "name": "Avtar Singh",
+        "id": "6823951fa5d8b0b9893f6231",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6235": {
+        "name": "Lakhan Singh",
+        "id": "6823966ea5d8b0b9893f6235",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "6823966ea5d8b0b9893f6236": {
+        "name": "Suraj Rathore",
+        "id": "6823966ea5d8b0b9893f6236",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f623a": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rana Singh",
+        "id": "6823966ea5d8b0b9893f623a",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6823966ea5d8b0b9893f623b": {
+        "id": "6823966ea5d8b0b9893f623b",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manohar Singh"
+      },
+      "6823951fa5d8b0b9893f622c": {
+        "status": "in",
+        "name": "Gurpreet Singh",
+        "id": "6823951fa5d8b0b9893f622c",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6823951fa5d8b0b9893f622e": {
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Maninder Singh",
+        "id": "6823951fa5d8b0b9893f622e",
+        "raidPoints": 0
+      },
+      "6823951fa5d8b0b9893f622f": {
+        "name": "Amarjit Singh",
+        "id": "6823951fa5d8b0b9893f622f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6237": {
+        "name": "Bhavani Singh",
+        "id": "6823966ea5d8b0b9893f6237",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "6823966ea5d8b0b9893f6238": {
+        "name": "Jaidev Chouhan",
+        "id": "6823966ea5d8b0b9893f6238",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "6823966ea5d8b0b9893f6239": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Tejpal Singh",
+        "id": "6823966ea5d8b0b9893f6239",
+        "raidPoints": 0
+      },
+      "6823951fa5d8b0b9893f622b": {
+        "id": "6823951fa5d8b0b9893f622b",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Harjeet Singh"
+      },
+      "6823951fa5d8b0b9893f622d": {
+        "name": "Baljit Singh",
+        "id": "6823951fa5d8b0b9893f622d",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f6230": {
+        "id": "6823951fa5d8b0b9893f6230",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rajveer Singh"
+      }
+    },
+    "raidDetails": {
+      "pointsGained": 1,
+      "type": "defenseSuccess",
+      "raider": "Lakhan Singh",
+      "defenders": [
+        "Baljit Singh",
+        "Maninder Singh"
+      ]
+    },
+    "raidNumber": 3,
+    "teamAPlayerIds": [
+      "6823951fa5d8b0b9893f622b",
+      "6823951fa5d8b0b9893f622c",
+      "6823951fa5d8b0b9893f622d",
+      "6823951fa5d8b0b9893f622e",
+      "6823951fa5d8b0b9893f622f",
+      "6823951fa5d8b0b9893f6230",
+      "6823951fa5d8b0b9893f6231"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "6909ef0e64ae626369adb22e"
+  },
+  "type": "gameStats",
+  "data": {
+    "emptyRaidCounts": {
+      "teamB": 0,
+      "teamA": 0
+    },
+    "teamA": {
+      "score": 2,
+      "name": "Berlin Barrage"
+    },
+    "teamB": {
+      "name": "Surat Stallions",
+      "score": 0
+    },
+    "playerStats": {
+      "68238e67a5d8b0b9893f6203": {
+        "name": "Nina Becker",
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "status": "in",
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "status": "in",
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ella Köhler"
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823929aa5d8b0b9893f6218": {
+        "status": "in",
+        "name": "Manish Patel",
+        "id": "6823929aa5d8b0b9893f6218",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6823929aa5d8b0b9893f621a": {
+        "name": "Harshad Vyas",
+        "id": "6823929aa5d8b0b9893f621a",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823929aa5d8b0b9893f6217": {
+        "status": "in",
+        "name": "Ketan Bhatt",
+        "id": "6823929aa5d8b0b9893f6217",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6823929aa5d8b0b9893f6219": {
+        "name": "Rina Mehta",
+        "id": "6823929aa5d8b0b9893f6219",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "6823929aa5d8b0b9893f621b": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Mona Trivedi",
+        "id": "6823929aa5d8b0b9893f621b",
+        "raidPoints": 0
+      },
+      "6823929aa5d8b0b9893f621c": {
+        "id": "6823929aa5d8b0b9893f621c",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Bhavesh Shah"
+      },
+      "6823929aa5d8b0b9893f621d": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Kajal Desai",
+        "id": "6823929aa5d8b0b9893f621d",
+        "raidPoints": 0,
+        "defencePoints": 0
+      }
+    },
+    "raidDetails": {
+      "pointsGained": 2,
+      "type": "raidSuccess",
+      "raider": "Nina Becker"
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "teamBPlayerIds": [
+      "6823929aa5d8b0b9893f6217",
+      "6823929aa5d8b0b9893f6218",
+      "6823929aa5d8b0b9893f6219",
+      "6823929aa5d8b0b9893f621a",
+      "6823929aa5d8b0b9893f621b",
+      "6823929aa5d8b0b9893f621c",
+      "6823929aa5d8b0b9893f621d"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "6909f8dd9f856796a0e2c419"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Berlin Barrage",
+      "score": 3
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "68238e67a5d8b0b9893f6204": {
+        "status": "in",
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "status": "in",
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6223": {
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prakash Naik"
+      },
+      "68239496a5d8b0b9893f6224": {
+        "status": "out",
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "status": "in",
+        "name": "Nina Becker",
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 2,
+        "defencePoints": 1,
+        "totalPoints": 3
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Finn Voigt"
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6225": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6227": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "defenseSuccess",
+      "raider": "Suresh Patil",
+      "defenders": [
+        "Nina Becker",
+        "Tom Keller"
+      ],
+      "pointsGained": 1
+    },
+    "raidNumber": 3,
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "6909fae0ef5ec617f4ea428b"
+  },
+  "type": "gameStats",
+  "data": {
+    "playerStats": {
+      "68239496a5d8b0b9893f6225": {
+        "status": "in",
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6227": {
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Nina Becker"
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205",
+        "raidPoints": 3,
+        "defencePoints": 0,
+        "totalPoints": 3,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "status": "in",
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6223": {
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226"
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 2,
+        "defencePoints": 1,
+        "totalPoints": 3,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 1,
+        "defencePoints": 1,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "status": "in",
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6224": {
+        "status": "in",
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Mia Braun",
+      "pointsGained": 5,
+      "allOut": true,
+      "allOutTeam": "B"
+    },
+    "raidNumber": 8,
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Berlin Barrage",
+      "score": 11
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 3
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "6909fb74ef5ec617f4ea428c"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Berlin Barrage",
+      "score": 1
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 2
+    },
+    "playerStats": {
+      "68239496a5d8b0b9893f6226": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226"
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "out"
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6225": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6227": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "name": "Nina Becker",
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Tom Keller"
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6223": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223"
+      },
+      "68239496a5d8b0b9893f6224": {
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      }
+    },
+    "raidDetails": {
+      "raider": "Vinay Kumar",
+      "pointsGained": 2,
+      "type": "raidSuccess"
+    },
+    "raidNumber": 3
+  }
+},
+{
+  "_id": {
+    "$oid": "6909ffbfd5c65a38a65a8e5a"
+  },
+  "type": "gameStats",
+  "data": {
+    "playerStats": {
+      "68239496a5d8b0b9893f6223": {
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6227": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227"
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "name": "Nina Becker",
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "status": "in",
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6222": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0
+      },
+      "68239496a5d8b0b9893f6224": {
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6225": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0
+      },
+      "68239496a5d8b0b9893f6226": {
+        "status": "out",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "status": "in",
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "status": "in",
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      }
+    },
+    "raidDetails": {
+      "pointsGained": 2,
+      "type": "raidSuccess",
+      "raider": "Mia Braun"
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "score": 2,
+      "name": "Berlin Barrage"
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a04fae7eaf106ec14b35a"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamAPlayerIds": [
+      "68238fcca5d8b0b9893f620d",
+      "68238fcca5d8b0b9893f620e",
+      "68238fcca5d8b0b9893f620f",
+      "68238fcca5d8b0b9893f6210",
+      "68238fcca5d8b0b9893f6211",
+      "68238fcca5d8b0b9893f6212",
+      "68238fcca5d8b0b9893f6213"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "New York Titans",
+      "score": 2
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "68239496a5d8b0b9893f6224": {
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "68239496a5d8b0b9893f6227": {
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai"
+      },
+      "68238fcca5d8b0b9893f620f": {
+        "name": "Emily Davis",
+        "id": "68238fcca5d8b0b9893f620f",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "68238fcca5d8b0b9893f6211": {
+        "status": "in",
+        "name": "Sophia Moore",
+        "id": "68238fcca5d8b0b9893f6211",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238fcca5d8b0b9893f6212": {
+        "name": "David Taylor",
+        "id": "68238fcca5d8b0b9893f6212",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6223": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0
+      },
+      "68239496a5d8b0b9893f6225": {
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226"
+      },
+      "68238fcca5d8b0b9893f620d": {
+        "name": "James Carter",
+        "id": "68238fcca5d8b0b9893f620d",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "68238fcca5d8b0b9893f620e": {
+        "id": "68238fcca5d8b0b9893f620e",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Michael Johnson"
+      },
+      "68238fcca5d8b0b9893f6210": {
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Daniel Wilson",
+        "id": "68238fcca5d8b0b9893f6210",
+        "raidPoints": 0,
+        "defencePoints": 1
+      },
+      "68238fcca5d8b0b9893f6213": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Jessica Anderson",
+        "id": "68238fcca5d8b0b9893f6213",
+        "raidPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "defenseSuccess",
+      "raider": "Vinay Kumar",
+      "defenders": [
+        "Daniel Wilson",
+        "Emily Davis"
+      ],
+      "pointsGained": 1
+    },
+    "raidNumber": 3
+  }
+},
+{
+  "_id": {
+    "$oid": "690a06b6e7eaf106ec14b35b"
+  },
+  "type": "gameStats",
+  "data": {
+    "raidDetails": {
+      "type": "defenseSuccess",
+      "raider": "Mia Braun",
+      "defenders": [
+        "Amit Pawar"
+      ],
+      "pointsGained": 1
+    },
+    "raidNumber": 4,
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "teamBPlayerIds": [
+      "6822182c07ccc1d95959324b",
+      "6822182c07ccc1d95959324c",
+      "6822182c07ccc1d95959324d",
+      "6822182c07ccc1d95959324e",
+      "6822182c07ccc1d95959324f",
+      "6822182c07ccc1d959593250",
+      "6822182c07ccc1d959593251"
+    ],
+    "emptyRaidCounts": {
+      "teamB": 0,
+      "teamA": 0
+    },
+    "teamA": {
+      "name": "Berlin Barrage",
+      "score": 1
+    },
+    "teamB": {
+      "name": "garybro",
+      "score": 2
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324f": {
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593250": {
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593251": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251"
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Nina Becker"
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205"
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959324b": {
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324c": {
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324d": {
+        "status": "in",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d95959324e": {
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      }
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a06d5e7eaf106ec14b35c"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324d": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d95959324e": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d95959324f": {
+        "id": "6822182c07ccc1d95959324f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Nikhil More"
+      },
+      "6822182c07ccc1d959593251": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Julian Frank"
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "status": "in",
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d95959324b": {
+        "status": "in",
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d95959324c": {
+        "status": "in",
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593250": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "status": "in",
+        "name": "Nina Becker",
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "status": "in",
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Nina Becker",
+      "pointsGained": 1
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "teamBPlayerIds": [
+      "6822182c07ccc1d95959324b",
+      "6822182c07ccc1d95959324c",
+      "6822182c07ccc1d95959324d",
+      "6822182c07ccc1d95959324e",
+      "6822182c07ccc1d95959324f",
+      "6822182c07ccc1d959593250",
+      "6822182c07ccc1d959593251"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "New York Titans",
+      "score": 1
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a0719e7eaf106ec14b35d"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamAPlayerIds": [
+      "682388cca5d8b0b9893f61f9",
+      "682388cca5d8b0b9893f61fa",
+      "682388cca5d8b0b9893f61fb",
+      "682388cca5d8b0b9893f61fc",
+      "682388cca5d8b0b9893f61fd",
+      "682388cca5d8b0b9893f61fe",
+      "682388cca5d8b0b9893f61ff"
+    ],
+    "teamBPlayerIds": [
+      "6823951fa5d8b0b9893f622b",
+      "6823951fa5d8b0b9893f622c",
+      "6823951fa5d8b0b9893f622d",
+      "6823951fa5d8b0b9893f622e",
+      "6823951fa5d8b0b9893f622f",
+      "6823951fa5d8b0b9893f6230",
+      "6823951fa5d8b0b9893f6231"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Bayern Blitz",
+      "score": 3
+    },
+    "teamB": {
+      "name": "Punjab Panthers",
+      "score": 0
+    },
+    "playerStats": {
+      "6823951fa5d8b0b9893f622f": {
+        "id": "6823951fa5d8b0b9893f622f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Amarjit Singh"
+      },
+      "682388cca5d8b0b9893f61fb": {
+        "status": "in",
+        "name": "Sophie Wagner",
+        "id": "682388cca5d8b0b9893f61fb",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "682388cca5d8b0b9893f61fd": {
+        "status": "in",
+        "name": "Leon Weber",
+        "id": "682388cca5d8b0b9893f61fd",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6823951fa5d8b0b9893f622b": {
+        "name": "Harjeet Singh",
+        "id": "6823951fa5d8b0b9893f622b",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f622c": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Gurpreet Singh",
+        "id": "6823951fa5d8b0b9893f622c",
+        "raidPoints": 0
+      },
+      "6823951fa5d8b0b9893f622e": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Maninder Singh",
+        "id": "6823951fa5d8b0b9893f622e",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6823951fa5d8b0b9893f6230": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rajveer Singh",
+        "id": "6823951fa5d8b0b9893f6230"
+      },
+      "6823951fa5d8b0b9893f6231": {
+        "id": "6823951fa5d8b0b9893f6231",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Avtar Singh"
+      },
+      "682388cca5d8b0b9893f61f9": {
+        "status": "in",
+        "name": "Lukas Müller",
+        "id": "682388cca5d8b0b9893f61f9",
+        "raidPoints": 3,
+        "defencePoints": 0,
+        "totalPoints": 3
+      },
+      "682388cca5d8b0b9893f61fa": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Maximilian Fischer",
+        "id": "682388cca5d8b0b9893f61fa",
+        "raidPoints": 0
+      },
+      "682388cca5d8b0b9893f61fc": {
+        "id": "682388cca5d8b0b9893f61fc",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Felix Schmidt"
+      },
+      "682388cca5d8b0b9893f61fe": {
+        "status": "in",
+        "name": "Lara Schulz",
+        "id": "682388cca5d8b0b9893f61fe",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "682388cca5d8b0b9893f61ff": {
+        "name": "Paul Hofmann",
+        "id": "682388cca5d8b0b9893f61ff",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f622d": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Baljit Singh",
+        "id": "6823951fa5d8b0b9893f622d"
+      }
+    },
+    "raidDetails": {
+      "bonusTaken": true,
+      "type": "raidSuccess",
+      "raider": "Lukas Müller",
+      "pointsGained": 3
+    },
+    "raidNumber": 2
+  }
+},
+{
+  "_id": {
+    "$oid": "690a2242bc54f24040637af8"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamA": {
+      "score": 2,
+      "name": "New York Titans"
+    },
+    "teamB": {
+      "name": "Berlin Barrage",
+      "score": 2
+    },
+    "playerStats": {
+      "68238fcca5d8b0b9893f620f": {
+        "status": "in",
+        "name": "Emily Davis",
+        "id": "68238fcca5d8b0b9893f620f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238fcca5d8b0b9893f6210": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Daniel Wilson",
+        "id": "68238fcca5d8b0b9893f6210",
+        "raidPoints": 0
+      },
+      "68238fcca5d8b0b9893f6213": {
+        "id": "68238fcca5d8b0b9893f6213",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Jessica Anderson"
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "status": "in",
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205"
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207"
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0
+      },
+      "68238fcca5d8b0b9893f620d": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "James Carter",
+        "id": "68238fcca5d8b0b9893f620d",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238fcca5d8b0b9893f620e": {
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Michael Johnson",
+        "id": "68238fcca5d8b0b9893f620e"
+      },
+      "68238fcca5d8b0b9893f6211": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Sophia Moore",
+        "id": "68238fcca5d8b0b9893f6211",
+        "raidPoints": 0
+      },
+      "68238fcca5d8b0b9893f6212": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "David Taylor",
+        "id": "68238fcca5d8b0b9893f6212",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Nina Becker",
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 2
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "status": "in",
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Nina Becker",
+      "pointsGained": 2
+    },
+    "raidNumber": 3,
+    "teamAPlayerIds": [
+      "68238fcca5d8b0b9893f620d",
+      "68238fcca5d8b0b9893f620e",
+      "68238fcca5d8b0b9893f620f",
+      "68238fcca5d8b0b9893f6210",
+      "68238fcca5d8b0b9893f6211",
+      "68238fcca5d8b0b9893f6212",
+      "68238fcca5d8b0b9893f6213"
+    ],
+    "teamBPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a3f13762eaf1a4db7fb4f"
+  },
+  "data": {
+    "teamA": {
+      "name": "",
+      "score": 5
+    },
+    "teamB": {
+      "name": "",
+      "score": 2
+    },
+    "playerStats": {
+      "6822182c07ccc1d959593254": {
+        "id": "6822182c07ccc1d959593254",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Aditya Deshmukh"
+      },
+      "6822182c07ccc1d959593257": {
+        "id": "6822182c07ccc1d959593257",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rohit Raut"
+      },
+      "6822182c07ccc1d95959325a": {
+        "id": "6822182c07ccc1d95959325a",
+        "raidPoints": 3,
+        "defencePoints": 0,
+        "totalPoints": 3,
+        "status": "in",
+        "name": "Mayur Chaudhari"
+      },
+      "6823951fa5d8b0b9893f622b": {
+        "name": "Harjeet Singh",
+        "id": "6823951fa5d8b0b9893f622b",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f622c": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Gurpreet Singh",
+        "id": "6823951fa5d8b0b9893f622c",
+        "raidPoints": 0
+      },
+      "6823951fa5d8b0b9893f622e": {
+        "id": "6823951fa5d8b0b9893f622e",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Maninder Singh"
+      },
+      "6823951fa5d8b0b9893f6230": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Rajveer Singh",
+        "id": "6823951fa5d8b0b9893f6230",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6823951fa5d8b0b9893f6231": {
+        "status": "in",
+        "name": "Avtar Singh",
+        "id": "6823951fa5d8b0b9893f6231",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593255": {
+        "name": "Saurabh Yadav",
+        "id": "6822182c07ccc1d959593255",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593256": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manish Rathod",
+        "id": "6822182c07ccc1d959593256",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593258": {
+        "name": "Ashutosh Kale",
+        "id": "6822182c07ccc1d959593258",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593259": {
+        "name": "Yogesh Pawar",
+        "id": "6822182c07ccc1d959593259",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f622d": {
+        "name": "Baljit Singh",
+        "id": "6823951fa5d8b0b9893f622d",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f622f": {
+        "name": "Amarjit Singh",
+        "id": "6823951fa5d8b0b9893f622f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Mayur Chaudhari",
+      "pointsGained": 3,
+      "bonusTaken": true
+    },
+    "raidNumber": 4,
+    "teamAPlayerIds": [
+      "6822182c07ccc1d959593254",
+      "6822182c07ccc1d959593255",
+      "6822182c07ccc1d959593256",
+      "6822182c07ccc1d959593257",
+      "6822182c07ccc1d959593258",
+      "6822182c07ccc1d959593259",
+      "6822182c07ccc1d95959325a"
+    ],
+    "teamBPlayerIds": [
+      "6823951fa5d8b0b9893f622b",
+      "6823951fa5d8b0b9893f622c",
+      "6823951fa5d8b0b9893f622d",
+      "6823951fa5d8b0b9893f622e",
+      "6823951fa5d8b0b9893f622f",
+      "6823951fa5d8b0b9893f6230",
+      "6823951fa5d8b0b9893f6231"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    }
+  },
+  "type": "gameStats"
+},
+{
+  "_id": {
+    "$oid": "690a3fd6dfe93eaf22c77e23"
+  },
+  "type": "gameStats",
+  "data": {
+    "raidDetails": {
+      "pointsGained": 1,
+      "type": "raidSuccess",
+      "raider": "Leon Weber"
+    },
+    "raidNumber": 4,
+    "teamAPlayerIds": [
+      "682388cca5d8b0b9893f61f9",
+      "682388cca5d8b0b9893f61fa",
+      "682388cca5d8b0b9893f61fb",
+      "682388cca5d8b0b9893f61fc",
+      "682388cca5d8b0b9893f61fd",
+      "682388cca5d8b0b9893f61fe",
+      "682388cca5d8b0b9893f61ff"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "score": 3,
+      "name": ""
+    },
+    "teamB": {
+      "name": "",
+      "score": 2
+    },
+    "playerStats": {
+      "682388cca5d8b0b9893f61f9": {
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Lukas Müller",
+        "id": "682388cca5d8b0b9893f61f9",
+        "raidPoints": 2
+      },
+      "682388cca5d8b0b9893f61fa": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Maximilian Fischer",
+        "id": "682388cca5d8b0b9893f61fa"
+      },
+      "682388cca5d8b0b9893f61fb": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Sophie Wagner",
+        "id": "682388cca5d8b0b9893f61fb",
+        "raidPoints": 0
+      },
+      "682388cca5d8b0b9893f61fe": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Lara Schulz",
+        "id": "682388cca5d8b0b9893f61fe",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61ff": {
+        "name": "Paul Hofmann",
+        "id": "682388cca5d8b0b9893f61ff",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6223": {
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Prakash Naik"
+      },
+      "68239496a5d8b0b9893f6224": {
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fc": {
+        "name": "Felix Schmidt",
+        "id": "682388cca5d8b0b9893f61fc",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "682388cca5d8b0b9893f61fd": {
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Leon Weber",
+        "id": "682388cca5d8b0b9893f61fd"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6225": {
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6227": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0
+      }
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a40b1679d3762d971ca8a"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamBPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Team A",
+      "score": 2
+    },
+    "teamB": {
+      "name": "Team B",
+      "score": 0
+    },
+    "playerStats": {
+      "68239496a5d8b0b9893f6226": {
+        "id": "68239496a5d8b0b9893f6226",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil"
+      },
+      "68239496a5d8b0b9893f6227": {
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Nina Becker"
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6221": {
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 2
+      },
+      "68239496a5d8b0b9893f6224": {
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6225": {
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205"
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6222": {
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6223": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0
+      }
+    },
+    "raidDetails": {
+      "pointsGained": 2,
+      "type": "raidSuccess",
+      "raider": "Ravi Gowda"
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "690a4169679d3762d971ca8d"
+  },
+  "type": "gameStats",
+  "data": {
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "68238fcca5d8b0b9893f620d",
+      "68238fcca5d8b0b9893f620e",
+      "68238fcca5d8b0b9893f620f",
+      "68238fcca5d8b0b9893f6210",
+      "68238fcca5d8b0b9893f6211",
+      "68238fcca5d8b0b9893f6212",
+      "68238fcca5d8b0b9893f6213"
+    ],
+    "teamBPlayerIds": [
+      "6823951fa5d8b0b9893f622b",
+      "6823951fa5d8b0b9893f622c",
+      "6823951fa5d8b0b9893f622d",
+      "6823951fa5d8b0b9893f622e",
+      "6823951fa5d8b0b9893f622f",
+      "6823951fa5d8b0b9893f6230",
+      "6823951fa5d8b0b9893f6231"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Team A",
+      "score": 2
+    },
+    "teamB": {
+      "score": 0,
+      "name": "Team B"
+    },
+    "playerStats": {
+      "68238fcca5d8b0b9893f620d": {
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "James Carter",
+        "id": "68238fcca5d8b0b9893f620d",
+        "raidPoints": 2
+      },
+      "68238fcca5d8b0b9893f620e": {
+        "name": "Michael Johnson",
+        "id": "68238fcca5d8b0b9893f620e",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238fcca5d8b0b9893f6211": {
+        "name": "Sophia Moore",
+        "id": "68238fcca5d8b0b9893f6211",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f622c": {
+        "status": "in",
+        "name": "Gurpreet Singh",
+        "id": "6823951fa5d8b0b9893f622c",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6823951fa5d8b0b9893f622d": {
+        "id": "6823951fa5d8b0b9893f622d",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Baljit Singh"
+      },
+      "6823951fa5d8b0b9893f622e": {
+        "id": "6823951fa5d8b0b9893f622e",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Maninder Singh"
+      },
+      "6823951fa5d8b0b9893f6230": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rajveer Singh",
+        "id": "6823951fa5d8b0b9893f6230",
+        "raidPoints": 0
+      },
+      "6823951fa5d8b0b9893f6231": {
+        "name": "Avtar Singh",
+        "id": "6823951fa5d8b0b9893f6231",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238fcca5d8b0b9893f620f": {
+        "id": "68238fcca5d8b0b9893f620f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Emily Davis"
+      },
+      "68238fcca5d8b0b9893f6210": {
+        "id": "68238fcca5d8b0b9893f6210",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Daniel Wilson"
+      },
+      "68238fcca5d8b0b9893f6212": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "David Taylor",
+        "id": "68238fcca5d8b0b9893f6212",
+        "raidPoints": 0
+      },
+      "68238fcca5d8b0b9893f6213": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Jessica Anderson",
+        "id": "68238fcca5d8b0b9893f6213"
+      },
+      "6823951fa5d8b0b9893f622b": {
+        "name": "Harjeet Singh",
+        "id": "6823951fa5d8b0b9893f622b",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823951fa5d8b0b9893f622f": {
+        "status": "in",
+        "name": "Amarjit Singh",
+        "id": "6823951fa5d8b0b9893f622f",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      }
+    },
+    "raidDetails": {
+      "pointsGained": 2,
+      "type": "raidSuccess",
+      "raider": "James Carter"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a432d9b7eeddf32cc1864"
+  },
+  "type": "gameStats",
+  "data": {
+    "playerStats": {
+      "6823966ea5d8b0b9893f623b": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manohar Singh",
+        "id": "6823966ea5d8b0b9893f623b",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61f9": {
+        "id": "682388cca5d8b0b9893f61f9",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Lukas Müller"
+      },
+      "682388cca5d8b0b9893f61fa": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Maximilian Fischer",
+        "id": "682388cca5d8b0b9893f61fa",
+        "raidPoints": 0
+      },
+      "682388cca5d8b0b9893f61fc": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Felix Schmidt",
+        "id": "682388cca5d8b0b9893f61fc",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61fe": {
+        "name": "Lara Schulz",
+        "id": "682388cca5d8b0b9893f61fe",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6235": {
+        "id": "6823966ea5d8b0b9893f6235",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Lakhan Singh"
+      },
+      "6823966ea5d8b0b9893f6236": {
+        "name": "Suraj Rathore",
+        "id": "6823966ea5d8b0b9893f6236",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6237": {
+        "name": "Bhavani Singh",
+        "id": "6823966ea5d8b0b9893f6237",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823966ea5d8b0b9893f6238": {
+        "name": "Jaidev Chouhan",
+        "id": "6823966ea5d8b0b9893f6238",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fb": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Sophie Wagner",
+        "id": "682388cca5d8b0b9893f61fb",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61fd": {
+        "id": "682388cca5d8b0b9893f61fd",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Leon Weber"
+      },
+      "682388cca5d8b0b9893f61ff": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Paul Hofmann",
+        "id": "682388cca5d8b0b9893f61ff",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6823966ea5d8b0b9893f6239": {
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Tejpal Singh",
+        "id": "6823966ea5d8b0b9893f6239",
+        "raidPoints": 0,
+        "defencePoints": 1
+      },
+      "6823966ea5d8b0b9893f623a": {
+        "name": "Rana Singh",
+        "id": "6823966ea5d8b0b9893f623a",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      }
+    },
+    "raidDetails": {
+      "type": "defenseSuccess",
+      "raider": "Paul Hofmann",
+      "defenders": [
+        "Tejpal Singh"
+      ],
+      "pointsGained": 1
+    },
+    "raidNumber": 4,
+    "teamAPlayerIds": [
+      "682388cca5d8b0b9893f61f9",
+      "682388cca5d8b0b9893f61fa",
+      "682388cca5d8b0b9893f61fb",
+      "682388cca5d8b0b9893f61fc",
+      "682388cca5d8b0b9893f61fd",
+      "682388cca5d8b0b9893f61fe",
+      "682388cca5d8b0b9893f61ff"
+    ],
+    "teamBPlayerIds": [
+      "6823966ea5d8b0b9893f6235",
+      "6823966ea5d8b0b9893f6236",
+      "6823966ea5d8b0b9893f6237",
+      "6823966ea5d8b0b9893f6238",
+      "6823966ea5d8b0b9893f6239",
+      "6823966ea5d8b0b9893f623a",
+      "6823966ea5d8b0b9893f623b"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Bayern Blitz",
+      "score": 2
+    },
+    "teamB": {
+      "score": 3,
+      "name": "Jaipur Royals"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a44da50f9ef0e07b40a3d"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamB": {
+      "name": "Surat Stallions",
+      "score": 3
+    },
+    "playerStats": {
+      "6823929aa5d8b0b9893f6217": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ketan Bhatt",
+        "id": "6823929aa5d8b0b9893f6217",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6823929aa5d8b0b9893f6218": {
+        "status": "in",
+        "name": "Manish Patel",
+        "id": "6823929aa5d8b0b9893f6218",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6823929aa5d8b0b9893f621a": {
+        "name": "Harshad Vyas",
+        "id": "6823929aa5d8b0b9893f621a",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6823929aa5d8b0b9893f621b": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Mona Trivedi",
+        "id": "6823929aa5d8b0b9893f621b",
+        "raidPoints": 0
+      },
+      "6823929aa5d8b0b9893f621c": {
+        "raidPoints": 0,
+        "defencePoints": 1,
+        "totalPoints": 1,
+        "status": "in",
+        "name": "Bhavesh Shah",
+        "id": "6823929aa5d8b0b9893f621c"
+      },
+      "6823929aa5d8b0b9893f621d": {
+        "name": "Kajal Desai",
+        "id": "6823929aa5d8b0b9893f621d",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fb": {
+        "id": "682388cca5d8b0b9893f61fb",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Sophie Wagner"
+      },
+      "682388cca5d8b0b9893f61fc": {
+        "name": "Felix Schmidt",
+        "id": "682388cca5d8b0b9893f61fc",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "682388cca5d8b0b9893f61fd": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Leon Weber",
+        "id": "682388cca5d8b0b9893f61fd"
+      },
+      "682388cca5d8b0b9893f61fe": {
+        "id": "682388cca5d8b0b9893f61fe",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Lara Schulz"
+      },
+      "682388cca5d8b0b9893f61ff": {
+        "id": "682388cca5d8b0b9893f61ff",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Paul Hofmann"
+      },
+      "6823929aa5d8b0b9893f6219": {
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Rina Mehta",
+        "id": "6823929aa5d8b0b9893f6219"
+      },
+      "682388cca5d8b0b9893f61f9": {
+        "name": "Lukas Müller",
+        "id": "682388cca5d8b0b9893f61f9",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fa": {
+        "name": "Maximilian Fischer",
+        "id": "682388cca5d8b0b9893f61fa",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      }
+    },
+    "raidDetails": {
+      "type": "defenseSuccess",
+      "raider": "Maximilian Fischer",
+      "defenders": [
+        "Bhavesh Shah"
+      ],
+      "pointsGained": 1
+    },
+    "raidNumber": 4,
+    "teamAPlayerIds": [
+      "682388cca5d8b0b9893f61f9",
+      "682388cca5d8b0b9893f61fa",
+      "682388cca5d8b0b9893f61fb",
+      "682388cca5d8b0b9893f61fc",
+      "682388cca5d8b0b9893f61fd",
+      "682388cca5d8b0b9893f61fe",
+      "682388cca5d8b0b9893f61ff"
+    ],
+    "teamBPlayerIds": [
+      "6823929aa5d8b0b9893f6217",
+      "6823929aa5d8b0b9893f6218",
+      "6823929aa5d8b0b9893f6219",
+      "6823929aa5d8b0b9893f621a",
+      "6823929aa5d8b0b9893f621b",
+      "6823929aa5d8b0b9893f621c",
+      "6823929aa5d8b0b9893f621d"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "score": 2,
+      "name": "Bayern Blitz"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a4b585fcfe45ddcbd46bf"
+  },
+  "type": "gameStats",
+  "data": {
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Berlin Barrage",
+      "score": 1
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "68239496a5d8b0b9893f6222": {
+        "status": "in",
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6224": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6225": {
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226",
+        "raidPoints": 0
+      },
+      "68238e67a5d8b0b9893f6204": {
+        "name": "Tom Keller",
+        "id": "68238e67a5d8b0b9893f6204",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6205": {
+        "name": "Mia Braun",
+        "id": "68238e67a5d8b0b9893f6205",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6206": {
+        "status": "in",
+        "name": "Finn Voigt",
+        "id": "68238e67a5d8b0b9893f6206",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6208": {
+        "status": "in",
+        "name": "Julian Frank",
+        "id": "68238e67a5d8b0b9893f6208",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68238e67a5d8b0b9893f6209": {
+        "name": "Emily Krüger",
+        "id": "68238e67a5d8b0b9893f6209",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6223": {
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6227": {
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6203": {
+        "name": "Nina Becker",
+        "id": "68238e67a5d8b0b9893f6203",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68238e67a5d8b0b9893f6207": {
+        "name": "Ella Köhler",
+        "id": "68238e67a5d8b0b9893f6207",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      }
+    },
+    "raidDetails": {
+      "raider": "Tom Keller",
+      "pointsGained": 1,
+      "type": "raidSuccess"
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "68238e67a5d8b0b9893f6203",
+      "68238e67a5d8b0b9893f6204",
+      "68238e67a5d8b0b9893f6205",
+      "68238e67a5d8b0b9893f6206",
+      "68238e67a5d8b0b9893f6207",
+      "68238e67a5d8b0b9893f6208",
+      "68238e67a5d8b0b9893f6209"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "690a4c2843224ff03ed12b45"
+  },
+  "type": "gameStats",
+  "data": {
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Lukas Müller",
+      "pointsGained": 2
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "682388cca5d8b0b9893f61f9",
+      "682388cca5d8b0b9893f61fa",
+      "682388cca5d8b0b9893f61fb",
+      "682388cca5d8b0b9893f61fc",
+      "682388cca5d8b0b9893f61fd",
+      "682388cca5d8b0b9893f61fe",
+      "682388cca5d8b0b9893f61ff"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamB": 0,
+      "teamA": 0
+    },
+    "teamA": {
+      "name": "Bayern Blitz",
+      "score": 2
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "682388cca5d8b0b9893f61fb": {
+        "name": "Sophie Wagner",
+        "id": "682388cca5d8b0b9893f61fb",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fd": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Leon Weber",
+        "id": "682388cca5d8b0b9893f61fd",
+        "raidPoints": 0
+      },
+      "682388cca5d8b0b9893f61ff": {
+        "status": "in",
+        "name": "Paul Hofmann",
+        "id": "682388cca5d8b0b9893f61ff",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6226": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226",
+        "raidPoints": 0
+      },
+      "68239496a5d8b0b9893f6227": {
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "682388cca5d8b0b9893f61fa": {
+        "name": "Maximilian Fischer",
+        "id": "682388cca5d8b0b9893f61fa",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fc": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Felix Schmidt",
+        "id": "682388cca5d8b0b9893f61fc",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61fe": {
+        "id": "682388cca5d8b0b9893f61fe",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Lara Schulz"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6223": {
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6224": {
+        "status": "out",
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6225": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61f9": {
+        "name": "Lukas Müller",
+        "id": "682388cca5d8b0b9893f61f9",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      }
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a4cec93b068bd64076364"
+  },
+  "type": "gameStats",
+  "data": {
+    "teamAPlayerIds": [
+      "6822182c07ccc1d95959324b",
+      "6822182c07ccc1d95959324c",
+      "6822182c07ccc1d95959324d",
+      "6822182c07ccc1d95959324e",
+      "6822182c07ccc1d95959324f",
+      "6822182c07ccc1d959593250",
+      "6822182c07ccc1d959593251"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Sahayadri Fighters",
+      "score": 2
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "6822182c07ccc1d95959324d": {
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593250": {
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593251": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6222": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6223": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6224": {
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out"
+      },
+      "68239496a5d8b0b9893f6225": {
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226"
+      },
+      "6822182c07ccc1d95959324b": {
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324c": {
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324e": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d95959324f": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f"
+      },
+      "68239496a5d8b0b9893f6221": {
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ravi Gowda"
+      },
+      "68239496a5d8b0b9893f6227": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Jeet S Mhatre",
+      "pointsGained": 2
+    },
+    "raidNumber": 2
+  }
+},
+{
+  "_id": {
+    "$oid": "690a53a78fcef4d5993a9aa8"
+  },
+  "type": "gameStats",
+  "data": {
+    "playerStats": {
+      "68239496a5d8b0b9893f6223": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6225": {
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6226": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226"
+      },
+      "68239496a5d8b0b9893f6227": {
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai"
+      },
+      "6822182c07ccc1d959593254": {
+        "name": "Aditya Deshmukh",
+        "id": "6822182c07ccc1d959593254",
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593256": {
+        "name": "Manish Rathod",
+        "id": "6822182c07ccc1d959593256",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593257": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rohit Raut",
+        "id": "6822182c07ccc1d959593257"
+      },
+      "6822182c07ccc1d959593259": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Yogesh Pawar",
+        "id": "6822182c07ccc1d959593259",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6222": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Manoj Shetty",
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6224": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593255": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Saurabh Yadav",
+        "id": "6822182c07ccc1d959593255",
+        "raidPoints": 0
+      },
+      "6822182c07ccc1d959593258": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ashutosh Kale",
+        "id": "6822182c07ccc1d959593258"
+      },
+      "6822182c07ccc1d95959325a": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Mayur Chaudhari",
+        "id": "6822182c07ccc1d95959325a",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6221": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Aditya Deshmukh",
+      "pointsGained": 2
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "6822182c07ccc1d959593254",
+      "6822182c07ccc1d959593255",
+      "6822182c07ccc1d959593256",
+      "6822182c07ccc1d959593257",
+      "6822182c07ccc1d959593258",
+      "6822182c07ccc1d959593259",
+      "6822182c07ccc1d95959325a"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ],
+    "emptyRaidCounts": {
+      "teamB": 0,
+      "teamA": 0
+    },
+    "teamA": {
+      "name": "Nagpur Nights",
+      "score": 2
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "690a565bc22f66db019bcfdf"
+  },
+  "type": "gameStats",
+  "data": {
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Bayern Blitz",
+      "score": 2
+    },
+    "teamB": {
+      "name": "Bangalore Bulls",
+      "score": 0
+    },
+    "playerStats": {
+      "682388cca5d8b0b9893f61fc": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Felix Schmidt",
+        "id": "682388cca5d8b0b9893f61fc",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61fd": {
+        "name": "Leon Weber",
+        "id": "682388cca5d8b0b9893f61fd",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "682388cca5d8b0b9893f61fe": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Lara Schulz",
+        "id": "682388cca5d8b0b9893f61fe",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6223": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Prakash Naik",
+        "id": "68239496a5d8b0b9893f6223"
+      },
+      "68239496a5d8b0b9893f6225": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Arjun Reddy",
+        "id": "68239496a5d8b0b9893f6225",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61ff": {
+        "status": "in",
+        "name": "Paul Hofmann",
+        "id": "682388cca5d8b0b9893f61ff",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "68239496a5d8b0b9893f6221": {
+        "name": "Ravi Gowda",
+        "id": "68239496a5d8b0b9893f6221",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "68239496a5d8b0b9893f6222": {
+        "id": "68239496a5d8b0b9893f6222",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Manoj Shetty"
+      },
+      "68239496a5d8b0b9893f6224": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Vinay Kumar",
+        "id": "68239496a5d8b0b9893f6224",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "68239496a5d8b0b9893f6226": {
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Suresh Patil",
+        "id": "68239496a5d8b0b9893f6226",
+        "raidPoints": 0
+      },
+      "68239496a5d8b0b9893f6227": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Anil Desai",
+        "id": "68239496a5d8b0b9893f6227",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "682388cca5d8b0b9893f61f9": {
+        "raidPoints": 2,
+        "defencePoints": 0,
+        "totalPoints": 2,
+        "status": "in",
+        "name": "Lukas Müller",
+        "id": "682388cca5d8b0b9893f61f9"
+      },
+      "682388cca5d8b0b9893f61fa": {
+        "status": "in",
+        "name": "Maximilian Fischer",
+        "id": "682388cca5d8b0b9893f61fa",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "682388cca5d8b0b9893f61fb": {
+        "name": "Sophie Wagner",
+        "id": "682388cca5d8b0b9893f61fb",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Lukas Müller",
+      "pointsGained": 2
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "682388cca5d8b0b9893f61f9",
+      "682388cca5d8b0b9893f61fa",
+      "682388cca5d8b0b9893f61fb",
+      "682388cca5d8b0b9893f61fc",
+      "682388cca5d8b0b9893f61fd",
+      "682388cca5d8b0b9893f61fe",
+      "682388cca5d8b0b9893f61ff"
+    ],
+    "teamBPlayerIds": [
+      "68239496a5d8b0b9893f6221",
+      "68239496a5d8b0b9893f6222",
+      "68239496a5d8b0b9893f6223",
+      "68239496a5d8b0b9893f6224",
+      "68239496a5d8b0b9893f6225",
+      "68239496a5d8b0b9893f6226",
+      "68239496a5d8b0b9893f6227"
+    ]
+  }
+},
+{
+  "_id": {
+    "$oid": "690a67cb604b6cfb0a722b06"
+  },
+  "data": {
+    "emptyRaidCounts": {
+      "teamA": 0,
+      "teamB": 0
+    },
+    "teamA": {
+      "name": "Sahayadri Fighters",
+      "score": 1
+    },
+    "teamB": {
+      "name": "Nagpur Nights",
+      "score": 0
+    },
+    "playerStats": {
+      "6822182c07ccc1d959593250": {
+        "name": "Ritesh Gaikwad",
+        "id": "6822182c07ccc1d959593250",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593251": {
+        "name": "Prathamesh Shinde",
+        "id": "6822182c07ccc1d959593251",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593254": {
+        "status": "in",
+        "name": "Aditya Deshmukh",
+        "id": "6822182c07ccc1d959593254",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593255": {
+        "status": "in",
+        "name": "Saurabh Yadav",
+        "id": "6822182c07ccc1d959593255",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0
+      },
+      "6822182c07ccc1d959593259": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Yogesh Pawar",
+        "id": "6822182c07ccc1d959593259",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d95959324b": {
+        "name": "Jeet S Mhatre",
+        "id": "6822182c07ccc1d95959324b",
+        "raidPoints": 1,
+        "defencePoints": 0,
+        "totalPoints": 1,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324e": {
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Sanket Patil",
+        "id": "6822182c07ccc1d95959324e",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d959593256": {
+        "name": "Manish Rathod",
+        "id": "6822182c07ccc1d959593256",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d959593257": {
+        "id": "6822182c07ccc1d959593257",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Rohit Raut"
+      },
+      "6822182c07ccc1d959593258": {
+        "totalPoints": 0,
+        "status": "out",
+        "name": "Ashutosh Kale",
+        "id": "6822182c07ccc1d959593258",
+        "raidPoints": 0,
+        "defencePoints": 0
+      },
+      "6822182c07ccc1d95959325a": {
+        "id": "6822182c07ccc1d95959325a",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Mayur Chaudhari"
+      },
+      "6822182c07ccc1d95959324c": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Amit Pawar",
+        "id": "6822182c07ccc1d95959324c"
+      },
+      "6822182c07ccc1d95959324d": {
+        "name": "Rahul Jadhav",
+        "id": "6822182c07ccc1d95959324d",
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in"
+      },
+      "6822182c07ccc1d95959324f": {
+        "raidPoints": 0,
+        "defencePoints": 0,
+        "totalPoints": 0,
+        "status": "in",
+        "name": "Nikhil More",
+        "id": "6822182c07ccc1d95959324f"
+      }
+    },
+    "raidDetails": {
+      "type": "raidSuccess",
+      "raider": "Jeet S Mhatre",
+      "pointsGained": 1
+    },
+    "raidNumber": 2,
+    "teamAPlayerIds": [
+      "6822182c07ccc1d95959324b",
+      "6822182c07ccc1d95959324c",
+      "6822182c07ccc1d95959324d",
+      "6822182c07ccc1d95959324e",
+      "6822182c07ccc1d95959324f",
+      "6822182c07ccc1d959593250",
+      "6822182c07ccc1d959593251"
+    ],
+    "teamBPlayerIds": [
+      "6822182c07ccc1d959593254",
+      "6822182c07ccc1d959593255",
+      "6822182c07ccc1d959593256",
+      "6822182c07ccc1d959593257",
+      "6822182c07ccc1d959593258",
+      "6822182c07ccc1d959593259",
+      "6822182c07ccc1d95959325a"
+    ]
+  },
+  "type": "gameStats"
+}]

@@ -1,0 +1,1612 @@
+[{
+  "_id": {
+    "$oid": "68221eff07ccc1d95959325d"
+  },
+  "team_name": "Sahayadri Fighters",
+  "players": [
+    {
+      "name": "Jeet S Mhatre",
+      "id": {
+        "$oid": "6822182c07ccc1d95959324b"
+      }
+    },
+    {
+      "name": "Amit Pawar",
+      "id": {
+        "$oid": "6822182c07ccc1d95959324c"
+      }
+    },
+    {
+      "name": "Rahul Jadhav",
+      "id": {
+        "$oid": "6822182c07ccc1d95959324d"
+      }
+    },
+    {
+      "name": "Sanket Patil",
+      "id": {
+        "$oid": "6822182c07ccc1d95959324e"
+      }
+    },
+    {
+      "name": "Nikhil More",
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      }
+    },
+    {
+      "name": "Ritesh Gaikwad",
+      "id": {
+        "$oid": "6822182c07ccc1d959593250"
+      }
+    },
+    {
+      "name": "Prathamesh Shinde",
+      "id": {
+        "$oid": "6822182c07ccc1d959593251"
+      }
+    },
+    {
+      "name": "Swapnil Jagtap",
+      "id": {
+        "$oid": "6822182c07ccc1d959593252"
+      }
+    },
+    {
+      "name": "Omkar Sawant",
+      "id": {
+        "$oid": "6822182c07ccc1d959593253"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68221eff07ccc1d95959325e"
+  },
+  "team_name": "Nagpur Nights",
+  "players": [
+    {
+      "name": "Aditya Deshmukh",
+      "id": {
+        "$oid": "6822182c07ccc1d959593254"
+      }
+    },
+    {
+      "name": "Saurabh Yadav",
+      "id": {
+        "$oid": "6822182c07ccc1d959593255"
+      }
+    },
+    {
+      "name": "Manish Rathod",
+      "id": {
+        "$oid": "6822182c07ccc1d959593256"
+      }
+    },
+    {
+      "name": "Rohit Raut",
+      "id": {
+        "$oid": "6822182c07ccc1d959593257"
+      }
+    },
+    {
+      "name": "Ashutosh Kale",
+      "id": {
+        "$oid": "6822182c07ccc1d959593258"
+      }
+    },
+    {
+      "name": "Yogesh Pawar",
+      "id": {
+        "$oid": "6822182c07ccc1d959593259"
+      }
+    },
+    {
+      "name": "Mayur Chaudhari",
+      "id": {
+        "$oid": "6822182c07ccc1d95959325a"
+      }
+    },
+    {
+      "name": "Vinay Tiwari",
+      "id": {
+        "$oid": "6822182c07ccc1d95959325b"
+      }
+    },
+    {
+      "name": "Deepak Borse",
+      "id": {
+        "$oid": "6822182c07ccc1d95959325c"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "682389c0a5d8b0b9893f6202"
+  },
+  "team_name": "Bayern Blitz",
+  "players": [
+    {
+      "name": "Lukas Müller",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61f9"
+      }
+    },
+    {
+      "name": "Maximilian Fischer",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fa"
+      }
+    },
+    {
+      "name": "Sophie Wagner",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fb"
+      }
+    },
+    {
+      "name": "Felix Schmidt",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fc"
+      }
+    },
+    {
+      "name": "Leon Weber",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fd"
+      }
+    },
+    {
+      "name": "Lara Schulz",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fe"
+      }
+    },
+    {
+      "name": "Paul Hofmann",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61ff"
+      }
+    },
+    {
+      "name": "Anna Lehmann",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f6200"
+      }
+    },
+    {
+      "name": "Jonas Bauer",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f6201"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68238f28a5d8b0b9893f620c"
+  },
+  "team_name": "Berlin Barrage",
+  "players": [
+    {
+      "name": "Nina Becker",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6203"
+      }
+    },
+    {
+      "name": "Tom Keller",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6204"
+      }
+    },
+    {
+      "name": "Mia Braun",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6205"
+      }
+    },
+    {
+      "name": "Finn Voigt",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6206"
+      }
+    },
+    {
+      "name": "Ella Köhler",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6207"
+      }
+    },
+    {
+      "name": "Julian Frank",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6208"
+      }
+    },
+    {
+      "name": "Emily Krüger",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6209"
+      }
+    },
+    {
+      "name": "Leon Schwarz",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f620a"
+      }
+    },
+    {
+      "name": "Clara Wolf",
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f620b"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68239025a5d8b0b9893f6216"
+  },
+  "team_name": "New York Titans",
+  "players": [
+    {
+      "name": "James Carter",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f620d"
+      }
+    },
+    {
+      "name": "Michael Johnson",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f620e"
+      }
+    },
+    {
+      "name": "Emily Davis",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f620f"
+      }
+    },
+    {
+      "name": "Daniel Wilson",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f6210"
+      }
+    },
+    {
+      "name": "Sophia Moore",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f6211"
+      }
+    },
+    {
+      "name": "David Taylor",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f6212"
+      }
+    },
+    {
+      "name": "Jessica Anderson",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f6213"
+      }
+    },
+    {
+      "name": "William Thomas",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f6214"
+      }
+    },
+    {
+      "name": "Olivia White",
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f6215"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6823933ea5d8b0b9893f6220"
+  },
+  "team_name": "Surat Stallions",
+  "players": [
+    {
+      "name": "Ketan Bhatt",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f6217"
+      }
+    },
+    {
+      "name": "Manish Patel",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f6218"
+      }
+    },
+    {
+      "name": "Rina Mehta",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f6219"
+      }
+    },
+    {
+      "name": "Harshad Vyas",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f621a"
+      }
+    },
+    {
+      "name": "Mona Trivedi",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f621b"
+      }
+    },
+    {
+      "name": "Bhavesh Shah",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f621c"
+      }
+    },
+    {
+      "name": "Kajal Desai",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f621d"
+      }
+    },
+    {
+      "name": "Pranav Joshi",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f621e"
+      }
+    },
+    {
+      "name": "Swati Shah",
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f621f"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "682394d9a5d8b0b9893f622a"
+  },
+  "team_name": "Bangalore Bulls",
+  "players": [
+    {
+      "name": "Ravi Gowda",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6221"
+      }
+    },
+    {
+      "name": "Manoj Shetty",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6222"
+      }
+    },
+    {
+      "name": "Prakash Naik",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6223"
+      }
+    },
+    {
+      "name": "Vinay Kumar",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6224"
+      }
+    },
+    {
+      "name": "Arjun Reddy",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6225"
+      }
+    },
+    {
+      "name": "Suresh Patil",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6226"
+      }
+    },
+    {
+      "name": "Anil Desai",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6227"
+      }
+    },
+    {
+      "name": "Deepak Kulkarni",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6228"
+      }
+    },
+    {
+      "name": "Santosh Rao",
+      "id": {
+        "$oid": "68239496a5d8b0b9893f6229"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68239541a5d8b0b9893f6234"
+  },
+  "team_name": "Punjab Panthers",
+  "players": [
+    {
+      "name": "Harjeet Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f622b"
+      }
+    },
+    {
+      "name": "Gurpreet Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f622c"
+      }
+    },
+    {
+      "name": "Baljit Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f622d"
+      }
+    },
+    {
+      "name": "Maninder Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f622e"
+      }
+    },
+    {
+      "name": "Amarjit Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f622f"
+      }
+    },
+    {
+      "name": "Rajveer Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f6230"
+      }
+    },
+    {
+      "name": "Avtar Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f6231"
+      }
+    },
+    {
+      "name": "Paramjit Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f6232"
+      }
+    },
+    {
+      "name": "Kuldeep Singh",
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f6233"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "682396f5a5d8b0b9893f623e"
+  },
+  "team_name": "Jaipur Royals",
+  "players": [
+    {
+      "name": "Lakhan Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6235"
+      }
+    },
+    {
+      "name": "Suraj Rathore",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6236"
+      }
+    },
+    {
+      "name": "Bhavani Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6237"
+      }
+    },
+    {
+      "name": "Jaidev Chouhan",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6238"
+      }
+    },
+    {
+      "name": "Tejpal Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6239"
+      }
+    },
+    {
+      "name": "Rana Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623a"
+      }
+    },
+    {
+      "name": "Manohar Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623b"
+      }
+    },
+    {
+      "name": "Gulab Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623c"
+      }
+    },
+    {
+      "name": "Pratap Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623d"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6826805ce448b758c982b152"
+  },
+  "team_name": "Test",
+  "players": [
+    {
+      "name": "Jeet S Mhatre",
+      "id": {
+        "$oid": "68210f2cbb8d4c0998be7295"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      },
+      "name": "Nikhil More"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593255"
+      },
+      "name": "Saurabh Yadav"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fd"
+      },
+      "name": "Leon Weber"
+    },
+    {
+      "id": {
+        "$oid": "68238fcca5d8b0b9893f620e"
+      },
+      "name": "Michael Johnson"
+    },
+    {
+      "id": {
+        "$oid": "6823929aa5d8b0b9893f621a"
+      },
+      "name": "Harshad Vyas"
+    },
+    {
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f622c"
+      },
+      "name": "Gurpreet Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6239"
+      },
+      "name": "Tejpal Singh"
+    },
+    {
+      "name": "Manky bro",
+      "id": {
+        "$oid": "68265b5b0b6745f28a721d84"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "682680fd14b800116456e5b4"
+  },
+  "team_name": "test2",
+  "players": [
+    {
+      "id": {
+        "$oid": "68211f1dafadf13ee44a5b71"
+      },
+      "name": "a"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324b"
+      },
+      "name": "Jeet S Mhatre"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      },
+      "name": "Nikhil More"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593253"
+      },
+      "name": "Omkar Sawant"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593255"
+      },
+      "name": "Saurabh Yadav"
+    },
+    {
+      "name": "Rohit Raut",
+      "id": {
+        "$oid": "6822182c07ccc1d959593257"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325c"
+      },
+      "name": "Deepak Borse"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61ff"
+      },
+      "name": "Paul Hofmann"
+    },
+    {
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6204"
+      },
+      "name": "Tom Keller"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6826812804336c2f1bcd6985"
+  },
+  "team_name": "test3",
+  "players": [
+    {
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f6231"
+      },
+      "name": "Avtar Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f6232"
+      },
+      "name": "Paramjit Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823951fa5d8b0b9893f6233"
+      },
+      "name": "Kuldeep Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6236"
+      },
+      "name": "Suraj Rathore"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6237"
+      },
+      "name": "Bhavani Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6238"
+      },
+      "name": "Jaidev Chouhan"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6239"
+      },
+      "name": "Tejpal Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623c"
+      },
+      "name": "Gulab Singh"
+    },
+    {
+      "id": {
+        "$oid": "68265b5b0b6745f28a721d84"
+      },
+      "name": "Manky bro"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68268ac1c1baa2c10ab6dba2"
+  },
+  "team_name": "test4",
+  "players": [
+    {
+      "name": "Sujal Chandekar",
+      "id": {
+        "$oid": "682113ee8d54de4edd9edb65"
+      }
+    },
+    {
+      "name": "Swapnil Jagtap",
+      "id": {
+        "$oid": "6822182c07ccc1d959593252"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325a"
+      },
+      "name": "Mayur Chaudhari"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325b"
+      },
+      "name": "Vinay Tiwari"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325c"
+      },
+      "name": "Deepak Borse"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fa"
+      },
+      "name": "Maximilian Fischer"
+    },
+    {
+      "name": "Sophie Wagner",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fb"
+      }
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fc"
+      },
+      "name": "Felix Schmidt"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fe"
+      },
+      "name": "Lara Schulz"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6826bfdb9645ca19d573eb97"
+  },
+  "team_name": "test5",
+  "players": [
+    {
+      "id": {
+        "$oid": "68211b0bbbcea2576d6c8718"
+      },
+      "name": "abc"
+    },
+    {
+      "name": "Jeet S Mhatre",
+      "id": {
+        "$oid": "6822182c07ccc1d95959324b"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      },
+      "name": "Nikhil More"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593251"
+      },
+      "name": "Prathamesh Shinde"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593252"
+      },
+      "name": "Swapnil Jagtap"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593254"
+      },
+      "name": "Aditya Deshmukh"
+    },
+    {
+      "name": "Saurabh Yadav",
+      "id": {
+        "$oid": "6822182c07ccc1d959593255"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593258"
+      },
+      "name": "Ashutosh Kale"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593259"
+      },
+      "name": "Yogesh Pawar"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6826c47d079a8d24097434cb"
+  },
+  "team_name": "demo team",
+  "players": [
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324e"
+      },
+      "name": "Sanket Patil"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      },
+      "name": "Nikhil More"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593250"
+      },
+      "name": "Ritesh Gaikwad"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593258"
+      },
+      "name": "Ashutosh Kale"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593259"
+      },
+      "name": "Yogesh Pawar"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325b"
+      },
+      "name": "Vinay Tiwari"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fa"
+      },
+      "name": "Maximilian Fischer"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fd"
+      },
+      "name": "Leon Weber"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f6200"
+      },
+      "name": "Anna Lehmann"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6826d34d079a8d24097434cc"
+  },
+  "team_name": "garybro",
+  "players": [
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324b"
+      },
+      "name": "Jeet S Mhatre"
+    },
+    {
+      "name": "Amit Pawar",
+      "id": {
+        "$oid": "6822182c07ccc1d95959324c"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324d"
+      },
+      "name": "Rahul Jadhav"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324e"
+      },
+      "name": "Sanket Patil"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      },
+      "name": "Nikhil More"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593250"
+      },
+      "name": "Ritesh Gaikwad"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593251"
+      },
+      "name": "Prathamesh Shinde"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593252"
+      },
+      "name": "Swapnil Jagtap"
+    },
+    {
+      "name": "Omkar Sawant",
+      "id": {
+        "$oid": "6822182c07ccc1d959593253"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68a41c499e69c63d74f4d824"
+  },
+  "team_name": "KGRMLK:RG LGKR",
+  "players": [
+    {
+      "id": {
+        "$oid": "68210f2cbb8d4c0998be7295"
+      },
+      "name": "Jeet S Mhatre"
+    },
+    {
+      "id": {
+        "$oid": "68211f1dafadf13ee44a5b71"
+      },
+      "name": "a"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324c"
+      },
+      "name": "Amit Pawar"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324d"
+      },
+      "name": "Rahul Jadhav"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      },
+      "name": "Nikhil More"
+    },
+    {
+      "name": "Swapnil Jagtap",
+      "id": {
+        "$oid": "6822182c07ccc1d959593252"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593258"
+      },
+      "name": "Ashutosh Kale"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325c"
+      },
+      "name": "Deepak Borse"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fa"
+      },
+      "name": "Maximilian Fischer"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68a43f1ee50a29519f8acd81"
+  },
+  "team_name": "dummy team 123",
+  "players": [
+    {
+      "id": {
+        "$oid": "68210f2cbb8d4c0998be7295"
+      },
+      "name": "Jeet S Mhatre"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324c"
+      },
+      "name": "Amit Pawar"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324d"
+      },
+      "name": "Rahul Jadhav"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593258"
+      },
+      "name": "Ashutosh Kale"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593259"
+      },
+      "name": "Yogesh Pawar"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325a"
+      },
+      "name": "Mayur Chaudhari"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325b"
+      },
+      "name": "Vinay Tiwari"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325c"
+      },
+      "name": "Deepak Borse"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fa"
+      },
+      "name": "Maximilian Fischer"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68c55485158a1ab9e9bb5e6b"
+  },
+  "team_name": "JSW",
+  "players": [
+    {
+      "id": {
+        "$oid": "68210f2cbb8d4c0998be7295"
+      },
+      "name": "Jeet S Mhatre"
+    },
+    {
+      "id": {
+        "$oid": "68211b0bbbcea2576d6c8718"
+      },
+      "name": "abc"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324c"
+      },
+      "name": "Amit Pawar"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959324f"
+      },
+      "name": "Nikhil More"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325a"
+      },
+      "name": "Mayur Chaudhari"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d95959325b"
+      },
+      "name": "Vinay Tiwari"
+    },
+    {
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61f9"
+      },
+      "name": "Lukas Müller"
+    },
+    {
+      "name": "Leon Weber",
+      "id": {
+        "$oid": "682388cca5d8b0b9893f61fd"
+      }
+    },
+    {
+      "id": {
+        "$oid": "68238e67a5d8b0b9893f6206"
+      },
+      "name": "Finn Voigt"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68c6e44429f902ebc8ac5926"
+  },
+  "players": [
+    {
+      "id": {
+        "$oid": "68210f2cbb8d4c0998be7295"
+      },
+      "name": "Jeet S Mhatre"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6238"
+      },
+      "name": "Jaidev Chouhan"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6239"
+      },
+      "name": "Tejpal Singh"
+    },
+    {
+      "name": "Rana Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623a"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623b"
+      },
+      "name": "Manohar Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623c"
+      },
+      "name": "Gulab Singh"
+    },
+    {
+      "name": "Pratap Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623d"
+      }
+    },
+    {
+      "id": {
+        "$oid": "68265b5b0b6745f28a721d84"
+      },
+      "name": "Manky bro"
+    },
+    {
+      "id": {
+        "$oid": "68c6e3f229f902ebc8ac5925"
+      },
+      "name": "Krushik"
+    }
+  ],
+  "team_name": "krusheek"
+},
+{
+  "_id": {
+    "$oid": "68c8f63e76f3c49253804d9a"
+  },
+  "team_name": "Preetis team",
+  "players": [
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623b"
+      },
+      "name": "Manohar Singh"
+    },
+    {
+      "name": "Gulab Singh",
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623c"
+      }
+    },
+    {
+      "id": {
+        "$oid": "68265b5b0b6745f28a721d84"
+      },
+      "name": "Manky bro"
+    },
+    {
+      "id": {
+        "$oid": "682684738f2844121c572299"
+      },
+      "name": "sss"
+    },
+    {
+      "id": {
+        "$oid": "6826c411079a8d24097434ca"
+      },
+      "name": "demo"
+    },
+    {
+      "id": {
+        "$oid": "68a43ebbe50a29519f8acd80"
+      },
+      "name": "dummy_1234"
+    },
+    {
+      "id": {
+        "$oid": "68c6e3f229f902ebc8ac5925"
+      },
+      "name": "Krushik"
+    },
+    {
+      "id": {
+        "$oid": "68c71e09b5c88b8acb2de437"
+      },
+      "name": "kettu"
+    },
+    {
+      "id": {
+        "$oid": "68c8f5e276f3c49253804d99"
+      },
+      "name": "Preeti"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68f06fb6444c315af1943d8a"
+  },
+  "team_name": "RaidX",
+  "players": [
+    {
+      "id": {
+        "$oid": "68210f2cbb8d4c0998be7295"
+      },
+      "name": "Jeet S Mhatre"
+    },
+    {
+      "id": {
+        "$oid": "682113ee8d54de4edd9edb65"
+      },
+      "name": "Sujal Chandekar"
+    },
+    {
+      "id": {
+        "$oid": "682116ff024256d93dba09ae"
+      },
+      "name": "Paddy"
+    },
+    {
+      "id": {
+        "$oid": "682120097a347f5508a0978e"
+      },
+      "name": "Darshan Patil"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593251"
+      },
+      "name": "Prathamesh Shinde"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593252"
+      },
+      "name": "Swapnil Jagtap"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593253"
+      },
+      "name": "Omkar Sawant"
+    },
+    {
+      "id": {
+        "$oid": "6822182c07ccc1d959593254"
+      },
+      "name": "Aditya Deshmukh"
+    },
+    {
+      "name": "Saurabh Yadav",
+      "id": {
+        "$oid": "6822182c07ccc1d959593255"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6909cb5dbaf4d7740a8d761e"
+  },
+  "players": [
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6237"
+      },
+      "name": "Bhavani Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6238"
+      },
+      "name": "Jaidev Chouhan"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f6239"
+      },
+      "name": "Tejpal Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623a"
+      },
+      "name": "Rana Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623c"
+      },
+      "name": "Gulab Singh"
+    },
+    {
+      "id": {
+        "$oid": "6823966ea5d8b0b9893f623d"
+      },
+      "name": "Pratap Singh"
+    },
+    {
+      "name": "sss",
+      "id": {
+        "$oid": "682684738f2844121c572299"
+      }
+    },
+    {
+      "id": {
+        "$oid": "68c71e09b5c88b8acb2de437"
+      },
+      "name": "kettu"
+    },
+    {
+      "id": {
+        "$oid": "68c8f5e276f3c49253804d99"
+      },
+      "name": "Preeti"
+    }
+  ],
+  "team_name": "TESTP01"
+},
+{
+  "_id": {
+    "$oid": "690a63cf4bb3d2b474505380"
+  },
+  "team_name": "Paddy team",
+  "players": [
+    {
+      "id": {
+        "$oid": "682684738f2844121c572299"
+      },
+      "name": "sss"
+    },
+    {
+      "name": "demo",
+      "id": {
+        "$oid": "6826c411079a8d24097434ca"
+      }
+    },
+    {
+      "id": {
+        "$oid": "68a43ebbe50a29519f8acd80"
+      },
+      "name": "dummy_1234"
+    },
+    {
+      "id": {
+        "$oid": "68c6e3f229f902ebc8ac5925"
+      },
+      "name": "Krushik"
+    },
+    {
+      "id": {
+        "$oid": "68c71e09b5c88b8acb2de437"
+      },
+      "name": "kettu"
+    },
+    {
+      "id": {
+        "$oid": "68c8f5e276f3c49253804d99"
+      },
+      "name": "Preeti"
+    },
+    {
+      "name": "test12344321",
+      "id": {
+        "$oid": "6909e8fd8bf4906b5bcd1350"
+      }
+    },
+    {
+      "id": {
+        "$oid": "6909fe4bd5c65a38a65a8e59"
+      },
+      "name": "Ketan"
+    },
+    {
+      "id": {
+        "$oid": "690a2cb30009a297c5fdb6e9"
+      },
+      "name": "Sagar"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "690a648aa9ae78432ae3ecfa"
+  },
+  "team_name": "paddy team",
+  "players": [
+    {
+      "id": {
+        "$oid": "682684738f2844121c572299"
+      },
+      "name": "sss"
+    },
+    {
+      "id": {
+        "$oid": "6826c411079a8d24097434ca"
+      },
+      "name": "demo"
+    },
+    {
+      "id": {
+        "$oid": "68a43ebbe50a29519f8acd80"
+      },
+      "name": "dummy_1234"
+    },
+    {
+      "name": "Krushik",
+      "id": {
+        "$oid": "68c6e3f229f902ebc8ac5925"
+      }
+    },
+    {
+      "id": {
+        "$oid": "68c71e09b5c88b8acb2de437"
+      },
+      "name": "kettu"
+    },
+    {
+      "id": {
+        "$oid": "68c8f5e276f3c49253804d99"
+      },
+      "name": "Preeti"
+    },
+    {
+      "id": {
+        "$oid": "6909e8fd8bf4906b5bcd1350"
+      },
+      "name": "test12344321"
+    },
+    {
+      "name": "Ketan",
+      "id": {
+        "$oid": "6909fe4bd5c65a38a65a8e59"
+      }
+    },
+    {
+      "id": {
+        "$oid": "690a2cb30009a297c5fdb6e9"
+      },
+      "name": "Sagar"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "690a653857a2d47bd3adbee6"
+  },
+  "team_name": "paddys team",
+  "players": [
+    {
+      "id": {
+        "$oid": "682684738f2844121c572299"
+      },
+      "name": "sss"
+    },
+    {
+      "id": {
+        "$oid": "6826c411079a8d24097434ca"
+      },
+      "name": "demo"
+    },
+    {
+      "id": {
+        "$oid": "68a43ebbe50a29519f8acd80"
+      },
+      "name": "dummy_1234"
+    },
+    {
+      "id": {
+        "$oid": "68c6e3f229f902ebc8ac5925"
+      },
+      "name": "Krushik"
+    },
+    {
+      "id": {
+        "$oid": "68c71e09b5c88b8acb2de437"
+      },
+      "name": "kettu"
+    },
+    {
+      "id": {
+        "$oid": "68c8f5e276f3c49253804d99"
+      },
+      "name": "Preeti"
+    },
+    {
+      "id": {
+        "$oid": "6909e8fd8bf4906b5bcd1350"
+      },
+      "name": "test12344321"
+    },
+    {
+      "id": {
+        "$oid": "6909fe4bd5c65a38a65a8e59"
+      },
+      "name": "Ketan"
+    },
+    {
+      "name": "Sagar",
+      "id": {
+        "$oid": "690a2cb30009a297c5fdb6e9"
+      }
+    }
+  ]
+}]

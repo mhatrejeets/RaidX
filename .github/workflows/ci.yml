@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, ver* ]
+  pull_request:
+    branches: [ main, master, ver* ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'" \
+          --health-interval 10s \
+          --health-timeout 5s \
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    env:
+      MONGO_URI: mongodb://localhost:27017/raidx
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: f44dfcbf3ea8e48544df68e56320f36457bb3ef6b608d3beb0b6b7e6dc5af137
+      PORT: 3000
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.1'
+      - name: Install dependencies
+        run: go mod download
+      - name: Lint
+        run: |
+          go install golang.org/x/lint/golint@latest
+          golint ./...
+      - name: Build
+        run: go build -v ./...
+      - name: Run tests
+        run: go test -v ./...

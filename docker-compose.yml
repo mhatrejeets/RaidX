@@ -1,4 +1,4 @@
-version: '3.8'
+ersion: '3.8'
 
 services:
   mongo:
@@ -13,9 +13,7 @@ services:
       - mongo_data:/data/db
 
   raidx:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile
+    build: .
     container_name: raidx-app
     depends_on:
       - mongo
@@ -23,14 +21,14 @@ services:
     environment:
       MONGO_URI: mongodb://mongo:27017/raidx
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: f44dfcbf3ea8e48544df68e56320f36457bb3ef6b608d3beb0b6b7e6dc5af137
+      JWT_SECRET: your-256-bit-secret
       PORT: 3000
     ports:
       - "3000:3000"
     volumes:
-      - ../Static:/app/Static
-      - ../views:/app/views
-      - ../.env:/app/.env
+      - ./Static:/app/Static
+      - ./views:/app/views
+      - ./.env:/app/.env
 
   redis:
     image: redis:7
@@ -44,7 +42,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ../dummydata:/dummydata
+      - ./dummydata:/dummydata
     entrypoint: ["bash", "-c", "sleep 5 && mongoimport --uri mongodb://mongo:27017/raidx --collection matches --file /dummydata/raidx.matches.json --jsonArray && mongoimport --uri mongodb://mongo:27017/raidx --collection players --file /dummydata/raidx.players.json --jsonArray && mongoimport --uri mongodb://mongo:27017/raidx --collection sessions --file /dummydata/raidx.sessions.json --jsonArray && mongoimport --uri mongodb://mongo:27017/raidx --collection teams --file /dummydata/raidx.teams.json --jsonArray"]
 
 volumes:
