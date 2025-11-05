@@ -142,7 +142,7 @@
   <div class="floating-bg circle2"></div>
 
   <div class="login-container">
-    <h2>Login to RaidX</h2>
+  <h2>Login to RaidX</h2>
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
@@ -156,7 +156,7 @@
       <div class="alert alert-danger d-none" id="loginError"></div>
       <div class="d-grid gap-2">
         <button type="submit" class="btn btn-submit" id="loginButton">Login</button>
-        <button type="button" class="btn btn-link" onclick="window.location.href='/forgot-password'">Forgot Password?</button>
+        
       </div>
     </form>
     
@@ -214,7 +214,12 @@
       loginButton.disabled = false;
     }
     </script>
-    <a href="/" class="back-link">← Back to Home</a>
+    
+    <div style="text-align:center; margin-top:1.5rem;">
+      <span style="color:#facc15;">Not already a user?</span>
+      <a href="/signup" style="color:#fbbf24; text-decoration:underline; margin-left:6px;">Sign up</a>
+    </div>
+    <a href="/" class="back-link" style="margin-top:2.5rem;">← Back to Home</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
