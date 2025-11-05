@@ -26,7 +26,7 @@ jobs:
     env:
       MONGO_URI: mongodb://localhost:27017/raidx
       REDIS_URL: redis://localhost:6379
-      JWT_SECRET: test-secret
+      JWT_SECRET: f44dfcbf3ea8e48544df68e56320f36457bb3ef6b608d3beb0b6b7e6dc5af137
       PORT: 3000
     steps:
       - uses: actions/checkout@v4
