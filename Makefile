@@ -12,8 +12,9 @@ test:
 lint:
 	golint ./...
 
-migrate:
-	@echo "Run your DB migration command here"
+
+seed:
+	bash scripts/seed.sh
 
 clean:
 	rm -f raidx-server

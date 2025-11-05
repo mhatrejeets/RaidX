@@ -1,0 +1,2311 @@
+[{
+  "_id": {
+    "$oid": "68210f2cbb8d4c0998be7295"
+  },
+  "fullName": "Jeet S Mhatre",
+  "email": "mhatrejeets@gmail.com",
+  "userId": "jeetsmhatre",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-11T20:57:16.806Z"
+  },
+  "totalPoints": 16,
+  "raidPoints": 10,
+  "defencePoints": 6,
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682113ee8d54de4edd9edb65"
+  },
+  "fullName": "Sujal Chandekar",
+  "email": "sujal@123",
+  "userId": "sujalchandekar@gv.com",
+  "password": "2ICMWST5gvI",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-11T21:17:34.511Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682116ff024256d93dba09ae"
+  },
+  "fullName": "Paddy",
+  "email": "pad@123",
+  "userId": "pard@gv.com",
+  "password": "2EsWh1JUUIz",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-11T21:30:39.740Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68211b0bbbcea2576d6c8718"
+  },
+  "fullName": "abc",
+  "email": "abc@123.com",
+  "userId": "pardfgmfgv.com",
+  "password": "HVq0Tud72DE",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-11T21:47:55.976Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68211f1dafadf13ee44a5b71"
+  },
+  "fullName": "a",
+  "email": "a@b.c",
+  "userId": "a",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-11T22:05:17.630Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682120097a347f5508a0978e"
+  },
+  "fullName": "Darshan Patil",
+  "email": "darshan@gmail.com",
+  "userId": "dpatil",
+  "password": "GPVvMdv2wCI",
+  "position": "allrounder",
+  "createdAt": {
+    "$date": "2025-05-11T22:09:13.697Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959324b"
+  },
+  "fullName": "Jeet S Mhatre",
+  "email": "mhatrejeets@gmail.com",
+  "userId": "jeetsmhatre",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-11T20:57:16.806Z"
+  },
+  "totalPoints": 24,
+  "raidPoints": 16,
+  "defencePoints": 8,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959324c"
+  },
+  "fullName": "Amit Pawar",
+  "email": "amit.pawar@example.com",
+  "userId": "amitpawar",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 19,
+  "raidPoints": 12,
+  "defencePoints": 7,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959324d"
+  },
+  "fullName": "Rahul Jadhav",
+  "email": "rahul.jadhav@example.com",
+  "userId": "rahulj",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 14,
+  "raidPoints": 9,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959324e"
+  },
+  "fullName": "Sanket Patil",
+  "email": "sanket.patil@example.com",
+  "userId": "sanketp",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 15,
+  "raidPoints": 7,
+  "defencePoints": 8,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959324f"
+  },
+  "fullName": "Nikhil More",
+  "email": "nikhil.more@example.com",
+  "userId": "nikmore",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 15,
+  "raidPoints": 10,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593250"
+  },
+  "fullName": "Ritesh Gaikwad",
+  "email": "ritesh.gaikwad@example.com",
+  "userId": "riteshg",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 8,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593251"
+  },
+  "fullName": "Prathamesh Shinde",
+  "email": "prathamesh.shinde@example.com",
+  "userId": "prathashinde",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593252"
+  },
+  "fullName": "Swapnil Jagtap",
+  "email": "swapnil.jagtap@example.com",
+  "userId": "swapnilj",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593253"
+  },
+  "fullName": "Omkar Sawant",
+  "email": "omkar.sawant@example.com",
+  "userId": "omkars",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593254"
+  },
+  "fullName": "Aditya Deshmukh",
+  "email": "aditya.deshmukh@example.com",
+  "userId": "adityad",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 18,
+  "raidPoints": 13,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593255"
+  },
+  "fullName": "Saurabh Yadav",
+  "email": "saurabh.yadav@example.com",
+  "userId": "saurabhy",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 14,
+  "raidPoints": 7,
+  "defencePoints": 7,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593256"
+  },
+  "fullName": "Manish Rathod",
+  "email": "manish.rathod@example.com",
+  "userId": "manishr",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593257"
+  },
+  "fullName": "Rohit Raut",
+  "email": "rohit.raut@example.com",
+  "userId": "rohitraut",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593258"
+  },
+  "fullName": "Ashutosh Kale",
+  "email": "ashutosh.kale@example.com",
+  "userId": "ashukale",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 8,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d959593259"
+  },
+  "fullName": "Yogesh Pawar",
+  "email": "yogesh.pawar@example.com",
+  "userId": "yogeshp",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959325a"
+  },
+  "fullName": "Mayur Chaudhari",
+  "email": "mayur.chaudhari@example.com",
+  "userId": "mayurc",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 16,
+  "raidPoints": 11,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959325b"
+  },
+  "fullName": "Vinay Tiwari",
+  "email": "vinay.tiwari@example.com",
+  "userId": "vinayt",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6822182c07ccc1d95959325c"
+  },
+  "fullName": "Deepak Borse",
+  "email": "deepak.borse@example.com",
+  "userId": "deepakb",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-12T15:47:56.199Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f61f9"
+  },
+  "fullName": "Lukas Müller",
+  "email": "lukas.muller@example.com",
+  "userId": "lukasmuller",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 31,
+  "raidPoints": 26,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f61fa"
+  },
+  "fullName": "Maximilian Fischer",
+  "email": "maximilian.fischer@example.com",
+  "userId": "maxfischer",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f61fb"
+  },
+  "fullName": "Sophie Wagner",
+  "email": "sophie.wagner@example.com",
+  "userId": "sophiewagner",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f61fc"
+  },
+  "fullName": "Felix Schmidt",
+  "email": "felix.schmidt@example.com",
+  "userId": "felixschmidt",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 7,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f61fd"
+  },
+  "fullName": "Leon Weber",
+  "email": "leon.weber@example.com",
+  "userId": "leonweber",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 16,
+  "raidPoints": 10,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f61fe"
+  },
+  "fullName": "Lara Schulz",
+  "email": "lara.schulz@example.com",
+  "userId": "laraschulz",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 8,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f61ff"
+  },
+  "fullName": "Paul Hofmann",
+  "email": "paul.hofmann@example.com",
+  "userId": "paulhofmann",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f6200"
+  },
+  "fullName": "Anna Lehmann",
+  "email": "anna.lehmann@example.com",
+  "userId": "annalehmann",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "682388cca5d8b0b9893f6201"
+  },
+  "fullName": "Jonas Bauer",
+  "email": "jonas.bauer@example.com",
+  "userId": "jonasbauer",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:00:44.709Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f6203"
+  },
+  "fullName": "Nina Becker",
+  "email": "nina.becker@example.com",
+  "userId": "ninabecker",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 23,
+  "raidPoints": 17,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f6204"
+  },
+  "fullName": "Tom Keller",
+  "email": "tom.keller@example.com",
+  "userId": "tomkeller",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 14,
+  "raidPoints": 8,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f6205"
+  },
+  "fullName": "Mia Braun",
+  "email": "mia.braun@example.com",
+  "userId": "miabraun",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 18,
+  "raidPoints": 13,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f6206"
+  },
+  "fullName": "Finn Voigt",
+  "email": "finn.voigt@example.com",
+  "userId": "finnvoigt",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 15,
+  "raidPoints": 9,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f6207"
+  },
+  "fullName": "Ella Köhler",
+  "email": "ella.kohler@example.com",
+  "userId": "ellakohler",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 7,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f6208"
+  },
+  "fullName": "Julian Frank",
+  "email": "julian.frank@example.com",
+  "userId": "julianfrank",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f6209"
+  },
+  "fullName": "Emily Krüger",
+  "email": "emily.kruger@example.com",
+  "userId": "emilykruger",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f620a"
+  },
+  "fullName": "Leon Schwarz",
+  "email": "leon.schwarz@example.com",
+  "userId": "leonschwarz",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238e67a5d8b0b9893f620b"
+  },
+  "fullName": "Clara Wolf",
+  "email": "clara.wolf@example.com",
+  "userId": "clarawolf",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:24:39.759Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f620d"
+  },
+  "fullName": "James Carter",
+  "email": "james.carter@example.com",
+  "userId": "jamescarter",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 15,
+  "raidPoints": 10,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f620e"
+  },
+  "fullName": "Michael Johnson",
+  "email": "michael.johnson@example.com",
+  "userId": "michaeljohnson",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 17,
+  "raidPoints": 12,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f620f"
+  },
+  "fullName": "Emily Davis",
+  "email": "emily.davis@example.com",
+  "userId": "emilydavis",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 7,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f6210"
+  },
+  "fullName": "Daniel Wilson",
+  "email": "daniel.wilson@example.com",
+  "userId": "danielwilson",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 7,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f6211"
+  },
+  "fullName": "Sophia Moore",
+  "email": "sophia.moore@example.com",
+  "userId": "sophiamoore",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 14,
+  "raidPoints": 9,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f6212"
+  },
+  "fullName": "David Taylor",
+  "email": "david.taylor@example.com",
+  "userId": "davidtaylor",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 13,
+  "raidPoints": 7,
+  "defencePoints": 6,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f6213"
+  },
+  "fullName": "Jessica Anderson",
+  "email": "jessica.anderson@example.com",
+  "userId": "jessicaanderson",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f6214"
+  },
+  "fullName": "William Thomas",
+  "email": "william.thomas@example.com",
+  "userId": "williamthomas",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 12,
+  "raidPoints": 7,
+  "defencePoints": 5,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68238fcca5d8b0b9893f6215"
+  },
+  "fullName": "Olivia White",
+  "email": "olivia.white@example.com",
+  "userId": "oliviawhite",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:30:36.320Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f6217"
+  },
+  "fullName": "Ketan Bhatt",
+  "email": "ketan.bhatt@example.com",
+  "userId": "ketanbhatt",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 2,
+  "raidPoints": 2,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f6218"
+  },
+  "fullName": "Manish Patel",
+  "email": "manish.patel@example.com",
+  "userId": "manishpatel",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f6219"
+  },
+  "fullName": "Rina Mehta",
+  "email": "rina.mehta@example.com",
+  "userId": "rinamehta",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 2,
+  "raidPoints": 2,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f621a"
+  },
+  "fullName": "Harshad Vyas",
+  "email": "harshad.vyas@example.com",
+  "userId": "harshadvyas",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f621b"
+  },
+  "fullName": "Mona Trivedi",
+  "email": "mona.trivedi@example.com",
+  "userId": "monatrivedi",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f621c"
+  },
+  "fullName": "Bhavesh Shah",
+  "email": "bhavesh.shah@example.com",
+  "userId": "bhaveshshah",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 0,
+  "defencePoints": 1,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f621d"
+  },
+  "fullName": "Kajal Desai",
+  "email": "kajal.desai@example.com",
+  "userId": "kajaldesai",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f621e"
+  },
+  "fullName": "Pranav Joshi",
+  "email": "pranav.joshi@example.com",
+  "userId": "pranavjoshi",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823929aa5d8b0b9893f621f"
+  },
+  "fullName": "Swati Shah",
+  "email": "swati.shah@example.com",
+  "userId": "swatishah",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:42:34.339Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6221"
+  },
+  "fullName": "Ravi Gowda",
+  "email": "ravi.gowda@example.com",
+  "userId": "ravigowda",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 6,
+  "raidPoints": 5,
+  "defencePoints": 1,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6222"
+  },
+  "fullName": "Manoj Shetty",
+  "email": "manoj.shetty@example.com",
+  "userId": "manojshetty",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 1,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6223"
+  },
+  "fullName": "Prakash Naik",
+  "email": "prakash.naik@example.com",
+  "userId": "prakashnaik",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6224"
+  },
+  "fullName": "Vinay Kumar",
+  "email": "vinay.kumar@example.com",
+  "userId": "vinaykumar",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 4,
+  "raidPoints": 4,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6225"
+  },
+  "fullName": "Arjun Reddy",
+  "email": "arjun.reddy@example.com",
+  "userId": "arjunreddy",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6226"
+  },
+  "fullName": "Suresh Patil",
+  "email": "suresh.patil@example.com",
+  "userId": "sureshpatil",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6227"
+  },
+  "fullName": "Anil Desai",
+  "email": "anil.desai@example.com",
+  "userId": "anildesai",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6228"
+  },
+  "fullName": "Deepak Kulkarni",
+  "email": "deepak.kulkarni@example.com",
+  "userId": "deepakkulkarni",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68239496a5d8b0b9893f6229"
+  },
+  "fullName": "Santosh Rao",
+  "email": "santosh.rao@example.com",
+  "userId": "santoshrao",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:51:02.121Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f622b"
+  },
+  "fullName": "Harjeet Singh",
+  "email": "harjeet.singh@example.com",
+  "userId": "harjeetsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 2,
+  "raidPoints": 2,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f622c"
+  },
+  "fullName": "Gurpreet Singh",
+  "email": "gurpreet.singh@example.com",
+  "userId": "gurpreetsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f622d"
+  },
+  "fullName": "Baljit Singh",
+  "email": "baljit.singh@example.com",
+  "userId": "baljitsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 3,
+  "raidPoints": 2,
+  "defencePoints": 1,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f622e"
+  },
+  "fullName": "Maninder Singh",
+  "email": "maninder.singh@example.com",
+  "userId": "manindersingh",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 0,
+  "defencePoints": 1,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f622f"
+  },
+  "fullName": "Amarjit Singh",
+  "email": "amarjit.singh@example.com",
+  "userId": "amarjitsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f6230"
+  },
+  "fullName": "Rajveer Singh",
+  "email": "rajveer.singh@example.com",
+  "userId": "rajveersingh",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f6231"
+  },
+  "fullName": "Avtar Singh",
+  "email": "avtar.singh@example.com",
+  "userId": "avtarsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f6232"
+  },
+  "fullName": "Paramjit Singh",
+  "email": "paramjit.singh@example.com",
+  "userId": "paramjitsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823951fa5d8b0b9893f6233"
+  },
+  "fullName": "Kuldeep Singh",
+  "email": "kuldeep.singh@example.com",
+  "userId": "kuldeepsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:53:19.004Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f6235"
+  },
+  "fullName": "Lakhan Singh",
+  "email": "lakhan.singh@example.com",
+  "userId": "lakhansingh",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f6236"
+  },
+  "fullName": "Suraj Rathore",
+  "email": "suraj.rathore@example.com",
+  "userId": "surajrathore",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 2,
+  "raidPoints": 2,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f6237"
+  },
+  "fullName": "Bhavani Singh",
+  "email": "bhavani.singh@example.com",
+  "userId": "bhavanisingh",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 4,
+  "raidPoints": 4,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f6238"
+  },
+  "fullName": "Jaidev Chouhan",
+  "email": "jaidev.chouhan@example.com",
+  "userId": "jaidevchouhan",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f6239"
+  },
+  "fullName": "Tejpal Singh",
+  "email": "tejpal.singh@example.com",
+  "userId": "tejpalsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 2,
+  "raidPoints": 0,
+  "defencePoints": 2,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f623a"
+  },
+  "fullName": "Rana Singh",
+  "email": "rana.singh@example.com",
+  "userId": "ranasingh",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f623b"
+  },
+  "fullName": "Manohar Singh",
+  "email": "manohar.singh@example.com",
+  "userId": "manoharsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 4,
+  "raidPoints": 4,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f623c"
+  },
+  "fullName": "Gulab Singh",
+  "email": "gulab.singh@example.com",
+  "userId": "gulabsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6823966ea5d8b0b9893f623d"
+  },
+  "fullName": "Pratap Singh",
+  "email": "pratap.singh@example.com",
+  "userId": "pratapsingh",
+  "password": "7rvsmC7lNUd",
+  "position": "all-rounder",
+  "createdAt": {
+    "$date": "2025-05-13T18:58:54.082Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0,
+  "teams_enrolled": {
+    "team_name": "",
+    "team_id": ""
+  },
+  "requests": {
+    "team-name": "",
+    "team-id": "",
+    "status": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "68265b5b0b6745f28a721d84"
+  },
+  "fullName": "Manky bro",
+  "email": "mayanks@abc.com",
+  "userId": "mankybro",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-15T21:23:39.758Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 0,
+  "defencePoints": 1
+},
+{
+  "_id": {
+    "$oid": "682684738f2844121c572299"
+  },
+  "fullName": "sss",
+  "email": "asb@c.in",
+  "userId": "adsdf",
+  "password": "Ael78kd2lZq",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-16T00:18:59.054Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 0,
+  "defencePoints": 1
+},
+{
+  "_id": {
+    "$oid": "6826c411079a8d24097434ca"
+  },
+  "fullName": "demo",
+  "email": "demo@gmail.com",
+  "userId": "demo",
+  "password": "7rvsmC7lNUd",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-05-16T04:50:25.162Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 0,
+  "defencePoints": 1
+},
+{
+  "_id": {
+    "$oid": "68a43ebbe50a29519f8acd80"
+  },
+  "fullName": "dummy_1234",
+  "email": "sioj@123.com",
+  "userId": "fsei9un",
+  "password": "Ael78kd2lZq",
+  "position": "defender",
+  "createdAt": {
+    "$date": "2025-08-19T09:07:07.289Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 0,
+  "defencePoints": 1
+},
+{
+  "_id": {
+    "$oid": "68c6e3f229f902ebc8ac5925"
+  },
+  "fullName": "Krushik",
+  "email": "krushik@microsoft.com",
+  "userId": "krushik",
+  "password": "7rvsmC7lNUd",
+  "position": "allrounder",
+  "createdAt": {
+    "$date": "2025-09-14T15:49:06.010Z"
+  },
+  "totalPoints": 5,
+  "raidPoints": 4,
+  "defencePoints": 1
+},
+{
+  "_id": {
+    "$oid": "68c71e09b5c88b8acb2de437"
+  },
+  "fullName": "kettu",
+  "email": "kettu@gmail.com",
+  "userId": "kettu13",
+  "password": "GpTbCnmSoYK",
+  "position": "allrounder",
+  "createdAt": {
+    "$date": "2025-09-14T19:56:57.966Z"
+  },
+  "totalPoints": 1,
+  "raidPoints": 0,
+  "defencePoints": 1
+},
+{
+  "_id": {
+    "$oid": "68c8f5e276f3c49253804d99"
+  },
+  "fullName": "Preeti",
+  "email": "preeti@gmail.com",
+  "userId": "preeti",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-09-16T05:30:10.888Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0
+},
+{
+  "_id": {
+    "$oid": "6909e8fd8bf4906b5bcd1350"
+  },
+  "fullName": "test12344321",
+  "email": "testing@asc.com",
+  "userId": "testerrr",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-11-04T11:52:29.256Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0
+},
+{
+  "_id": {
+    "$oid": "6909fe4bd5c65a38a65a8e59"
+  },
+  "fullName": "Ketan",
+  "email": "itsmeketan000@gmail.com",
+  "userId": "1234",
+  "password": "5AEVtUxF3WH",
+  "position": "allrounder",
+  "createdAt": {
+    "$date": "2025-11-04T13:23:23.058Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0
+},
+{
+  "_id": {
+    "$oid": "690a2cb30009a297c5fdb6e9"
+  },
+  "fullName": "Sagar",
+  "email": "sagarc@gmail.com",
+  "userId": "sagar",
+  "password": "7rvsmC7lNUd",
+  "position": "raider",
+  "createdAt": {
+    "$date": "2025-11-04T16:41:23.897Z"
+  },
+  "totalPoints": 0,
+  "raidPoints": 0,
+  "defencePoints": 0
+}]
