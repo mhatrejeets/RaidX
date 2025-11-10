@@ -53,19 +53,41 @@ func SetupWebSocket(app *fiber.App) {
 
 	// Handle scorer WebSocket
 	app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
+		// Create a dedicated write channel for this scorer connection
+		// This ensures all writes to this connection are serialized
+		writeCh := make(chan []byte, 50)
+		stopCh := make(chan struct{})
+
+		// Start write pump goroutine - handles all writes for this connection
+		go func() {
+			defer c.Close()
+			for {
+				select {
+				case msg := <-writeCh:
+					if err := c.WriteMessage(websocket.TextMessage, msg); err != nil {
+						logrus.Error("Error:", "ScorerWritePump:", " Failed to write message: %v", err)
+						return
+					}
+				case <-stopCh:
+					return
+				}
+			}
+		}()
+
 		// JWT token must be present in query param
 		token := c.Query("token")
 		_, err := middleware.AuthWebSocket(token)
 		if err != nil {
 			logrus.Warn("WebSocket scorer: JWT invalid or missing")
-			c.WriteMessage(websocket.TextMessage, []byte(`{"error":"Unauthorized: Invalid JWT"}`))
-			c.Close()
+			writeCh <- []byte(`{"error":"Unauthorized: Invalid JWT"}`)
+			close(stopCh)
 			return
 		}
 		// Expect first message from client to be a join with matchId
 		_, joinMsg, err := c.ReadMessage()
 		if err != nil {
 			logrus.Error("Error:", "SetupWebSocket:", " Failed to read join message: %v", err)
+			close(stopCh)
 			return
 		}
 		var join struct {
@@ -76,8 +98,9 @@ func SetupWebSocket(app *fiber.App) {
 			// ask client to send proper join
 			req := map[string]string{"type": "requestJoin"}
 			if data, e := json.Marshal(req); e == nil {
-				_ = c.WriteMessage(websocket.TextMessage, data)
+				writeCh <- data
 			}
+			close(stopCh)
 			return
 		}
 
@@ -86,7 +109,8 @@ func SetupWebSocket(app *fiber.App) {
 		room.AddScorer(c)
 		defer func() {
 			logrus.Info("Info:", "SetupWebSocket:", " Scorer connection closed")
-			c.Close()
+			close(stopCh)
+			room.RemoveScorer(c)
 		}()
 
 		// ...existing code...
@@ -99,7 +123,11 @@ func SetupWebSocket(app *fiber.App) {
 				// Ask client to send initial state
 				req := map[string]string{"type": "requestInit"}
 				if data, e := json.Marshal(req); e == nil {
-					_ = c.WriteMessage(websocket.TextMessage, data)
+					select {
+					case writeCh <- data:
+					case <-stopCh:
+						return
+					}
 				}
 			} else {
 				logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats for match %s: %v", matchID, err)
@@ -107,7 +135,11 @@ func SetupWebSocket(app *fiber.App) {
 		} else {
 			if data, err := json.Marshal(currentMatch); err == nil {
 				// send to connecting scorer only
-				_ = c.WriteMessage(websocket.TextMessage, data)
+				select {
+				case writeCh <- data:
+				case <-stopCh:
+					return
+				}
 			}
 		}
 
@@ -154,7 +186,11 @@ func SetupWebSocket(app *fiber.App) {
 						// Ask client to initialize server state
 						errMsg := map[string]string{"error": "server: game state not initialized. Please send initial state"}
 						if b, e := json.Marshal(errMsg); e == nil {
-							_ = c.WriteMessage(websocket.TextMessage, b)
+							select {
+							case writeCh <- b:
+							case <-stopCh:
+								return
+							}
 						}
 						continue
 					}
@@ -166,7 +202,11 @@ func SetupWebSocket(app *fiber.App) {
 				if err := validateRaidPayload(payload, &currentMatch); err != nil {
 					errMsg := map[string]string{"error": err.Error()}
 					if b, e := json.Marshal(errMsg); e == nil {
-						_ = c.WriteMessage(websocket.TextMessage, b)
+						select {
+						case writeCh <- b:
+						case <-stopCh:
+							return
+						}
 					}
 					continue
 				}
@@ -191,7 +231,11 @@ func SetupWebSocket(app *fiber.App) {
 				if data, err := json.Marshal(currentMatch); err == nil {
 					room.BroadcastBytes(data)
 					// also send updated state back to scorer who initiated the action
-					_ = c.WriteMessage(websocket.TextMessage, data)
+					select {
+					case writeCh <- data:
+					case <-stopCh:
+						return
+					}
 				}
 				continue
 			}
@@ -224,7 +268,11 @@ func SetupWebSocket(app *fiber.App) {
 						// Ask client to initialize server state
 						errMsg := map[string]string{"error": "server: game state not initialized. Please send initial state"}
 						if b, e := json.Marshal(errMsg); e == nil {
-							_ = c.WriteMessage(websocket.TextMessage, b)
+							select {
+							case writeCh <- b:
+							case <-stopCh:
+								return
+							}
 						}
 						continue
 					}
@@ -271,7 +319,11 @@ func SetupWebSocket(app *fiber.App) {
 				}
 				if data, err := json.Marshal(currentMatch); err == nil {
 					room.BroadcastBytes(data)
-					_ = c.WriteMessage(websocket.TextMessage, data)
+					select {
+					case writeCh <- data:
+					case <-stopCh:
+						return
+					}
 				}
 				continue
 			}
@@ -295,9 +347,6 @@ func SetupWebSocket(app *fiber.App) {
 				room.BroadcastBytes(data)
 			}
 		}
-
-		// cleanup
-		room.RemoveScorer(c)
 	}))
 
 	// Handle viewer WebSocket

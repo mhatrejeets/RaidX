@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofiber/websocket/v2"
+	"github.com/sirupsen/logrus"
 )
 
 // MatchRoom manages all connections and broadcasts for a single match_id
@@ -73,7 +74,12 @@ func (r *MatchRoom) run() {
 		case msg := <-r.broadcastCh:
 			r.mu.Lock()
 			for conn := range r.viewers {
-				_ = conn.WriteMessage(websocket.TextMessage, msg)
+				err := conn.WriteMessage(websocket.TextMessage, msg)
+				if err != nil {
+					logrus.Error("Error:", "MatchRoom.run:", " Failed to write to viewer: %v", err)
+					conn.Close()
+					delete(r.viewers, conn)
+				}
 			}
 			r.mu.Unlock()
 			r.lastActivity = time.Now()
