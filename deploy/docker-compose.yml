@@ -15,7 +15,9 @@ services:
       - raidx-network
 
   raidx:
-    build: .
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
     container_name: raidx-app
     depends_on:
       - mongo

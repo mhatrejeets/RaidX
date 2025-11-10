@@ -12,6 +12,7 @@ WORKDIR /app
 COPY --from=builder /app/raidx-server .
 COPY ./Static ./Static
 COPY ./views ./views
-COPY .env .env
+# Copy .env if it exists (optional for Docker, will use environment variables)
+COPY .env* ./
 EXPOSE 3000
 CMD ["./raidx-server"]
