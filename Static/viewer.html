@@ -149,6 +149,21 @@
     </div>
     
 
+    <!-- View Matches Button -->
+    <div style="text-align:center; margin-top:2.5rem;">
+        <a id="view-matches-btn" href="/matches" class="btn btn-warning btn-lg" style="padding:0.75rem 2.5rem; font-size:1.25rem;">View Matches</a>
+        <script>
+            // Attach JWT token to /matches link if present in localStorage
+            document.addEventListener('DOMContentLoaded', function() {
+                var btn = document.getElementById('view-matches-btn');
+                var token = localStorage.getItem('jwtToken') || localStorage.getItem('token');
+                if (btn && token) {
+                    btn.href = `/matches?token=${encodeURIComponent(token)}`;
+                }
+            });
+        </script>
+    </div>
+
     <script src="/static/viewer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
