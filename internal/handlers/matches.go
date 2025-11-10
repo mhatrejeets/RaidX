@@ -125,8 +125,7 @@ func ProcessRaidResult(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to persist game state"})
 	}
 
-	// Broadcast to viewers
-	BroadcastToViewers(currentMatch)
+	// Broadcast to viewers (handled via room system in WebSocket handlers)
 
 	// respond with updated state
 	// Use a simple wrapper with Data field to match frontend expectation

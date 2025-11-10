@@ -593,11 +593,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             const matchInput = document.getElementById('match-id-input');
             const viewerLinkEl = document.getElementById('viewer-link');
 
+            // Always prefill match id if empty
+            if (matchInput && !matchInput.value) {
+                const shortId = 'm-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+                matchInput.value = shortId;
+            }
+
             function updateViewerLink() {
                 if (!matchInput || !viewerLinkEl) return;
+                const matchIdVal = matchInput.value.trim();
                 // Prefer the server route /viewer so route-level rendering is used
-                const link = `${location.origin}/viewer?match_id=${encodeURIComponent(matchInput.value)}`;
+                const link = matchIdVal ? `${location.origin}/viewer?match_id=${encodeURIComponent(matchIdVal)}` : '';
                 viewerLinkEl.textContent = link;
+                // Disable copy button if no match id
+                if (copyBtn) copyBtn.disabled = !matchIdVal;
             }
 
             if (matchInput) {

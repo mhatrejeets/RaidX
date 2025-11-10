@@ -130,7 +130,7 @@
       <div id="player-list"></div>
       <button type="submit" class="btn btn-submit">Confirm Selection</button>
     </form>
-    <a href="/" class="back-link">← Back to Home</a>
+  <a href="#" id="backToHome" class="back-link">← Back to Home</a>
   </div>
 
   <script>
@@ -192,6 +192,43 @@
         const team1Name = params.get("team1_name");
         const team2Name = document.getElementById("team-name").textContent;
         window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&team2_name=${encodeURIComponent(team2Name)}&token=${encodeURIComponent(token)}`;
+      }
+    });
+    // Back to Home navigation (match matches.html logic)
+    document.addEventListener('DOMContentLoaded', () => {
+      const backToHomeLink = document.getElementById('backToHome');
+      if (backToHomeLink) {
+        backToHomeLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
+          if (!token) {
+            window.location.href = '/login';
+            return;
+          }
+          // Extract userId from JWT
+          function getUserIdFromToken() {
+            const t = token;
+            if (!t) return null;
+            const parts = t.split('.');
+            if (parts.length < 2) return null;
+            let payload = parts[1];
+            // Pad base64 if needed
+            while (payload.length % 4 !== 0) payload += '=';
+            try {
+              const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+              return decoded.user_id || decoded.userId || decoded.sub || decoded.session_id || decoded.sessionId || null;
+            } catch {
+              return null;
+            }
+          }
+          const userId = getUserIdFromToken();
+          const playerName = localStorage.getItem('playerName') || 'Player';
+          if (!userId) {
+            window.location.href = '/login';
+            return;
+          }
+          window.location.href = `/home1/${userId}?name=${encodeURIComponent(playerName)}&token=${encodeURIComponent(token)}`;
+        });
       }
     });
   </script>

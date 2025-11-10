@@ -43,6 +43,23 @@ function joinMatch(id) {
                 if (payload.teamB) document.getElementById("teamB-name").textContent = payload.teamB.name;
                 if (payload.teamB) document.getElementById("teamB-score").textContent = payload.teamB.score;
 
+                // If match ended, show winner
+                if (payload.matchEnded) {
+                    let winner = "";
+                    if (payload.teamA && payload.teamB) {
+                        if (payload.teamA.score > payload.teamB.score) {
+                            winner = `${payload.teamA.name} wins!`;
+                        } else if (payload.teamB.score > payload.teamA.score) {
+                            winner = `${payload.teamB.name} wins!`;
+                        } else {
+                            winner = "Match Draw!";
+                        }
+                    }
+                    const liveEl = document.getElementById("live-commentary");
+                    if (liveEl) liveEl.textContent = `Match Ended. ${winner}`;
+                    return;
+                }
+
                 // commentary if present
                 const raid = payload.raidDetails || payload.raid || {};
                 const commentary = raid.raider ? `Raid by ${raid.raider}: ${raid.pointsGained || 0} points ${raid.bonusTaken ? "(Bonus taken)" : ""} ${raid.superTackle ? "(Super Tackle)" : ""}` : 'Waiting for match updates...';
@@ -85,14 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (urlMatch) {
         if (joinInput) joinInput.value = urlMatch;
         joinMatch(urlMatch);
-    } else {
-        // show join panel
-        if (joinBtn) {
-            joinBtn.addEventListener('click', () => {
-                const v = joinInput ? joinInput.value.trim() : '';
-                if (!v) return alert('Enter a match id to join');
-                joinMatch(v);
-            });
-        }
+    }
+
+    // Always show join panel if joinBtn exists
+    if (joinBtn) {
+        joinBtn.addEventListener('click', () => {
+            const v = joinInput ? joinInput.value.trim() : '';
+            if (!v) return alert('Enter a match id to join');
+            joinMatch(v);
+        });
     }
 });
