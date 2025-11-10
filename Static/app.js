@@ -538,9 +538,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (team1Id && team2Id) {
         try {
             // 1. Fetch Team Data
+            const headers = { 'Authorization': `Bearer ${jwtToken}` };
             const [res1, res2] = await Promise.all([
-                fetch(`/api/team/${team1Id}`),
-                fetch(`/api/team/${team2Id}`)
+                fetch(`/api/team/${team1Id}`, { headers }),
+                fetch(`/api/team/${team2Id}`, { headers })
             ]);
 
             const data1 = await res1.json();

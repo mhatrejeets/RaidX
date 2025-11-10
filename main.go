@@ -158,6 +158,9 @@ func main() {
 	// Setup routes
 	setupPublicRoutes(app)
 
+	// WebSocket setup BEFORE applying middleware
+	handlers.SetupWebSocket(app)
+
 	// Protected routes - require JWT auth
 	app.Use("/scorer", middleware.AuthRequired)
 	app.Use("/api", middleware.AuthRequired)
@@ -168,9 +171,6 @@ func main() {
 	app.Use("/selectteams", middleware.AuthRequired)
 	app.Use("/createteam", middleware.AuthRequired)
 	setupProtectedRoutes(app)
-
-	// WebSocket setup
-	handlers.SetupWebSocket(app)
 
 	// Static assets
 	app.Static("/static", "./Static")
