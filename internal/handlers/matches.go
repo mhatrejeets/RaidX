@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetAllMatches(c *fiber.Ctx) error {
@@ -46,16 +47,20 @@ type PlayerWithID struct {
 
 func GetMatchByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
-	objID, err := primitive.ObjectIDFromHex(idParam)
-	if err != nil {
-		logrus.Warn("Warning:", "GetMatchByID:", " Invalid match ID: %v", err)
-		return c.Status(400).SendString("Invalid match ID")
-	}
-
 	matchesCol := db.MongoClient.Database("raidx").Collection("matches")
-
 	var match models.Match
-	err = matchesCol.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&match)
+	var err error
+
+	// Try lookup by Mongo ObjectID first (if valid), else fallback to matchId field
+	if objID, e := primitive.ObjectIDFromHex(idParam); e == nil {
+		err = matchesCol.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&match)
+	} else {
+		err = mongo.ErrNoDocuments
+	}
+	if err != nil {
+		// fallback to matchId
+		err = matchesCol.FindOne(context.TODO(), bson.M{"matchId": idParam}).Decode(&match)
+	}
 	if err != nil {
 		logrus.Warn("Warning:", "GetMatchByID:", " Match not found: %v", err)
 		return c.Status(404).SendString("Match not found")
@@ -75,6 +80,32 @@ func GetMatchByID(c *fiber.Ctx) error {
 		"Match":       match,
 		"PlayerStats": playerList,
 	})
+}
+
+// GetMatchByIDJSON returns match details as JSON (for API consumers like viewer)
+func GetMatchByIDJSON(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	matchesCol := db.MongoClient.Database("raidx").Collection("matches")
+	var match models.Match
+	var err error
+
+	// Try lookup by Mongo ObjectID first (if valid), else fallback to matchId field
+	if objID, e := primitive.ObjectIDFromHex(idParam); e == nil {
+		err = matchesCol.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&match)
+	} else {
+		err = mongo.ErrNoDocuments
+	}
+	if err != nil {
+		// fallback to matchId
+		err = matchesCol.FindOne(context.TODO(), bson.M{"matchId": idParam}).Decode(&match)
+	}
+	if err != nil {
+		logrus.Warn("Warning:", "GetMatchByIDJSON:", " Match not found: %v", err)
+		return c.Status(404).JSON(fiber.Map{"error": "Match not found"})
+	}
+
+	// Return match as JSON
+	return c.JSON(match)
 }
 
 // RaidPayload represents the payload expected from frontend when submitting a raid

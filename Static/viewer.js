@@ -3,6 +3,7 @@ let ws = null;
 let matchId = null;
 // Optional token (viewer is allowed without auth)
 let jwtToken = (typeof getValidToken === 'function') ? getValidToken() : null;
+let matchEnded = false;
 
 function joinMatch(id) {
     if (!id) return;
@@ -31,6 +32,15 @@ function joinMatch(id) {
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+            
+            // Check for error indicating match ended or not found
+            if (data.error && (data.error.includes('not initialized') || data.error.includes('not found') || data.error.includes('ended'))) {
+                matchEnded = true;
+                ws.close();
+                showEndedMatchUI();
+                return;
+            }
+            
             if (data.type === "gameStats" || data.data) {
                 const payload = data.data || data;
                 if (payload.teamA) document.getElementById("teamA-name").textContent = payload.teamA.name;
@@ -64,6 +74,92 @@ function joinMatch(id) {
             conn.style.background = '#ef4444'; 
         }
     };
+}
+
+function showEndedMatchUI() {
+    if (matchEnded) {
+        // Ensure ended UI is visible and wired once
+        const endedSection = document.getElementById('viewer-ended');
+        if (endedSection) endedSection.style.display = 'block';
+        const viewBtn = document.getElementById('view-match-score-btn');
+        if (viewBtn && !viewBtn.dataset.bound) {
+            viewBtn.addEventListener('click', fetchMatchScore);
+            viewBtn.dataset.bound = 'true';
+        }
+    }
+
+    // Hide live commentary section
+    const commentaryDiv = document.querySelector('.commentary');
+    if (commentaryDiv) commentaryDiv.style.display = 'none';
+    
+    // Update connection status
+    const conn = document.getElementById('viewer-conn');
+    if (conn) {
+        conn.textContent = 'Match Ended';
+        conn.style.background = '#f59e0b';
+    }
+    
+    // Update commentary to show match ended message
+    const liveEl = document.getElementById('live-commentary');
+    if (liveEl) {
+        liveEl.innerHTML = '<strong style="color:#f59e0b;">Match Ended</strong><br>This match has been completed and archived.';
+    }
+    
+    // Show the match ended UI (pre-rendered in HTML)
+    const endedSection = document.getElementById('viewer-ended');
+    if (endedSection) endedSection.style.display = 'block';
+
+    const viewBtn = document.getElementById('view-match-score-btn');
+    if (viewBtn && !viewBtn.dataset.bound) {
+        viewBtn.addEventListener('click', fetchMatchScore);
+        viewBtn.dataset.bound = 'true';
+    }
+
+    // Try to fetch and show the final score from MongoDB
+    tryFetchFinalScore();
+}
+
+function tryFetchFinalScore() {
+    if (!matchId) return;
+    
+    // Try to get match details from MongoDB via API
+    fetch(`/api/match/${matchId}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Match not found');
+            return res.json();
+        })
+        .then(match => {
+            if (match && match.data) {
+                const data = match.data;
+                if (data.teamA) {
+                    document.getElementById('teamA-name').textContent = data.teamA.name || 'Team A';
+                    document.getElementById('teamA-score').textContent = data.teamA.score || 0;
+                }
+                if (data.teamB) {
+                    document.getElementById('teamB-name').textContent = data.teamB.name || 'Team B';
+                    document.getElementById('teamB-score').textContent = data.teamB.score || 0;
+                }
+            }
+        })
+        .catch(err => {
+            console.log('Could not fetch final score:', err);
+        });
+}
+
+function fetchMatchScore() {
+    if (!matchId) {
+        alert('No match ID available');
+        return;
+    }
+    
+    // Navigate to the match details page
+    const token = jwtToken || (typeof getValidToken === 'function' ? getValidToken() : null);
+    if (token) {
+        window.location.href = `/matches/${matchId}?token=${encodeURIComponent(token)}`;
+    } else {
+        // Try without token; backend will redirect to login if needed
+        window.location.href = `/matches/${matchId}`;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

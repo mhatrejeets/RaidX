@@ -18,6 +18,10 @@ func AuthRequired(c *fiber.Ctx) error {
 		tokenStr = c.Query("token")
 	}
 	if tokenStr == "" {
+		// Try HttpOnly cookie
+		tokenStr = c.Cookies("token")
+	}
+	if tokenStr == "" {
 		// For non-API routes, redirect to login; keep JSON for API
 		if strings.HasPrefix(c.Path(), "/api") {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing JWT token"})

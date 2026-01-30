@@ -16,6 +16,9 @@ func LogoutHandler(c *fiber.Ctx) error {
 	if tokenStr == "" {
 		tokenStr = c.Query("token")
 	}
+	if tokenStr == "" {
+		tokenStr = c.Cookies("token")
+	}
 	if strings.HasPrefix(tokenStr, "Bearer ") {
 		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 	}
@@ -42,5 +45,8 @@ func LogoutHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete session"})
 	}
+
+	// Clear auth cookie
+	c.ClearCookie("token")
 	return c.JSON(fiber.Map{"success": true})
 }

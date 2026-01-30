@@ -46,6 +46,9 @@ func EndGameHandler(c *fiber.Ctx) error {
 		return c.Status(500).SendString("Failed to parse Redis JSON: " + err.Error())
 	}
 
+	// Ensure matchId is stored in Mongo for shareable lookups
+	gameStats["matchId"] = matchId
+
 	// 3. Insert full gameStats into matches collection
 	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
 	logrus.Debug("EndGame Handler will insert ", gameStats)

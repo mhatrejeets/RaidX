@@ -348,6 +348,19 @@ func SetupWebSocket(app *fiber.App) {
 		if err == nil {
 			data, _ := json.Marshal(latestStats)
 			_ = c.WriteMessage(websocket.TextMessage, data)
+		} else if err == redisImpl.RedisNull {
+			// Match not found in Redis - likely ended
+			errMsg := map[string]string{"error": "Match not found or has ended", "matchId": matchID}
+			if data, e := json.Marshal(errMsg); e == nil {
+				_ = c.WriteMessage(websocket.TextMessage, data)
+			}
+		} else {
+			// Other Redis error
+			logrus.Error("Error:", "SetupWebSocket:", " Failed to get match stats for viewer: %v", err)
+			errMsg := map[string]string{"error": "Failed to retrieve match data"}
+			if data, e := json.Marshal(errMsg); e == nil {
+				_ = c.WriteMessage(websocket.TextMessage, data)
+			}
 		}
 
 		// Keep connection open

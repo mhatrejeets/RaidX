@@ -88,6 +88,15 @@ func LoginHandler(c *fiber.Ctx) error {
 	}
 
 	// Success: send JWT to frontend
+	// Also set HttpOnly cookie for backend auth redirects
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    tokenStr,
+		HTTPOnly: true,
+		Path:     "/",
+		SameSite: "Lax",
+		Expires:  expiry,
+	})
 	return c.JSON(fiber.Map{
 		"token":   tokenStr,
 		"user_id": user.ID.Hex(),

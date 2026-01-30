@@ -34,6 +34,9 @@ func setupPublicRoutes(app *fiber.App) {
 	app.Get("/viewer", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/viewer.html")
 	})
+
+	// Public API endpoint to fetch match details by ID (JSON) - no auth required for viewers
+	app.Get("/api/match/:id", handlers.GetMatchByIDJSON)
 }
 
 func setupProtectedRoutes(app *fiber.App) {
