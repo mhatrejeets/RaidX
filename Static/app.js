@@ -1,3 +1,22 @@
+// ==============================================================================
+// RaidX Kabaddi Scorer - Frontend (UI Only)
+// ==============================================================================
+// 
+// ARCHITECTURE:
+// - All Kabaddi scoring calculations, player status management, revivals, 
+//   all-out detection, do-or-die logic, super tackles, and bonus points are
+//   handled on the BACKEND (Go server in internal/handlers/matches.go)
+// 
+// - This frontend is responsible ONLY for:
+//   1. Displaying the UI (teams, scores, players, raid info)
+//   2. Capturing user actions (selecting raiders/defenders, raid outcomes)
+//   3. Sending action payloads to the backend via WebSocket
+//   4. Receiving complete game state updates from backend
+//   5. Rendering the updated state
+//
+// - The backend is the single source of truth for all game state
+// ==============================================================================
+
 // Constants
 const MATCH_STORAGE_KEY = 'currentMatchId';
 
@@ -75,7 +94,7 @@ function setupWebSocket() {
                 return;
             }
             if (msg.data) {
-                // Update local state based on server response
+                // Backend sends complete calculated state - just update UI
                 if (msg.data.teamA) teamA.score = msg.data.teamA.score;
                 if (msg.data.teamB) teamB.score = msg.data.teamB.score;
                 if (msg.data.playerStats) {
@@ -85,7 +104,7 @@ function setupWebSocket() {
                 }
                 if (msg.data.raidNumber) currentRaidNumber = msg.data.raidNumber;
 
-                // Check for Empty Raid Counts from server (if applicable)
+                // Update empty raid counts from backend (server is source of truth)
                 if (msg.data.emptyRaidCounts) {
                     emptyRaidCountA = msg.data.emptyRaidCounts.teamA;
                     emptyRaidCountB = msg.data.emptyRaidCounts.teamB;
@@ -129,7 +148,7 @@ function setMatchIdDisplay(id) {
 }
 
 /**
- * Game State Management
+ * Game State Management (UI helpers only - all calculations done on backend)
  */
 function initializePlayerStats(team) {
     team.players.forEach(player => {
@@ -152,36 +171,6 @@ function getRaidingTeam() {
     return currentRaidNumber % 2 !== 0 ? teamA : teamB;
 }
 
-function canRaid(team) {
-    const activePlayers = team.players.filter(player => player.status === "in").length;
-    return activePlayers >= 1 && activePlayers <= 7;
-}
-
-function enforceLobbyRule() {
-    const raidingTeam = getRaidingTeam();
-    if (!canRaid(raidingTeam)) {
-        alert(`${raidingTeam.name} does not have enough players to raid!`);
-        return false;
-    }
-    return true;
-}
-
-function revivePlayers(team, count) {
-    let outPlayers = team.players.filter(p => p.status === "out");
-    for (let i = 0; i < count && i < outPlayers.length; i++) {
-        outPlayers[i].status = "in";
-    }
-}
-
-function checkAllOut() {
-    [teamA, teamB].forEach(team => {
-        if (team.players.every(p => p.status === "out")) {
-            team.players.forEach(p => p.status = "in");
-            const opponent = team === teamA ? teamB : teamA;
-            opponent.score += 2;
-        }
-    });
-}
 
 function handleLobbyTouch(player, isRaiderTouchingLobby) {
     if (!player) return alert("Select a player first.");
@@ -192,7 +181,7 @@ function handleLobbyTouch(player, isRaiderTouchingLobby) {
     // Determine the team that gets the point
     const scoringTeam = isRaiderTouchingLobby ? defendingTeam : raidingTeam;
     
-    // Create the payload for the server
+    // Create the payload for the server (backend will handle all calculations)
     const lobbyPayload = {
         type: "lobbyTouch",
         data: {
@@ -208,6 +197,7 @@ function handleLobbyTouch(player, isRaiderTouchingLobby) {
         alert('Socket not connected');
     }
 }
+
 
 function endGame() {
     game = false;
@@ -225,6 +215,12 @@ function endGame() {
         message = `${teamB.name || 'Team B'} wins`;
     } else {
         message = "It was a tie";
+    }
+
+    // Update live commentary with end match message
+    const commentaryEl = document.getElementById('live-commentary');
+    if (commentaryEl) {
+        commentaryEl.textContent = `🏁 Match Ended: ${message}`;
     }
 
     alert(message);
@@ -266,10 +262,10 @@ function endGame() {
     });
 }
 
+
 function nextRaid() {
     selectedRaider = null;
     selectedDefenders = [];
-
     bonusTaken = false;
     isDoOrDieRaid = false;
 
@@ -283,10 +279,6 @@ function nextRaid() {
     updateRaidInfoUI();
 }
 
-function resetEmptyRaidCount(team) {
-    if (team === teamA) emptyRaidCountA = 0;
-    else emptyRaidCountB = 0;
-}
 
 /**
  * UI Interaction Handlers
@@ -325,7 +317,7 @@ function toggleDefenderSelection(player) {
 }
 
 /**
- * Score Action Handlers (Sending data to server)
+ * Score Action Handlers (Send RAW data only - backend determines everything)
  */
 function raidSuccessful() {
     if (!selectedRaider) {
@@ -333,26 +325,20 @@ function raidSuccessful() {
         return;
     }
 
+    // Send ONLY raw player IDs and action - backend calculates everything
     const payload = {
         raidType: "successful",
         raiderId: selectedRaider.id,
         defenderIds: selectedDefenders.map(d => d.id),
-        raidingTeam: currentRaidNumber % 2 !== 0 ? "A" : "B",
-        bonusTaken: bonusTaken,
-        emptyRaidCounts: {
-            teamA: emptyRaidCountA,
-            teamB: emptyRaidCountB
-        }
+        bonusTaken: bonusTaken
     };
 
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(payload));
-        resetEmptyRaidCount(getRaidingTeam()); // Reset count on successful raid
     } else {
         alert('Socket not connected');
     }
 }
-
 
 function defenseSuccessful() {
     if (!selectedRaider) {
@@ -360,20 +346,16 @@ function defenseSuccessful() {
         return;
     }
 
+    // Send ONLY raw player IDs and action - backend calculates everything
     const payload = {
         raidType: "defense",
         raiderId: selectedRaider.id,
         defenderIds: selectedDefenders.map(d => d.id),
-        raidingTeam: currentRaidNumber % 2 !== 0 ? "A" : "B",
-        bonusTaken: bonusTaken,
-        emptyRaidCounts: {
-            teamA: emptyRaidCountA,
-            teamB: emptyRaidCountB
-        }
+        bonusTaken: bonusTaken
     };
+    
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(payload));
-        resetEmptyRaidCount(getRaidingTeam()); // Reset count on successful defense
     }
 }
 
@@ -383,26 +365,19 @@ function emptyRaid() {
         return;
     }
 
-    const isTeamA = currentRaidNumber % 2 !== 0;
-    if (isTeamA) {
-        emptyRaidCountA++;
-    } else {
-        emptyRaidCountB++;
-    }
-
+    // Send ONLY raw player ID and action - backend tracks empty raid counts
     const payload = {
         raidType: "empty",
         raiderId: selectedRaider.id,
         defenderIds: [],
-        raidingTeam: isTeamA ? "A" : "B",
-        bonusTaken: bonusTaken,
-        emptyRaidCounts: {
-            teamA: emptyRaidCountA,
-            teamB: emptyRaidCountB
-        }
+        bonusTaken: bonusTaken
     };
-    if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(payload));
+    
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payload));
+    }
 }
+
 
 /**
  * UI Rendering and Updates
@@ -463,7 +438,7 @@ function renderPlayers() {
     render(teamB, "teamB-players");
 }
 
-// Sync statuses from the authoritative playerStats map (received from server)
+// Sync statuses from the authoritative playerStats map (received from backend server)
 // into the team player objects used for rendering and selection.
 function syncPlayerStatusesFromPlayerStats() {
     try {
@@ -474,11 +449,11 @@ function syncPlayerStatusesFromPlayerStats() {
                 }
             });
         });
-        // If a currently selected raider was marked out, clear selection
+        // If a currently selected raider was marked out by backend, clear selection
         if (selectedRaider && playerStats[selectedRaider.id] && playerStats[selectedRaider.id].status !== 'in') {
             selectedRaider = null;
         }
-        // Remove any selected defenders who are now out
+        // Remove any selected defenders who are now out (as determined by backend)
         selectedDefenders = selectedDefenders.filter(d => playerStats[d.id] && playerStats[d.id].status === 'in');
         // Refresh UI to reflect possible deselections
         updateCurrentRaidDisplay();
@@ -515,13 +490,38 @@ function updateRaidInfoUI() {
  * Initialization (Runs when the HTML document is fully loaded)
  */
 document.addEventListener("DOMContentLoaded", async () => {
-    // Wire Copy Match ID button
+    // Robust clipboard helper (navigator.clipboard with textarea fallback)
+    function copyToClipboard(text) {
+        if (!text) return Promise.reject(new Error('No text to copy'));
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text);
+        }
+        return new Promise((resolve, reject) => {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                // Avoid scrolling to bottom
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                if (ok) resolve(); else reject(new Error('execCommand failed'));
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    // Wire Copy Match ID button (top persistent button)
     const copyMatchIdBtn = document.getElementById('copy-matchid-btn');
     if (copyMatchIdBtn) {
         copyMatchIdBtn.addEventListener('click', () => {
             const id = matchId || '';
             if (!id) return;
-            navigator.clipboard?.writeText(id).then(() => {
+            copyToClipboard(id).then(() => {
                 copyMatchIdBtn.textContent = 'Copied!';
                 setTimeout(() => (copyMatchIdBtn.textContent = 'Copy Match ID'), 1200);
             }).catch(() => alert('Copy failed - please copy manually'));
@@ -532,6 +532,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const team2Id = params.get("team2_id");
     // Allow prefilled match id via URL (scorer could open /scorer?match_id=xxx)
     const prefillMatchId = params.get("match_id");
+    // Optional resume flag to auto-join without showing overlay
+    const resumeFlag = params.get("resume") === "1";
 
     console.log("DOM fully loaded. Starting initialization.");
 
@@ -610,7 +612,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     updateViewerLink();
                     const link = viewerLinkEl ? viewerLinkEl.textContent : '';
                     if (!link) return;
-                    navigator.clipboard?.writeText(link).then(() => {
+                    copyToClipboard(link).then(() => {
                         copyBtn.textContent = 'Copied';
                         setTimeout(() => (copyBtn.textContent = 'Copy Link'), 1500);
                     }).catch(() => alert('Copy failed - please copy manually'));
@@ -645,18 +647,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (stored && stored.trim() !== '') {
                 matchId = stored.trim();
                 if (matchInput) matchInput.value = matchId;
-                // hide overlay immediately and auto-join
-                const overlay = document.getElementById('match-setup');
-                if (overlay) overlay.style.display = 'none';
-                // update UI
-                setMatchIdDisplay(matchId);
-                setupWebSocket();
-                if (socket) {
-                    socket.onopen = () => {
-                        socket.send(JSON.stringify({ type: 'join', matchId }));
-                        setConnectionStatus('Connected');
-                        console.log('Auto-joined stored match:', matchId);
-                    };
+                // Only auto-join (and hide overlay) if explicitly allowed via URL (prefill/resume)
+                const allowAutoJoin = !!prefillMatchId || resumeFlag;
+                if (allowAutoJoin) {
+                    const overlay = document.getElementById('match-setup');
+                    if (overlay) overlay.style.display = 'none';
+                    setMatchIdDisplay(matchId);
+                    setupWebSocket();
+                    if (socket) {
+                        socket.onopen = () => {
+                            socket.send(JSON.stringify({ type: 'join', matchId }));
+                            setConnectionStatus('Connected');
+                            console.log('Auto-joined stored match:', matchId);
+                        };
+                    }
+                } else {
+                    // Prefill but keep overlay so user can copy/confirm
+                    setMatchIdDisplay('—');
+                    const overlay = document.getElementById('match-setup');
+                    if (overlay) overlay.style.display = 'flex';
                 }
             }
 

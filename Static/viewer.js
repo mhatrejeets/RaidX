@@ -1,27 +1,22 @@
-// Constants
-const JWT_STORAGE_KEY = 'jwtToken';
-
 // State variables
 let ws = null;
 let matchId = null;
-let jwtToken = localStorage.getItem(JWT_STORAGE_KEY);
+// Optional token (viewer is allowed without auth)
+let jwtToken = (typeof getValidToken === 'function') ? getValidToken() : null;
 
 function joinMatch(id) {
     if (!id) return;
-    if (!jwtToken) {
-        const currentUrl = encodeURIComponent(window.location.href);
-        window.location.href = `/login?returnUrl=${currentUrl}`;
-        return;
-    }
     
     matchId = id;
     // hide join UI
     const joinDiv = document.getElementById('viewer-join');
     if (joinDiv) joinDiv.style.display = 'none';
 
-    // Use current hostname for WebSocket connection with JWT token
+    // Use current hostname for WebSocket connection; token is optional
     const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProto}//${location.host}/ws/viewer?token=${jwtToken}`;
+    const wsUrl = jwtToken
+        ? `${wsProto}//${location.host}/ws/viewer?token=${encodeURIComponent(jwtToken)}`
+        : `${wsProto}//${location.host}/ws/viewer`;
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -67,10 +62,6 @@ function joinMatch(id) {
         if (conn) { 
             conn.textContent = 'Error'; 
             conn.style.background = '#ef4444'; 
-        }
-        if (!jwtToken) {
-            const currentUrl = encodeURIComponent(window.location.href);
-            window.location.href = `/login?returnUrl=${currentUrl}`;
         }
     };
 }

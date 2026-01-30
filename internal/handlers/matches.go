@@ -78,16 +78,13 @@ func GetMatchByID(c *fiber.Ctx) error {
 }
 
 // RaidPayload represents the payload expected from frontend when submitting a raid
+// Frontend sends ONLY raw data - backend determines everything else
 type RaidPayload struct {
-	RaidType        string   `json:"raidType"`
-	RaiderID        string   `json:"raiderId"`
-	DefenderIDs     []string `json:"defenderIds"`
-	RaidingTeam     string   `json:"raidingTeam"`
-	BonusTaken      bool     `json:"bonusTaken"`
-	EmptyRaidCounts struct {
-		TeamA int `json:"teamA"`
-		TeamB int `json:"teamB"`
-	} `json:"emptyRaidCounts"`
+	RaidType    string   `json:"raidType"`
+	RaiderID    string   `json:"raiderId"`
+	DefenderIDs []string `json:"defenderIds"`
+	BonusTaken  bool     `json:"bonusTaken"`
+	// Note: RaidingTeam and EmptyRaidCounts removed - backend calculates these
 }
 
 // ProcessRaidResult handles raid outcomes and updates scores/state in Redis and broadcasts updates
@@ -135,6 +132,7 @@ func ProcessRaidResult(c *fiber.Ctx) error {
 }
 
 // validateRaidPayload performs server-side validation of incoming raid data
+// Backend automatically determines which team the raider belongs to
 func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) error {
 	// raid type
 	if raid.RaidType != "successful" && raid.RaidType != "defense" && raid.RaidType != "empty" {
@@ -190,18 +188,33 @@ func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) e
 		return fmt.Errorf("raider is not active: %s", raid.RaiderID)
 	}
 
-	// raidingTeam
-	if raid.RaidingTeam != "A" && raid.RaidingTeam != "B" {
-		return fmt.Errorf("invalid raidingTeam: %s", raid.RaidingTeam)
+	// Determine which team the raider belongs to (backend logic, not frontend)
+	raiderTeam := ""
+	for _, pid := range match.Data.TeamAPlayerIDs {
+		if pid == raid.RaiderID {
+			raiderTeam = "A"
+			break
+		}
+	}
+	if raiderTeam == "" {
+		for _, pid := range match.Data.TeamBPlayerIDs {
+			if pid == raid.RaiderID {
+				raiderTeam = "B"
+				break
+			}
+		}
+	}
+	if raiderTeam == "" {
+		return fmt.Errorf("raider does not belong to any team: %s", raid.RaiderID)
 	}
 
-	// Verify alternating raid rule
+	// Verify alternating raid rule - backend determines expected team
 	expectedRaidingTeam := "A"
 	if match.Data.RaidNumber%2 == 0 {
 		expectedRaidingTeam = "B"
 	}
-	if raid.RaidingTeam != expectedRaidingTeam {
-		return fmt.Errorf("incorrect raiding team. Expected team %s to raid", expectedRaidingTeam)
+	if raiderTeam != expectedRaidingTeam {
+		return fmt.Errorf("incorrect raiding team. Expected team %s to raid, but raider belongs to team %s", expectedRaidingTeam, raiderTeam)
 	}
 
 	// defenders validation for types that require defenders
@@ -255,19 +268,32 @@ func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) e
 		}
 	}
 
-	// empty raid counts non-negative
-	if raid.EmptyRaidCounts.TeamA < 0 || raid.EmptyRaidCounts.TeamB < 0 {
-		return fmt.Errorf("emptyRaidCounts must be non-negative")
-	}
-
 	return nil
 }
 
+// Helper function to determine which team a raider belongs to (backend logic)
+func getRaidingTeam(match *models.EnhancedStatsMessage, raiderID string) string {
+	for _, pid := range match.Data.TeamAPlayerIDs {
+		if pid == raiderID {
+			return "A"
+		}
+	}
+	for _, pid := range match.Data.TeamBPlayerIDs {
+		if pid == raiderID {
+			return "B"
+		}
+	}
+	return "" // should never happen if validation passed
+}
+
 func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
+	// Backend determines raiding team from raider's team membership
+	raidingTeam := getRaidingTeam(match, raid.RaiderID)
+
 	raidPoints := len(raid.DefenderIDs)
 
 	// update team score
-	if raid.RaidingTeam == "A" {
+	if raidingTeam == "A" {
 		match.Data.TeamA.Score += raidPoints
 		if raid.BonusTaken {
 			match.Data.TeamA.Score++
@@ -290,7 +316,7 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 	match.Data.PlayerStats[raid.RaiderID] = raiderStat
 
 	// Reset empty raid count for the raiding team on a successful raid
-	if raid.RaidingTeam == "A" {
+	if raidingTeam == "A" {
 		match.Data.EmptyRaidCounts.TeamA = 0
 	} else {
 		match.Data.EmptyRaidCounts.TeamB = 0
@@ -307,7 +333,7 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 	// Only revive players based on defenders out, not bonus points
 	revivals := raidPoints                                  // number of defenders out determines revival count
 	pointsGained := raidPoints + boolToInt(raid.BonusTaken) // total points includes bonus
-	if raid.RaidingTeam == "A" {
+	if raidingTeam == "A" {
 		revivePlayersByIDs(match, match.Data.TeamAPlayerIDs, revivals)
 	} else {
 		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, revivals)
@@ -328,9 +354,12 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 }
 
 func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload) {
+	// Backend determines raiding team from raider's team membership
+	raidingTeam := getRaidingTeam(match, raid.RaiderID)
+
 	// Determine defending team by id (A/B)
 	defendingTeam := "A"
-	if raid.RaidingTeam == "A" {
+	if raidingTeam == "A" {
 		defendingTeam = "B"
 	}
 
@@ -362,7 +391,7 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 	// Update raider stats accordingly. When a raider with bonus is tackled, defenders
 	// should only be awarded the normal tackle point (1), not the super tackle bonus.
 	if raid.BonusTaken {
-		if raid.RaidingTeam == "A" {
+		if raidingTeam == "A" {
 			match.Data.TeamA.Score++
 		} else {
 			match.Data.TeamB.Score++
@@ -413,7 +442,7 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 	// Revive exactly 1 player for the defending team (super tackle revives 1 as per rules)
 
 	// Reset empty raid count for the raiding team on a defense success
-	if raid.RaidingTeam == "A" {
+	if raidingTeam == "A" {
 		match.Data.EmptyRaidCounts.TeamA = 0
 	} else {
 		match.Data.EmptyRaidCounts.TeamB = 0
@@ -430,11 +459,14 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 }
 
 func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
+	// Backend determines raiding team from raider's team membership
+	raidingTeam := getRaidingTeam(match, raid.RaiderID)
+
 	r := match.Data.PlayerStats[raid.RaiderID]
 
 	// Award bonus point to raiding team if taken (no revival for bonus points)
 	if raid.BonusTaken {
-		if raid.RaidingTeam == "A" {
+		if raidingTeam == "A" {
 			match.Data.TeamA.Score++
 		} else {
 			match.Data.TeamB.Score++
@@ -443,16 +475,14 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 		r.TotalPoints++
 	}
 
-	// do-or-die handling
-	// Persist the incoming empty raid counts from the client so server and UI stay in sync.
-	match.Data.EmptyRaidCounts.TeamA = raid.EmptyRaidCounts.TeamA
-	match.Data.EmptyRaidCounts.TeamB = raid.EmptyRaidCounts.TeamB
-
+	// Backend tracks empty raid counts (increment for current raiding team)
 	emptyCount := 0
-	if raid.RaidingTeam == "A" {
-		emptyCount = raid.EmptyRaidCounts.TeamA
+	if raidingTeam == "A" {
+		match.Data.EmptyRaidCounts.TeamA++
+		emptyCount = match.Data.EmptyRaidCounts.TeamA
 	} else {
-		emptyCount = raid.EmptyRaidCounts.TeamB
+		match.Data.EmptyRaidCounts.TeamB++
+		emptyCount = match.Data.EmptyRaidCounts.TeamB
 	}
 
 	if emptyCount >= 3 {
@@ -463,7 +493,7 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 		if raid.BonusTaken {
 			// Raider took bonus on do-or-die -> safe. No out, no opponent point.
 			// Reset the empty raid count for that raiding team.
-			if raid.RaidingTeam == "A" {
+			if raidingTeam == "A" {
 				match.Data.EmptyRaidCounts.TeamA = 0
 			} else {
 				match.Data.EmptyRaidCounts.TeamB = 0
@@ -471,7 +501,7 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 		} else {
 			// failure: raider out, opponent gets 1 point
 			r.Status = "out"
-			if raid.RaidingTeam == "A" {
+			if raidingTeam == "A" {
 				match.Data.TeamB.Score++
 			} else {
 				match.Data.TeamA.Score++
@@ -487,7 +517,7 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	// If do-or-die resulted in raider out (i.e., no bonus taken), defending team gets 1 point and revival
 	if emptyCount >= 3 && !raid.BonusTaken {
 		defending := "A"
-		if raid.RaidingTeam == "A" {
+		if raidingTeam == "A" {
 			defending = "B"
 		}
 		if defending == "A" {
@@ -496,7 +526,7 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 			revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, 1)
 		}
 		// After a do-or-die failure, reset that team's empty count (already reset above for bonus case)
-		if raid.RaidingTeam == "A" {
+		if raidingTeam == "A" {
 			match.Data.EmptyRaidCounts.TeamA = 0
 		} else {
 			match.Data.EmptyRaidCounts.TeamB = 0

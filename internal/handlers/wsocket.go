@@ -307,15 +307,16 @@ func SetupWebSocket(app *fiber.App) {
 			c.Close()
 		}()
 
-		// --- JWT Auth for Viewer WebSocket ---
+		// --- Optional JWT Auth for Viewer WebSocket ---
 		token := c.Query("token")
-		_, err := middleware.AuthWebSocket(token)
-		if err != nil {
-			resp := map[string]string{"type": "error", "message": "Unauthorized: Invalid or missing JWT token"}
-			if data, e := json.Marshal(resp); e == nil {
-				_ = c.WriteMessage(websocket.TextMessage, data)
+		if token != "" {
+			if _, err := middleware.AuthWebSocket(token); err != nil {
+				resp := map[string]string{"type": "error", "message": "Unauthorized: Invalid JWT token"}
+				if data, e := json.Marshal(resp); e == nil {
+					_ = c.WriteMessage(websocket.TextMessage, data)
+				}
+				return
 			}
-			return
 		}
 
 		// Expect a join message with matchId

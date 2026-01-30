@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -17,7 +18,12 @@ func AuthRequired(c *fiber.Ctx) error {
 		tokenStr = c.Query("token")
 	}
 	if tokenStr == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing JWT token"})
+		// For non-API routes, redirect to login; keep JSON for API
+		if strings.HasPrefix(c.Path(), "/api") {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing JWT token"})
+		}
+		returnUrl := c.OriginalURL()
+		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
 	}
 	if strings.HasPrefix(tokenStr, "Bearer ") {
 		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
@@ -26,16 +32,28 @@ func AuthRequired(c *fiber.Ctx) error {
 		return jwtSecret, nil
 	})
 	if err != nil || !token.Valid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid or expired JWT token"})
+		if strings.HasPrefix(c.Path(), "/api") {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid or expired JWT token"})
+		}
+		returnUrl := c.OriginalURL()
+		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid JWT claims"})
+		if strings.HasPrefix(c.Path(), "/api") {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid JWT claims"})
+		}
+		returnUrl := c.OriginalURL()
+		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
 	}
 	// Check expiry
 	exp, ok := claims["exp"].(float64)
 	if !ok || int64(exp) < time.Now().Unix() {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "JWT expired"})
+		if strings.HasPrefix(c.Path(), "/api") {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "JWT expired"})
+		}
+		returnUrl := c.OriginalURL()
+		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
 	}
 	// Attach user info to context
 	c.Locals("user_id", claims["user_id"])
