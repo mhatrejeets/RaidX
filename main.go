@@ -11,6 +11,7 @@ import (
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/handlers"
 	"github.com/mhatrejeets/RaidX/internal/middleware"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 )
 
@@ -145,6 +146,20 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/matches", handlers.GetAllMatches)
 	app.Get("/matches/:id", handlers.GetMatchByID)
 	app.Post("/api/matches/raid", handlers.ProcessRaidResult)
+
+	// RBAC: Team Owner APIs
+	app.Post("/api/teams", middleware.RoleRequired(models.RoleTeamOwner), handlers.CreateTeamHandler)
+	app.Post("/api/teams/:id/invite", middleware.RoleRequired(models.RoleTeamOwner), handlers.CreateTeamInviteHandler)
+	app.Get("/api/teams/:id/invites", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetTeamInvitesHandler)
+
+	// RBAC: Organizer APIs
+	app.Post("/api/events", middleware.RoleRequired(models.RoleOrganizer), handlers.CreateEventHandler)
+	app.Post("/api/events/:id/invite", middleware.RoleRequired(models.RoleOrganizer), handlers.CreateEventInviteHandler)
+	app.Get("/api/events/:id/teams", middleware.RoleRequired(models.RoleOrganizer), handlers.GetEventTeamsHandler)
+
+	// RBAC: Invitations (players and team owners)
+	app.Put("/api/invitations/:id", middleware.RoleRequired(models.RolePlayer, models.RoleTeamOwner), handlers.UpdateInvitationStatusHandler)
+	app.Get("/api/invitations", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerInvitationsHandler)
 
 	// Protected team management endpoints
 	app.Get("/api/team/:id", handlers.GetTeamByID)

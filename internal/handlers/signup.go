@@ -62,6 +62,7 @@ func SignupHandler(c *fiber.Ctx) error {
 		Email:         form.Email,
 		UserID:        form.UserID,
 		Password:      encodedPassword,
+		Role:          models.RolePlayer,
 		Position:      form.Position,
 		CreatedAt:     time.Now(),
 		TotalPoints:   0,

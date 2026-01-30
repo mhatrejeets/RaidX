@@ -59,6 +59,11 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Incorrect password"})
 	}
 
+	role := strings.ToLower(strings.TrimSpace(user.Role))
+	if role == "" {
+		role = models.RolePlayer
+	}
+
 	// Extract device information
 	userAgent := c.Get("User-Agent")
 	ipAddress := c.IP()
@@ -134,7 +139,7 @@ func LoginHandler(c *fiber.Ctx) error {
 	expiry := time.Now().Add(time.Hour)
 	claims := jwt.MapClaims{
 		"user_id":    user.ID.Hex(),
-		"role":       "user",
+		"role":       role,
 		"session_id": sessionID,
 		"exp":        expiry.Unix(),
 	}

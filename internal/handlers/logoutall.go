@@ -49,7 +49,7 @@ func LogoutAllDevicesHandler(c *fiber.Ctx) error {
 
 	result, err := sessionColl.UpdateMany(ctx, bson.M{"user_id": userID}, bson.M{
 		"$set": bson.M{
-			"active": false,
+			"active":        false,
 			"refresh_token": "", // Clear refresh token
 		},
 	})

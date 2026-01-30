@@ -17,9 +17,9 @@ type Session struct {
 	RefreshExpiryTime time.Time          `bson:"refresh_expiry_time"`
 	Active            bool               `bson:"active"`
 	// Device tracking for multi-device sessions
-	DeviceID          string             `bson:"device_id"`           // Unique device fingerprint
-	UserAgent         string             `bson:"user_agent"`          // Browser/client info
-	IPAddress         string             `bson:"ip_address"`          // Client IP
-	CreatedAt         time.Time          `bson:"created_at"`          // When session was created
-	LastUsedAt        time.Time          `bson:"last_used_at"`        // When token was last refreshed
+	DeviceID   string    `bson:"device_id"`    // Unique device fingerprint
+	UserAgent  string    `bson:"user_agent"`   // Browser/client info
+	IPAddress  string    `bson:"ip_address"`   // Client IP
+	CreatedAt  time.Time `bson:"created_at"`   // When session was created
+	LastUsedAt time.Time `bson:"last_used_at"` // When token was last refreshed
 }

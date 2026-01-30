@@ -12,6 +12,7 @@ type Userr struct {
 	Email    string             `bson:"email"`
 	Password string             `bson:"password"`
 	Name     string             `bson:"fullName"`
+	Role     string             `bson:"role"`
 }
 
 // User represents a player document in the DB
@@ -20,6 +21,7 @@ type User struct {
 	Email         string    `bson:"email"`
 	UserID        string    `bson:"userId"`
 	Password      string    `bson:"password"`
+	Role          string    `bson:"role"`
 	Position      string    `bson:"position"`
 	CreatedAt     time.Time `bson:"createdAt"`
 	TotalPoints   int       `bson:"totalPoints"`

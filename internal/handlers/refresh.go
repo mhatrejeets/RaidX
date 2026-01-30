@@ -4,12 +4,15 @@ import (
 	"context"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -50,12 +53,30 @@ func RefreshTokenHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Refresh token expired"})
 	}
 
+	// Resolve role from user profile
+	role := models.RolePlayer
+	if session.UserID != "" {
+		userID, err := primitive.ObjectIDFromHex(session.UserID)
+		if err == nil {
+			playersColl := db.MongoClient.Database("raidx").Collection("players")
+			var user struct {
+				Role string `bson:"role"`
+			}
+			if err := playersColl.FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user); err == nil {
+				role = strings.ToLower(strings.TrimSpace(user.Role))
+				if role == "" {
+					role = models.RolePlayer
+				}
+			}
+		}
+	}
+
 	// Issue new access JWT (15-minute duration)
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 	newExpiry := time.Now().Add(15 * time.Minute)
 	claims := jwt.MapClaims{
 		"user_id":    session.UserID,
-		"role":       "user",
+		"role":       role,
 		"session_id": session.SessionID,
 		"exp":        newExpiry.Unix(),
 	}
