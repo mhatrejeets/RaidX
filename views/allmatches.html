@@ -110,7 +110,13 @@
     <div class="floating-bg circle1"></div>
     <div class="floating-bg circle2"></div>
 
-    <div class="container text-center">
+    <nav style="position:fixed;top:0;width:100%;background:rgba(0,0,0,0.9);padding:1rem 2rem;z-index:9999;display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="margin:0;color:#f97316;font-weight:bold;">RaidX - Match Details</h3>
+        <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+    </nav>
+
+    <div style="margin-top:70px;">
+        <div class="container text-center">
     <h1>{{.Match.Data.TeamA.Name}} vs {{.Match.Data.TeamB.Name}}</h1>
     <h2>Score: {{.Match.Data.TeamA.Score}} - {{.Match.Data.TeamB.Score}}</h2>
     <!-- Debug info -->

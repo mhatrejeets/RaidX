@@ -116,11 +116,46 @@ function setupAuthenticatedLink(elementId, basePath) {
 // Function to handle logout
 async function logout() {
     try {
-        await apiRequest('/logout', { method: 'POST' });
+        const response = await fetch('/logout', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (response.ok) {
+            localStorage.removeItem(JWT_STORAGE_KEY);
+            window.location.href = '/';
+        } else {
+            console.error('Logout failed:', response.statusText);
+            localStorage.removeItem(JWT_STORAGE_KEY);
+            window.location.href = '/';
+        }
     } catch (error) {
-        console.error('Logout failed:', error);
-    } finally {
+        console.error('Logout error:', error);
         localStorage.removeItem(JWT_STORAGE_KEY);
-        window.location.href = '/login';
+        window.location.href = '/';
+    }
+}
+
+// Function to refresh access token using refresh token
+async function refreshAccessToken() {
+    try {
+        const response = await fetch('/refresh', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem(JWT_STORAGE_KEY, data.token);
+            return true;
+        } else if (response.status === 401) {
+            // Refresh token expired or invalid
+            localStorage.removeItem(JWT_STORAGE_KEY);
+            window.location.href = '/login';
+            return false;
+        }
+        return false;
+    } catch (error) {
+        console.error('Token refresh failed:', error);
+        return false;
     }
 }

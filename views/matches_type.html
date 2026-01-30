@@ -68,7 +68,12 @@
 </head>
 
 <body>
-  <div class="container">
+  <!-- Navbar with logout -->
+  <nav style="position:fixed;top:0;width:100%;background:rgba(0,0,0,0.9);padding:1rem 2rem;z-index:9999;display:flex;justify-content:space-between;align-items:center;">
+    <h3 style="margin:0;color:#f97316;font-weight:bold;">RaidX - Match Types</h3>
+    <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+  </nav>
+  <div class="container" style="margin-top:70px;">
     <!-- Create Team -->
     <a href="/createteam/{{ .ID }}">
       <div class="card">

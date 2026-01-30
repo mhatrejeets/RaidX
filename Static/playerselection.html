@@ -124,13 +124,21 @@
   <div class="floating-bg circle1"></div>
   <div class="floating-bg circle2"></div>
 
-  <div class="form-container">
+  <!-- Navbar with logout -->
+  <nav style="position:fixed;top:0;width:100%;background:rgba(0,0,0,0.9);padding:1rem 2rem;z-index:9999;display:flex;justify-content:space-between;align-items:center;">
+    <h3 style="margin:0;color:#f97316;font-weight:bold;">RaidX - Player Selection</h3>
+    <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+  </nav>
+
+  <div class="form-container" style="margin-top:70px;">
     <h2>Select 7 Players for <span id="team-name"></span></h2>
     <form id="player-form">
       <div id="player-list"></div>
       <button type="submit" class="btn btn-submit">Confirm Selection</button>
     </form>
-    <a href="/" class="back-link">← Back to Home</a>
+    <div style="margin-top:1rem;display:flex;justify-content:space-between;">
+      <a href="/" class="back-link">← Back to Home</a>
+    </div>
   </div>
 
   <script>

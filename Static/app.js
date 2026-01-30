@@ -515,15 +515,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Wire Copy Match ID button (top persistent button)
+    // Wire Copy Match Link button (top persistent button)
     const copyMatchIdBtn = document.getElementById('copy-matchid-btn');
     if (copyMatchIdBtn) {
         copyMatchIdBtn.addEventListener('click', () => {
             const id = matchId || '';
             if (!id) return;
-            copyToClipboard(id).then(() => {
+            const matchLink = `${location.origin}/viewer?match_id=${encodeURIComponent(id)}`;
+            copyToClipboard(matchLink).then(() => {
                 copyMatchIdBtn.textContent = 'Copied!';
-                setTimeout(() => (copyMatchIdBtn.textContent = 'Copy Match ID'), 1200);
+                setTimeout(() => (copyMatchIdBtn.textContent = 'Copy Match Link'), 1200);
             }).catch(() => alert('Copy failed - please copy manually'));
         });
     }

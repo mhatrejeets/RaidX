@@ -159,6 +159,7 @@
 
         <div style="text-align:center;margin-top:2.5rem;">
             <button id="show-matches-btn" class="btn btn-primary" style="background:linear-gradient(45deg,#f97316,#ea580c);border:none;color:white;font-weight:bold;padding:0.75rem 2rem;border-radius:0.5rem;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(255,87,34,0.5);">Show Matches</button>
+            <button id="logout-btn" class="btn btn-danger" style="margin-left:0.5rem;padding:0.75rem 2rem;border-radius:0.5rem;font-weight:bold;">Logout</button>
         </div>
     </div>
     
@@ -175,6 +176,20 @@
                     // Navigate to protected route; backend redirects to /login if not authenticated
                     window.location.href = '/matches';
                 });
+            }
+            
+            // Handle Logout button
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                const token = (typeof getValidToken === 'function') ? getValidToken() : null;
+                if (!token) {
+                    logoutBtn.style.display = 'none';
+                } else {
+                    logoutBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        logout();
+                    });
+                }
             }
         });
     </script>

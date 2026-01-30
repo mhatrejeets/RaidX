@@ -46,7 +46,20 @@ func LogoutHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete session"})
 	}
 
-	// Clear auth cookie
+	// Mark session as inactive (revoke refresh token) in DB
+	update := map[string]interface{}{
+		"$set": map[string]interface{}{
+			"active":        false,
+			"refresh_token": "",
+		},
+	}
+	_, err = sessionColl.UpdateOne(ctx, map[string]interface{}{"session_id": sessionID}, update)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to revoke session"})
+	}
+
+	// Clear auth cookies
 	c.ClearCookie("token")
+	c.ClearCookie("refreshToken")
 	return c.JSON(fiber.Map{"success": true})
 }

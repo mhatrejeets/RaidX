@@ -7,7 +7,7 @@ type Match struct {
 	ID      primitive.ObjectID `json:"id" bson:"_id"`
 	MatchID string             `json:"matchId" bson:"matchId"`
 	Type    string             `json:"type" bson:"type"`
-	Data struct {
+	Data    struct {
 		TeamA       TeamStat              `json:"teamA" bson:"teamA"`
 		TeamB       TeamStat              `json:"teamB" bson:"teamB"`
 		PlayerStats map[string]PlayerStat `json:"playerStats" bson:"playerStats"`

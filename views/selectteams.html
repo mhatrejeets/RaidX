@@ -154,8 +154,14 @@
   <div class="floating-bg circle1"></div>
   <div class="floating-bg circle2"></div>
 
+  <!-- Navbar with logout -->
+  <nav style="position:fixed;top:0;width:100%;background:rgba(0,0,0,0.9);padding:1rem 2rem;z-index:9999;display:flex;justify-content:space-between;align-items:center;">
+    <h3 style="margin:0;color:#f97316;font-weight:bold;">RaidX - Select Teams</h3>
+    <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+  </nav>
+
   <!-- Select Teams Section -->
-  <section class="section" data-aos="zoom-in">
+  <section class="section" data-aos="zoom-in" style="margin-top:70px;">
     <h2><i class="bi bi-people-fill me-2"></i>Select Teams for RaidX Match</h2>
     <div class="selector-box">
       <div class="row g-4">

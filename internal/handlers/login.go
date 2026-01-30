@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"crypto/md5"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -13,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func LoginHandler(c *fiber.Ctx) error {
@@ -56,6 +59,75 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Incorrect password"})
 	}
 
+	// Extract device information
+	userAgent := c.Get("User-Agent")
+	ipAddress := c.IP()
+	deviceID := hashDeviceFingerprint(userAgent) // Create device fingerprint
+
+	sessionColl := db.MongoClient.Database("raidx").Collection("sessions")
+
+	// Check if this device already has an active session for this user
+	existingSession := models.Session{}
+	err = sessionColl.FindOne(ctx, bson.M{
+		"user_id":   user.ID.Hex(),
+		"device_id": deviceID,
+		"active":    true,
+	}).Decode(&existingSession)
+
+	if err == nil && time.Now().Before(existingSession.RefreshExpiryTime) {
+		// Existing valid session found for this device - REUSE it
+		// Update last_used_at timestamp
+		_, err := sessionColl.UpdateOne(ctx, bson.M{"_id": existingSession.ID},
+			bson.M{"$set": bson.M{"last_used_at": time.Now()}})
+		if err == nil {
+			// Return existing tokens
+			c.Cookie(&fiber.Cookie{
+				Name:     "token",
+				Value:    existingSession.JWTToken,
+				HTTPOnly: true,
+				Path:     "/",
+				SameSite: "Lax",
+				Expires:  existingSession.ExpiryTime,
+			})
+			c.Cookie(&fiber.Cookie{
+				Name:     "refreshToken",
+				Value:    existingSession.RefreshToken,
+				HTTPOnly: true,
+				Path:     "/",
+				SameSite: "Lax",
+				Expires:  existingSession.RefreshExpiryTime,
+			})
+			return c.JSON(fiber.Map{
+				"token":         existingSession.JWTToken,
+				"refresh_token": existingSession.RefreshToken,
+				"user_id":       user.ID.Hex(),
+				"name":          user.Name,
+				"expires":       existingSession.ExpiryTime.Unix(),
+				"reused":        true,
+			})
+		}
+	}
+
+	// New device: Check active session count for this user (max 5)
+	activeSessions, err := sessionColl.CountDocuments(ctx, bson.M{
+		"user_id": user.ID.Hex(),
+		"active":  true,
+	})
+	if err == nil && activeSessions >= 5 {
+		// Invalidate oldest session
+		oldestSession := models.Session{}
+		opts := options.FindOne().SetSort(bson.M{"created_at": 1})
+		sessionColl.FindOne(ctx, bson.M{
+			"user_id": user.ID.Hex(),
+			"active":  true,
+		}, opts).Decode(&oldestSession)
+
+		if oldestSession.ID != primitive.NilObjectID {
+			sessionColl.UpdateOne(ctx, bson.M{"_id": oldestSession.ID},
+				bson.M{"$set": bson.M{"active": false}})
+		}
+	}
+
 	// Generate JWT
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 	sessionID := primitive.NewObjectID().Hex()
@@ -72,23 +144,32 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate JWT"})
 	}
 
-	// Store session in MongoDB
-	sessionColl := db.MongoClient.Database("raidx").Collection("sessions")
+	// Generate refresh token
+	refreshToken := primitive.NewObjectID().Hex()
+	refreshExpiry := time.Now().Add(7 * 24 * time.Hour) // 7 days
+
+	// Create new session with device tracking
 	session := models.Session{
-		SessionID:  sessionID,
-		UserID:     user.ID.Hex(),
-		JWTToken:   tokenStr,
-		LoginTime:  time.Now(),
-		ExpiryTime: expiry,
-		Active:     true,
+		SessionID:         sessionID,
+		UserID:            user.ID.Hex(),
+		JWTToken:          tokenStr,
+		LoginTime:         time.Now(),
+		ExpiryTime:        expiry,
+		RefreshToken:      refreshToken,
+		RefreshExpiryTime: refreshExpiry,
+		Active:            true,
+		DeviceID:          deviceID,
+		UserAgent:         userAgent,
+		IPAddress:         ipAddress,
+		CreatedAt:         time.Now(),
+		LastUsedAt:        time.Now(),
 	}
 	_, err = sessionColl.InsertOne(ctx, session)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to store session"})
 	}
 
-	// Success: send JWT to frontend
-	// Also set HttpOnly cookie for backend auth redirects
+	// Success: set access JWT as HttpOnly cookie and return both tokens
 	c.Cookie(&fiber.Cookie{
 		Name:     "token",
 		Value:    tokenStr,
@@ -97,11 +178,29 @@ func LoginHandler(c *fiber.Ctx) error {
 		SameSite: "Lax",
 		Expires:  expiry,
 	})
-	return c.JSON(fiber.Map{
-		"token":   tokenStr,
-		"user_id": user.ID.Hex(),
-		"name":    user.Name,
-		"expires": expiry.Unix(),
+
+	// Also set refresh token cookie (HttpOnly)
+	c.Cookie(&fiber.Cookie{
+		Name:     "refreshToken",
+		Value:    refreshToken,
+		HTTPOnly: true,
+		Path:     "/",
+		SameSite: "Lax",
+		Expires:  refreshExpiry,
 	})
 
+	return c.JSON(fiber.Map{
+		"token":         tokenStr,
+		"refresh_token": refreshToken,
+		"user_id":       user.ID.Hex(),
+		"name":          user.Name,
+		"expires":       expiry.Unix(),
+	})
+
+}
+
+// hashDeviceFingerprint creates a unique device identifier from user agent and other factors
+func hashDeviceFingerprint(userAgent string) string {
+	hash := md5.Sum([]byte(userAgent))
+	return fmt.Sprintf("%x", hash)
 }

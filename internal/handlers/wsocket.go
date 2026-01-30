@@ -1,15 +1,19 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/middleware"
 	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var viewerClients = struct {
@@ -349,10 +353,26 @@ func SetupWebSocket(app *fiber.App) {
 			data, _ := json.Marshal(latestStats)
 			_ = c.WriteMessage(websocket.TextMessage, data)
 		} else if err == redisImpl.RedisNull {
-			// Match not found in Redis - likely ended
-			errMsg := map[string]string{"error": "Match not found or has ended", "matchId": matchID}
-			if data, e := json.Marshal(errMsg); e == nil {
-				_ = c.WriteMessage(websocket.TextMessage, data)
+			// Match not found in Redis - check Mongo to distinguish ended vs not initialized
+			matchesColl := db.MongoClient.Database("raidx").Collection("matches")
+			var matchDoc bson.M
+			mErr := matchesColl.FindOne(context.Background(), bson.M{"matchId": matchID}).Decode(&matchDoc)
+			if mErr == nil {
+				errMsg := map[string]string{"error": "Match ended", "matchId": matchID}
+				if data, e := json.Marshal(errMsg); e == nil {
+					_ = c.WriteMessage(websocket.TextMessage, data)
+				}
+			} else if mErr == mongo.ErrNoDocuments {
+				errMsg := map[string]string{"error": "Match not initialized", "matchId": matchID}
+				if data, e := json.Marshal(errMsg); e == nil {
+					_ = c.WriteMessage(websocket.TextMessage, data)
+				}
+			} else {
+				logrus.Error("Error:", "SetupWebSocket:", " Failed to check match in Mongo: %v", mErr)
+				errMsg := map[string]string{"error": "Failed to retrieve match data"}
+				if data, e := json.Marshal(errMsg); e == nil {
+					_ = c.WriteMessage(websocket.TextMessage, data)
+				}
 			}
 		} else {
 			// Other Redis error

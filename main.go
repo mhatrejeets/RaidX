@@ -29,6 +29,9 @@ func setupPublicRoutes(app *fiber.App) {
 	// Public auth endpoints
 	app.Post("/signup", handlers.SignupHandler)
 	app.Post("/login", handlers.LoginHandler)
+	app.Post("/logout", handlers.LogoutHandler)
+	app.Post("/logout-all", handlers.LogoutAllDevicesHandler) // Logout from all devices
+	app.Post("/refresh", handlers.RefreshTokenHandler)
 
 	// Public viewer access
 	app.Get("/viewer", func(c *fiber.Ctx) error {

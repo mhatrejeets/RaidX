@@ -123,7 +123,13 @@
     <div class="floating-bg circle1"></div>
     <div class="floating-bg circle2"></div>
 
-    <div class="matches-container">
+    <nav style="position:fixed;top:0;width:100%;background:rgba(0,0,0,0.9);padding:1rem 2rem;z-index:9999;display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="margin:0;color:#f97316;font-weight:bold;">RaidX - All Matches</h3>
+        <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+    </nav>
+
+    <div style="margin-top:70px;">
+        <div class="matches-container">
         <h1>All Matches</h1>
         <ul>
             {{range .Matches}}

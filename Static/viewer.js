@@ -33,8 +33,17 @@ function joinMatch(id) {
         try {
             const data = JSON.parse(event.data);
             
+            // Match not initialized yet: show waiting message, don't mark ended
+            if (data.error && data.error.toLowerCase().includes('not initialized')) {
+                const infoEl = document.getElementById('viewer-info');
+                if (infoEl) infoEl.textContent = 'Match not started yet. Please wait for the scorer to start the match.';
+                const conn = document.getElementById('viewer-conn');
+                if (conn) { conn.textContent = 'Waiting'; conn.style.background = '#6b7280'; }
+                return;
+            }
+
             // Check for error indicating match ended or not found
-            if (data.error && (data.error.includes('not initialized') || data.error.includes('not found') || data.error.includes('ended'))) {
+            if (data.error && data.error.toLowerCase().includes('ended')) {
                 matchEnded = true;
                 ws.close();
                 showEndedMatchUI();
