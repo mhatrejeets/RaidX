@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Team Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      color: #f97316 !important;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      max-width: 1000px;
+    }
+
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      margin-bottom: 2rem;
+    }
+
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+
+    .card-header h5 {
+      color: #fbbf24;
+      margin: 0;
+    }
+
+    .btn-primary-orange {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      border: none;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary-orange:hover {
+      background: linear-gradient(45deg, #ea580c, #f97316);
+      color: white;
+      transform: scale(1.02);
+    }
+
+    .player-item {
+      background-color: #0f172a;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid #f97316;
+    }
+
+    .player-info h6 {
+      color: #fbbf24;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .player-info p {
+      color: #cbd5e1;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .badge-custom {
+      background-color: #334155;
+      color: #f97316;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
+    }
+
+    .nav-tabs {
+      border-bottom: 2px solid #334155;
+    }
+
+    .nav-tabs .nav-link {
+      color: #cbd5e1;
+      border: none;
+      border-bottom: 3px solid transparent;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: #f97316;
+      border-bottom-color: #f97316;
+      background-color: transparent;
+    }
+
+    .form-control, .form-select {
+      background-color: #0f172a;
+      border: 1px solid #334155;
+      color: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background-color: #0f172a;
+      border-color: #f97316;
+      color: white;
+      box-shadow: 0 0 0 0.2rem rgba(249, 115, 22, 0.25);
+    }
+
+    .form-label {
+      color: #cbd5e1;
+    }
+
+    .back-link {
+      color: #f97316;
+      text-decoration: none;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .section-title {
+      color: #fbbf24;
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 0.5rem;
+    }
+
+    .message {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .message.success {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .message.error {
+      background-color: #ef4444;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <i class="bi bi-lightning-fill"></i> RaidX
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="ms-auto">
+          <a href="/owner/dashboard" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Team Header -->
+    <div id="teamHeader"></div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button">
+          <i class="bi bi-people"></i> Players
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" id="tournaments-tab" data-bs-toggle="tab" data-bs-target="#tournaments" type="button">
+          <i class="bi bi-trophy"></i> Tournaments
+        </button>
+      </li>
+      <li class="nav-item" id="editTabItem">
+        <button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit" type="button">
+          <i class="bi bi-pencil"></i> Edit Team
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content mt-4">
+      <!-- Players Tab -->
+      <div class="tab-pane fade show active" id="players" role="tabpanel">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Team Players</h5>
+            <button class="btn btn-primary-orange btn-sm" onclick="toggleAddPlayer()">
+              <i class="bi bi-plus-circle"></i> Add Player
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="addPlayerForm" style="display: none;">
+              <div class="mb-3">
+                <label class="form-label">Invite Player by Username or Email</label>
+                <input type="text" class="form-control" id="playerInput" placeholder="Enter player's username or email address">
+                <small class="text-white">An invite will be sent for the player to accept in their dashboard.</small>
+              </div>
+              <div class="mb-3">
+                <button type="button" class="btn btn-primary-orange btn-sm" onclick="addPlayerDirect()">
+                  <i class="bi bi-send"></i> Send Invite
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAddPlayer()">
+                  Cancel
+                </button>
+              </div>
+              <hr>
+              <div class="mb-3">
+                <label class="form-label">Or Create Shareable Link</label>
+                <button type="button" class="btn btn-warning btn-sm" onclick="generateInviteLink()">
+                  <i class="bi bi-link-45deg"></i> Generate Invite Link
+                </button>
+              </div>
+              <div id="inviteLinkMessage"></div>
+            </div>
+            <div id="playersList"></div>
+            <hr class="my-4">
+            <h6 class="text-white">Pending / Declined Requests</h6>
+            <div id="inviteRequestsList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tournaments Tab -->
+      <div class="tab-pane fade" id="tournaments" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Tournaments</h5>
+          </div>
+          <div class="card-body" id="tournamentsList"></div>
+        </div>
+      </div>
+
+      <!-- Edit Team Tab -->
+      <div class="tab-pane fade" id="edit" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Edit Team</h5>
+          </div>
+          <div class="card-body">
+            <form id="editTeamForm" onsubmit="updateTeam(event)">
+              <div class="mb-3">
+                <label for="teamName" class="form-label">Team Name</label>
+                <input type="text" class="form-control" id="teamName" required>
+              </div>
+              <button type="submit" class="btn btn-primary-orange">
+                <i class="bi bi-check-circle"></i> Save Changes
+              </button>
+              <div id="editMessage" style="margin-top: 1rem;"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const teamId = window.location.pathname.split('/')[3];
+    const isEditMode = window.location.pathname.includes('/edit');
+    
+    console.log('Page URL:', window.location.pathname);
+    console.log('Extracted TeamID:', teamId);
+    
+    // Get token from localStorage (set during login)
+    const token = localStorage.getItem('token');
+
+    // Redirect to login if no token
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    async function loadTeamDetails() {
+      try {
+        const response = await fetch(`/api/teams/${teamId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const team = await response.json();
+          renderTeamHeader(team);
+          renderPlayers(team.Players || []);
+          renderInviteRequests(team.Invites || []);
+          renderTournaments(team.tournaments || []);
+          document.getElementById('teamName').value = team.TeamName;
+
+          // If edit mode, show edit tab
+          if (isEditMode) {
+            document.getElementById('edit-tab').click();
+          }
+        } else {
+          alert('Failed to load team details');
+        }
+      } catch (error) {
+        console.error('Error loading team:', error);
+        alert('Error loading team');
+      }
+    }
+
+    function renderTeamHeader(team) {
+      const header = document.getElementById('teamHeader');
+      header.innerHTML = `
+        <div class="card mb-3">
+          <div class="card-body">
+            <h2 style="color: #fbbf24;"><i class="bi bi-shield-check"></i> ${team.TeamName}</h2>
+            <p class="text-white mb-0">Owner: ${team.OwnerName} | Players: ${team.Players ? team.Players.length : 0}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPlayers(players) {
+      const container = document.getElementById('playersList');
+      
+      if (!players || players.length === 0) {
+        container.innerHTML = '<p class="text-white">No players in this team yet</p>';
+        return;
+      }
+
+      container.innerHTML = players.map(player => {
+        const playerId = player._id || player.userId || '';
+        const profileUrl = playerId ? `/playerprofile/${playerId}` : '#';
+        return `
+        <div class="player-item">
+          <div class="player-info">
+            <h6><a href="${profileUrl}" class="text-decoration-none" target="_blank">${player.fullName || player.name || 'Player'}</a></h6>
+            <p>${player.position || 'N/A'}</p>
+          </div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-outline-light btn-sm" href="${profileUrl}" target="_blank">
+              <i class="bi bi-person"></i> View Profile
+            </a>
+            <button class="btn btn-danger btn-sm" onclick="removePlayer('${playerId}')" ${playerId ? '' : 'disabled'}>
+              <i class="bi bi-trash"></i> Remove
+            </button>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function renderInviteRequests(invites) {
+      const container = document.getElementById('inviteRequestsList');
+      if (!container) return;
+
+      if (!invites || invites.length === 0) {
+        container.innerHTML = '<p class="text-white">No pending or declined requests.</p>';
+        return;
+      }
+
+      container.innerHTML = invites.map(invite => {
+        const name = invite.fullName || invite.userId || invite.email || 'Unknown player';
+        const status = invite.status || 'pending';
+        const statusBadge = status === 'declined' ? 'badge bg-danger' : 'badge bg-warning text-dark';
+        return `
+        <div class="player-item">
+          <div class="player-info">
+            <h6>${name}</h6>
+            <p>${invite.email || ''}</p>
+          </div>
+          <span class="${statusBadge}">${status}</span>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function renderTournaments(tournaments) {
+      const container = document.getElementById('tournamentsList');
+      
+      if (!tournaments || tournaments.length === 0) {
+        container.innerHTML = '<p class="text-white">This team hasn\'t participated in any tournaments yet</p>';
+        return;
+      }
+
+      container.innerHTML = tournaments.map(t => `
+        <div class="alert alert-info mb-2">
+          <strong>${t.eventName}</strong><br>
+          <small class="text-muted">Joined: ${new Date(t.joinedDate).toLocaleDateString()}</small>
+        </div>
+      `).join('');
+    }
+
+    function toggleAddPlayer() {
+      const form = document.getElementById('addPlayerForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      if (form.style.display === 'block') {
+        document.getElementById('playerInput').focus();
+      }
+    }
+
+    async function addPlayerDirect() {
+      const input = document.getElementById('playerInput').value.trim();
+      if (!input) {
+        alert('Please enter a player username or email');
+        return;
+      }
+
+      console.log('Adding player to team:', teamId);
+      console.log('Token:', token);
+
+      try {
+        const url = `/api/teams/${teamId}/invite`;
+        console.log('Request URL:', url);
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username: input })
+        });
+
+        console.log('Response status:', response.status);
+
+        if (response.ok) {
+          const data = await response.json().catch(() => ({}));
+          document.getElementById('playerInput').value = '';
+          const messageDiv = document.getElementById('inviteLinkMessage');
+          if (messageDiv) {
+            const inviteUrl = data.invite_url ? `<div class="small">Invite link: <a href="${data.invite_url}" target="_blank">${data.invite_url}</a></div>` : '';
+            messageDiv.innerHTML = `<div class="message success">✅ Invitation sent.</div>${inviteUrl}`;
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Error response:', errorData);
+          alert(`Failed to send invite: ${response.status} ${errorData.error || ''}`);
+        }
+      } catch (error) {
+        console.error('Error adding player:', error);
+        alert('Error sending invitation');
+      }
+    }
+
+    async function generateInviteLink() {
+      try {
+        const response = await fetch(`/api/teams/${teamId}/generate-link`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const inviteUrl = `${window.location.origin}${data.link}`;
+          const messageDiv = document.getElementById('inviteLinkMessage');
+          messageDiv.innerHTML = `
+            <div class="message success">
+              <strong>Invite Link Generated!</strong><br>
+              <div class="input-group mt-2">
+                <input type="text" class="form-control" id="inviteLinkInput" value="${inviteUrl}" readonly>
+                <button class="btn btn-primary-orange" type="button" onclick="copyInviteLink()">
+                  <i class="bi bi-clipboard"></i> Copy Link
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          alert('Failed to generate invite link');
+        }
+      } catch (error) {
+        console.error('Error generating link:', error);
+        alert('Error generating link');
+      }
+    }
+
+    async function removePlayer(playerId) {
+      if (confirm('Remove this player from the team?')) {
+        try {
+          const response = await fetch(`/api/teams/${teamId}/remove-player/${playerId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (response.ok) {
+            loadTeamDetails();
+          } else {
+            alert('Failed to remove player');
+          }
+        } catch (error) {
+          console.error('Error removing player:', error);
+          alert('Error removing player');
+        }
+      }
+    }
+
+    function copyInviteLink() {
+      const inviteLinkInput = document.getElementById('inviteLinkInput');
+      if (inviteLinkInput) {
+        inviteLinkInput.select();
+        document.execCommand('copy');
+        alert('Invite link copied to clipboard!');
+      }
+    }
+
+    async function updateTeam(event) {
+      event.preventDefault();
+      
+      const teamName = document.getElementById('teamName').value;
+
+      console.log('Updating team:', teamId);
+      console.log('Team name:', teamName);
+
+      try {
+        const url = `/api/teams/${teamId}`;
+        console.log('PUT URL:', url);
+        
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ teamName })
+        });
+
+        console.log('Response status:', response.status);
+
+        if (response.ok) {
+          const messageDiv = document.getElementById('editMessage');
+          messageDiv.innerHTML = '<div class="message success">✅ Team updated successfully</div>';
+          setTimeout(() => loadTeamDetails(), 1000);
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Error response:', errorData);
+          const messageDiv = document.getElementById('editMessage');
+          messageDiv.innerHTML = `<div class="message error">Failed to update team: ${response.status} ${errorData.error || ''}</div>`;
+        }
+      } catch (error) {
+        console.error('Error updating team:', error);
+        const messageDiv = document.getElementById('editMessage');
+        messageDiv.innerHTML = '<div class="message error">Error updating team</div>';
+      }
+    }
+
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', loadTeamDetails);
+  </script>
+</body>
+
+</html>

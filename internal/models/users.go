@@ -15,16 +15,18 @@ type Userr struct {
 	Role     string             `bson:"role"`
 }
 
-// User represents a player document in the DB
+// User represents a user document in the DB (team_owner, organizer, or player)
 type User struct {
-	FullName      string    `bson:"fullName"`
-	Email         string    `bson:"email"`
-	UserID        string    `bson:"userId"`
-	Password      string    `bson:"password"`
-	Role          string    `bson:"role"`
-	Position      string    `bson:"position"`
-	CreatedAt     time.Time `bson:"createdAt"`
-	TotalPoints   int       `bson:"totalPoints"`
-	RaidPoints    int       `bson:"raidPoints"`
-	DefencePoints int       `bson:"defencePoints"`
+	FullName  string    `bson:"fullName"`
+	Email     string    `bson:"email"`
+	UserID    string    `bson:"userId"`
+	Password  string    `bson:"password"`
+	Role      string    `bson:"role"` // player, team_owner, organizer
+	CreatedAt time.Time `bson:"createdAt"`
+
+	// Player-specific fields (only populated if Role == "player")
+	Position      string `bson:"position,omitempty"`
+	TotalPoints   int    `bson:"totalPoints,omitempty"`
+	RaidPoints    int    `bson:"raidPoints,omitempty"`
+	DefencePoints int    `bson:"defencePoints,omitempty"`
 }

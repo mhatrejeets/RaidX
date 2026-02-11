@@ -146,11 +146,11 @@
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" autocomplete="email" required>
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password"
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" autocomplete="current-password"
           required>
       </div>
       <div class="alert alert-danger d-none" id="loginError"></div>
@@ -190,14 +190,44 @@
         const data = await response.json();
         
         if (response.ok && data.token) {
-          console.log('Login successful:', data); // Debug line
-          // Store token under both keys for backward compatibility
+          // Store token (don't clear - just overwrite)
           localStorage.setItem('token', data.token);
           localStorage.setItem('jwtToken', data.token);
 
-          const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-          // Redirect to home1 with user ID
-          window.location.href = returnUrl || `/home1/${data.user_id}`;
+          const returnUrlParam = new URLSearchParams(window.location.search).get('returnUrl');
+          const returnUrl = returnUrlParam ? decodeURIComponent(returnUrlParam) : '';
+          
+          if (returnUrl && !returnUrl.includes('/login')) {
+            // For returnUrl, add the freshly received token
+            const separator = returnUrl.includes('?') ? '&' : '?';
+            const authUrl = returnUrl + separator + 'token=' + data.token;
+            window.location.replace(authUrl);
+            return;
+          }
+
+          // Get role directly from response data instead of parsing token
+          const role = (data.role || '').toLowerCase();
+          
+          let target = '/player/dashboard';
+          if (role === 'team_owner') {
+            target = '/owner/dashboard';
+          } else if (role === 'organizer') {
+            target = '/organizer/dashboard';
+          } else if (role === 'player') {
+            target = '/player/dashboard';
+          } else {
+            // Fallback: parse from token if not in response
+            const tokenRole = (getRoleFromToken() || '').toLowerCase();
+            if (tokenRole === 'team_owner') {
+              target = '/owner/dashboard';
+            } else if (tokenRole === 'organizer') {
+              target = '/organizer/dashboard';
+            } else if (tokenRole === 'player') {
+              target = '/player/dashboard';
+            }
+          }
+          // Remove the delay - redirect immediately
+          window.location.replace(target + '?token=' + data.token);
         } else {
           showError(data.error || 'Login failed. Please try again.');
         }

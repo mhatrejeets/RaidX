@@ -44,19 +44,6 @@ func CreateTeamHandler(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Ensure this owner doesn't already have an active team
-	var existing models.TeamProfile
-	err = teamColl.FindOne(ctx, bson.M{
-		"owner_id": ownerID,
-		"status":   models.TeamStatusActive,
-	}).Decode(&existing)
-	if err == nil {
-		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Owner already has an active team"})
-	}
-	if err != mongo.ErrNoDocuments {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to check existing team"})
-	}
-
 	team := models.TeamProfile{
 		TeamName:    strings.TrimSpace(req.TeamName),
 		OwnerID:     ownerID,
@@ -132,9 +119,9 @@ func CreateTeamInviteHandler(c *fiber.Ctx) error {
 			}
 		}
 
-		// Try by userId or fullName
+		// Try by userId, email, or fullName
 		if toID == primitive.NilObjectID && username != "" {
-			_ = playersColl.FindOne(ctx, bson.M{"$or": []bson.M{{"userId": username}, {"fullName": username}}}).Decode(&player)
+			_ = playersColl.FindOne(ctx, bson.M{"$or": []bson.M{{"userId": username}, {"email": username}, {"fullName": username}}}).Decode(&player)
 			if player.ID != primitive.NilObjectID {
 				toID = player.ID
 			}
@@ -213,6 +200,96 @@ func GetTeamInvitesHandler(c *fiber.Ctx) error {
 	return c.JSON(invites)
 }
 
+func GetOwnerEventInvitesHandler(c *fiber.Ctx) error {
+	ownerUserID, err := getUserIDFromLocals(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	statusFilter := strings.ToLower(strings.TrimSpace(c.Query("status")))
+
+	filter := bson.M{
+		"type":  models.InviteTypeEvent,
+		"to_id": ownerUserID,
+	}
+	if statusFilter != "" {
+		filter["status"] = statusFilter
+	}
+
+	invitesColl := db.MongoClient.Database("raidx").Collection("invitations")
+	playersColl := db.MongoClient.Database("raidx").Collection("players")
+	eventsColl := db.MongoClient.Database("raidx").Collection("events")
+	teamsColl := db.MongoClient.Database("raidx").Collection("rbac_teams")
+
+	// Debug: Check all event invitations in database
+	allCursor, _ := invitesColl.Find(ctx, bson.M{"type": models.InviteTypeEvent})
+	var allInvites []models.Invitation
+	if allCursor != nil {
+		allCursor.All(ctx, &allInvites)
+
+	}
+
+	cursor, err := invitesColl.Find(ctx, filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch event invites"})
+	}
+
+	var invites []models.Invitation
+	if err := cursor.All(ctx, &invites); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to decode event invites"})
+	}
+
+	// Ensure we return an empty array instead of null
+	if invites == nil {
+		invites = []models.Invitation{}
+	}
+
+	var ownerName string
+	var owner struct {
+		FullName string `bson:"fullName"`
+	}
+	if err := playersColl.FindOne(ctx, bson.M{"_id": ownerUserID}).Decode(&owner); err == nil {
+		ownerName = owner.FullName
+	}
+
+	response := make([]fiber.Map, 0, len(invites))
+	for _, invite := range invites {
+		item := fiber.Map{
+			"id":     invite.ID.Hex(),
+			"status": invite.Status,
+		}
+		if ownerName != "" {
+			item["ownerName"] = ownerName
+		}
+		if invite.EventID != nil {
+			item["eventId"] = invite.EventID.Hex()
+			var event struct {
+				EventName string `bson:"event_name"`
+				EventType string `bson:"event_type"`
+			}
+			if err := eventsColl.FindOne(ctx, bson.M{"_id": *invite.EventID}).Decode(&event); err == nil {
+				item["eventName"] = event.EventName
+				item["eventType"] = event.EventType
+			}
+		}
+		if invite.TeamID != nil {
+			item["teamId"] = invite.TeamID.Hex()
+			var team struct {
+				TeamName string `bson:"team_name"`
+			}
+			if err := teamsColl.FindOne(ctx, bson.M{"_id": *invite.TeamID}).Decode(&team); err == nil {
+				item["teamName"] = team.TeamName
+			}
+		}
+		response = append(response, item)
+	}
+
+	return c.JSON(response)
+}
+
 func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 	userID, err := getUserIDFromLocals(c)
 	if err != nil {
@@ -263,6 +340,7 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 		if roleStr != models.RoleTeamOwner {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Only team owners can accept event invites"})
 		}
+
 		if invite.ToID != primitive.NilObjectID && invite.ToID != userID {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Invitation not assigned to this user"})
 		}
@@ -271,6 +349,11 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 	update := bson.M{"$set": bson.M{"status": status}}
 	if invite.ToID == primitive.NilObjectID {
 		update["$set"].(bson.M)["to_id"] = userID
+	}
+	if invite.Type == models.InviteTypeEvent && strings.TrimSpace(req.TeamID) != "" {
+		if oid, err := primitive.ObjectIDFromHex(req.TeamID); err == nil {
+			update["$set"].(bson.M)["team_id"] = oid
+		}
 	}
 
 	if _, err := invitesColl.UpdateOne(ctx, bson.M{"_id": invID}, update); err != nil {
@@ -307,7 +390,7 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 
 		eventsColl := db.MongoClient.Database("raidx").Collection("events")
 		updateRes, _ := eventsColl.UpdateOne(ctx, bson.M{
-			"_id": *invite.EventID,
+			"_id":                         *invite.EventID,
 			"participating_teams.team_id": teamID,
 		}, bson.M{"$set": bson.M{"participating_teams.$.status": models.EventTeamStatusAccepted, "updated_at": time.Now()}})
 		if updateRes == nil || updateRes.MatchedCount == 0 {

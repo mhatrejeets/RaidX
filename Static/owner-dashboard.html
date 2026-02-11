@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX | Team Owner Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body data-role="team_owner" class="bg-light">
+  <nav class="navbar navbar-dark bg-dark px-3">
+    <span class="navbar-brand">RaidX Team Owner</span>
+    <div class="d-flex align-items-center">
+      <span class="badge bg-warning text-dark me-3" id="role-badge">team owner</span>
+      <button class="btn btn-sm btn-outline-light" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div id="role-warning" class="alert alert-warning d-none"></div>
+    <div id="owner-status" class="alert alert-info d-none"></div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-body">
+            <h5>Create Team</h5>
+            <form id="owner-create-team">
+              <div class="mb-2">
+                <label class="form-label">Team Name</label>
+                <input id="team-name" class="form-control" required />
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Description</label>
+                <input id="team-desc" class="form-control" />
+              </div>
+              <button class="btn btn-primary btn-sm" type="submit">Create</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-body">
+            <h5>Invite Players</h5>
+            <div class="mb-2">
+              <label class="form-label">Team ID</label>
+              <input id="owner-team-id" class="form-control" placeholder="Use created team ID" />
+            </div>
+            <form id="owner-invite-player">
+              <div class="mb-2">
+                <label class="form-label">Player ID</label>
+                <input id="player-id" class="form-control" />
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Username / Full Name</label>
+                <input id="player-username" class="form-control" />
+              </div>
+              <div class="form-check mb-2">
+                <input id="generate-link" class="form-check-input" type="checkbox" />
+                <label class="form-check-label" for="generate-link">Generate invite link</label>
+              </div>
+              <button class="btn btn-primary btn-sm" type="submit">Send Invite</button>
+            </form>
+            <div class="mt-2">
+              <label class="form-label">Invite Link</label>
+              <input id="invite-link" class="form-control" readonly />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Team Invites</h5>
+              <button id="owner-refresh" class="btn btn-sm btn-outline-primary">Refresh</button>
+            </div>
+            <div id="owner-invites"></div>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Event Invites</h5>
+              <button id="owner-event-refresh" class="btn btn-sm btn-outline-primary">Refresh</button>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Team ID for Event Accept</label>
+              <input id="owner-event-team-id" class="form-control" placeholder="Required if invite has no team_id" />
+            </div>
+            <div id="owner-event-invites"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/auth.js"></script>
+  <script src="/static/rbac-dashboard.js"></script>
+</body>
+</html>

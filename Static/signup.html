@@ -154,6 +154,14 @@
           placeholder="Confirm your password" required>
       </div>
       <div class="mb-3">
+        <label for="role" class="form-label">Role</label>
+        <select class="form-select" id="role" name="role" required>
+          <option value="player" selected>Player</option>
+          <option value="team_owner">Team Owner</option>
+          <option value="organizer">Organizer</option>
+        </select>
+      </div>
+      <div class="mb-3" id="position-group">
         <label for="position" class="form-label">Playing Position</label>
         <select class="form-select" id="position" name="position" required>
           <option selected disabled>Select Position</option>
@@ -170,6 +178,42 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const roleSelect = document.getElementById('role');
+    const positionSelect = document.getElementById('position');
+    const positionGroup = document.getElementById('position-group');
+    const form = document.querySelector('form');
+
+    function togglePositionRequired() {
+      const role = roleSelect.value;
+      const isPlayer = role === 'player';
+      positionSelect.required = isPlayer;
+      
+      if (!isPlayer) {
+        positionSelect.value = '';
+        positionGroup.style.display = 'none';
+        // Remove from form submission by removing name attribute
+        positionSelect.removeAttribute('name');
+      } else {
+        positionGroup.style.display = '';
+        // Add name attribute back for form submission
+        positionSelect.setAttribute('name', 'position');
+      }
+    }
+
+    // Prevent form submission if required field is empty
+    form.addEventListener('submit', function(e) {
+      const role = roleSelect.value;
+      const isPlayer = role === 'player';
+      if (isPlayer && !positionSelect.value) {
+        e.preventDefault();
+        alert('Please select a position');
+      }
+    });
+
+    roleSelect.addEventListener('change', togglePositionRequired);
+    togglePositionRequired();
+  </script>
 </body>
 
 </html>

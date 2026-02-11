@@ -1,5 +1,6 @@
-// Constants
-const JWT_STORAGE_KEY = 'token';
+// Constants (guard against duplicate script includes)
+var JWT_STORAGE_KEY = window.JWT_STORAGE_KEY || 'token';
+window.JWT_STORAGE_KEY = JWT_STORAGE_KEY;
 
 // Get a valid token from localStorage
 function getValidToken() {
@@ -75,8 +76,15 @@ function setupGlobalAuth() {
 function getAuthenticatedUrl(url) {
     const token = getValidToken();
     if (!token) return url;
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}token=${token}`;
+    
+    // Simple approach: remove any existing token parameter and add new one
+    // Remove old token params using regex
+    const cleanUrl = url.replace(/[?&]token=[^&]*/g, '');
+    const separator = cleanUrl.includes('?') ? '&' : '?';
+    const result = `${cleanUrl}${separator}token=${token}`;
+
+
+    return result;
 }
 
 // Extract user id from JWT token (client-side). Returns null if not found.
@@ -95,6 +103,25 @@ function getUserIdFromToken() {
         return payload.user_id || payload.userId || payload.sub || payload.session_id || payload.sessionId || null;
     } catch (e) {
         console.warn('Failed to parse token for user id', e);
+        return null;
+    }
+}
+
+// Extract role from JWT token (client-side). Returns null if not found.
+function getRoleFromToken() {
+    const token = getValidToken();
+    if (!token) return null;
+    try {
+        const parts = token.split('.');
+        if (parts.length < 2) return null;
+        const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const json = decodeURIComponent(atob(b64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const payload = JSON.parse(json);
+        return (payload.role || payload.Role || null);
+    } catch (e) {
+        console.warn('Failed to parse token for role', e);
         return null;
     }
 }
@@ -120,18 +147,19 @@ async function logout() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
+        // Always clear local storage regardless of response
+        localStorage.clear();
+        
         if (response.ok) {
-            localStorage.removeItem(JWT_STORAGE_KEY);
-            window.location.href = '/';
+            window.location.replace('/login');
         } else {
             console.error('Logout failed:', response.statusText);
-            localStorage.removeItem(JWT_STORAGE_KEY);
-            window.location.href = '/';
+            window.location.replace('/login');
         }
     } catch (error) {
         console.error('Logout error:', error);
-        localStorage.removeItem(JWT_STORAGE_KEY);
-        window.location.href = '/';
+        localStorage.clear();
+        window.location.replace('/login');
     }
 }
 

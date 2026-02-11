@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	EventTypeMatch       = "match"
-	EventTypeTournament  = "tournament"
+	EventTypeMatch        = "match"
+	EventTypeTournament   = "tournament"
 	EventTypeChampionship = "championship"
 
 	EventStatusDraft     = "draft"
@@ -34,6 +34,7 @@ type Event struct {
 	OrganizerID        primitive.ObjectID `bson:"organizer_id"`
 	EventName          string             `bson:"event_name"`
 	EventType          string             `bson:"event_type"`
+	MaxTeams           int                `bson:"max_teams,omitempty"`
 	ParticipatingTeams []EventTeamEntry   `bson:"participating_teams"`
 	Status             string             `bson:"status"`
 	CreatedAt          time.Time          `bson:"created_at"`

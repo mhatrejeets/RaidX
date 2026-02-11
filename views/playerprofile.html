@@ -139,6 +139,7 @@
             margin-top: 60px;
         }
 
+
         .floating-bg {
             position: absolute;
             border-radius: 50%;
@@ -179,20 +180,17 @@
     <div class="floating-bg circle2"></div>
 
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="display:flex;justify-content:space-between;">
-        <a class="navbar-brand" href="#">RaidX</a>
-        <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
-    </nav>
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">RaidX</a>
+            <div class="d-flex align-items-center gap-2">
+                <a class="navbar-brand" href="#">RaidX</a>
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="/home1/{{ .ID }}?name={{ .FullName }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/requests/{{ .ID }}">Requests</a></li>
-                
+                    <li class="nav-item ms-2"><button class="btn btn-sm btn-danger" onclick="logout()">Logout</button></li>
                 </ul>
             </div>
         </div>

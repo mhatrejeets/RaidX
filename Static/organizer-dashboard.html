@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Organizer Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      color: #f97316 !important;
+      font-size: 1.5rem;
+    }
+
+    .nav-link {
+      color: #cbd5e1 !important;
+    }
+
+    .nav-link:hover {
+      color: #f97316 !important;
+    }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    .dashboard-header {
+      margin-bottom: 3rem;
+    }
+
+    .dashboard-header h1 {
+      color: #fbbf24;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header p {
+      color: #cbd5e1;
+    }
+
+    .tabs-section {
+      margin-bottom: 3rem;
+    }
+
+    .nav-tabs {
+      border-bottom: 2px solid #334155;
+    }
+
+    .nav-tabs .nav-link {
+      color: #cbd5e1;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 1rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+      color: #f97316;
+      border-bottom-color: #f97316;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: #f97316;
+      border-bottom-color: #f97316;
+      background-color: transparent;
+    }
+
+    .tab-content {
+      margin-top: 2rem;
+    }
+
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+    }
+
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+
+    .btn-primary-orange {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      border: none;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary-orange:hover {
+      background: linear-gradient(45deg, #ea580c, #f97316);
+      color: white;
+      transform: scale(1.02);
+    }
+
+    .event-card {
+      background-color: rgba(30, 41, 59, 0.8);
+      border: 2px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .event-card:hover {
+      border-color: #f97316;
+      box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .event-card h5 {
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+    }
+
+    .event-card p {
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .event-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .request-card {
+      background-color: rgba(30, 41, 59, 0.8);
+      border-left: 4px solid #f97316;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .request-card h6 {
+      color: #fbbf24;
+    }
+
+    .request-card p {
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-custom {
+      background-color: #334155;
+      color: #f97316;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body data-role="organizer">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <i class="bi bi-lightning-fill"></i> RaidX
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="ms-auto d-flex gap-2 align-items-center">
+          <a class="btn btn-outline-light btn-sm" id="organizer-profile-link" href="#">
+            <i class="bi bi-person"></i> My Profile
+          </a>
+          <button class="btn btn-outline-light btn-sm" onclick="logout()">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1><i class="bi bi-trophy"></i> Organizer Dashboard</h1>
+      <p>Manage your events, invitations, and requests.</p>
+    </div>
+
+    <div id="role-warning" class="alert alert-warning d-none"></div>
+    <div id="organizer-status" class="alert alert-info d-none"></div>
+
+    <div class="tabs-section">
+      <ul class="nav nav-tabs" id="organizerTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button">
+            <i class="bi bi-calendar-event"></i> My Events
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="requests-tab" data-bs-toggle="tab" data-bs-target="#requests" type="button">
+            <i class="bi bi-envelope"></i> Requests
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button">
+            <i class="bi bi-plus-circle"></i> Create Event
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="events" role="tabpanel">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">My Events</h5>
+            <button id="organizer-refresh-events" class="btn btn-primary-orange btn-sm">
+              <i class="bi bi-arrow-repeat"></i> Refresh
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="organizer-events"></div>
+            <hr>
+            <h6 class="text-muted">Completed Events</h6>
+            <div id="organizer-events-completed"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="requests" role="tabpanel">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Requests</h5>
+            <button id="organizer-refresh-requests" class="btn btn-primary-orange btn-sm">
+              <i class="bi bi-arrow-repeat"></i> Refresh
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-lg-4">
+                <h6>Pending</h6>
+                <div id="organizer-requests-pending"></div>
+              </div>
+              <div class="col-lg-4">
+                <h6>Accepted</h6>
+                <div id="organizer-requests-accepted"></div>
+              </div>
+              <div class="col-lg-4">
+                <h6>Declined</h6>
+                <div id="organizer-requests-declined"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="create" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Create Event</h5>
+          </div>
+          <div class="card-body">
+            <form id="organizer-create-event" class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Event Name</label>
+                <input id="event-name" class="form-control" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Event Type</label>
+                <select id="event-type" class="form-select">
+                  <option value="match">Match</option>
+                  <option value="tournament">Tournament</option>
+                  <option value="championship">Championship</option>
+                </select>
+              </div>
+              <div class="col-md-3" id="max-teams-group" style="display:none;">
+                <label class="form-label">No. of Teams</label>
+                <input id="event-max-teams" type="number" min="2" class="form-control" placeholder="Required for tournaments" />
+              </div>
+              <div class="col-12">
+                <button class="btn btn-primary-orange" type="submit">Create Event</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/auth.js"></script>
+  <script src="/static/rbac-dashboard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

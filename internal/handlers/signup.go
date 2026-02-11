@@ -56,18 +56,30 @@ func SignupHandler(c *fiber.Ctx) error {
 	// Encode password with Base62 after hashing it
 	encodedPassword := hashAndEncodeBase62(form.Password)
 
+	role := strings.ToLower(strings.TrimSpace(c.FormValue("role")))
+	if role == "" {
+		role = models.RolePlayer
+	}
+	if role != models.RolePlayer && role != models.RoleTeamOwner && role != models.RoleOrganizer {
+		role = models.RolePlayer
+	}
+
 	// Create a new user entry
 	newUser := models.User{
-		FullName:      form.FullName,
-		Email:         form.Email,
-		UserID:        form.UserID,
-		Password:      encodedPassword,
-		Role:          models.RolePlayer,
-		Position:      form.Position,
-		CreatedAt:     time.Now(),
-		TotalPoints:   0,
-		RaidPoints:    0,
-		DefencePoints: 0,
+		FullName:  form.FullName,
+		Email:     form.Email,
+		UserID:    form.UserID,
+		Password:  encodedPassword,
+		Role:      role,
+		CreatedAt: time.Now(),
+	}
+
+	// Only populate player-specific fields for players
+	if role == models.RolePlayer {
+		newUser.Position = form.Position
+		newUser.TotalPoints = 0
+		newUser.RaidPoints = 0
+		newUser.DefencePoints = 0
 	}
 
 	// Insert the new user into the database

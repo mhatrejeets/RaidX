@@ -1,11 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"strings"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
@@ -39,133 +34,118 @@ func setupPublicRoutes(app *fiber.App) {
 		return c.SendFile("./Static/viewer.html")
 	})
 
+	// Public player profile page (client-side auth gate)
+	app.Get("/playerprofile/:id", handlers.PlayerProfileHandler)
+
 	// Public API endpoint to fetch match details by ID (JSON) - no auth required for viewers
 	app.Get("/api/match/:id", handlers.GetMatchByIDJSON)
+
+	// Public invite link pages (anyone can visit)
+	app.Get("/invite/team/:token", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/invite-team.html")
+	})
+	app.Get("/invite/event/:token", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/invite-event.html")
+	})
+	app.Get("/api/invite-link/team/:token/details", handlers.GetTeamInviteLinkDetails)
+	app.Get("/api/invite-link/event/:token/details", handlers.GetEventInviteLinkDetails)
 }
 
 func setupProtectedRoutes(app *fiber.App) {
-	// Protected pages/views
-	app.Get("/scorer", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/scorer.html")
+	// Role-based dashboards (RBAC only)
+	app.Get("/player/dashboard", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/player-dashboard.html")
 	})
-	app.Get("/start", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/startscore.html")
+	app.Get("/owner/dashboard", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/owner-dashboard-v2.html")
 	})
-	app.Get("/home1/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/home1.html")
+	app.Get("/organizer/dashboard", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-dashboard.html")
 	})
-	app.Get("/playerprofile/:id", handlers.PlayerProfileHandler)
-	app.Get("/playerselection/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/playerselection.html")
-	})
-	app.Get("/matchestype/:id", func(c *fiber.Ctx) error {
-		id := c.Params("id")
-		return c.Render("matches_type", fiber.Map{
-			"ID": id,
-		})
-	})
-	app.Get("/selectteams/:id", func(c *fiber.Ctx) error {
-		id := c.Params("id")
-		return c.Render("selectteams", fiber.Map{
-			"ID": id,
-		})
-	})
-
-	// All matches page for a user (protected)
-	app.Get("/allmatches/:id", func(c *fiber.Ctx) error {
-		id := c.Params("id")
-		return c.Render("allmatches", fiber.Map{
-			"ID": id,
-		})
-	})
-
-	// Convenience redirect: /allmatches -> /allmatches/:id using token (query or Authorization header)
-	app.Get("/allmatches", func(c *fiber.Ctx) error {
-		// Try query param first
-		token := c.Query("token")
-		if token == "" {
-			// Try Authorization header
-			auth := c.Get("Authorization")
-			if strings.HasPrefix(auth, "Bearer ") {
-				token = strings.TrimPrefix(auth, "Bearer ")
-			}
-		}
-		if token == "" {
-			// No token: redirect to login
-			return c.Redirect("/login")
-		}
-
-		// Decode JWT payload (no verification) to extract user id
-		parts := strings.Split(token, ".")
-		if len(parts) < 2 {
-			return c.Redirect("/login")
-		}
-		payloadB64 := parts[1]
-		// Adjust padding for base64
-		switch len(payloadB64) % 4 {
-		case 2:
-			payloadB64 += "=="
-		case 3:
-			payloadB64 += "="
-		}
-		decoded, err := base64.URLEncoding.DecodeString(payloadB64)
-		if err != nil {
-			// attempt standard base64
-			decoded, err = base64.StdEncoding.DecodeString(payloadB64)
-			if err != nil {
-				return c.Redirect("/login")
-			}
-		}
-		var payload map[string]interface{}
-		if err := json.Unmarshal(decoded, &payload); err != nil {
-			return c.Redirect("/login")
-		}
-		// Check common fields
-		var id string
-		if v, ok := payload["user_id"]; ok {
-			id = fmt.Sprintf("%v", v)
-		} else if v, ok := payload["userId"]; ok {
-			id = fmt.Sprintf("%v", v)
-		} else if v, ok := payload["sub"]; ok {
-			id = fmt.Sprintf("%v", v)
-		} else if v, ok := payload["session_id"]; ok {
-			id = fmt.Sprintf("%v", v)
-		} else if v, ok := payload["sessionId"]; ok {
-			id = fmt.Sprintf("%v", v)
-		}
-		if id == "" {
-			return c.Redirect("/login")
-		}
-
-		// Redirect to the canonical allmatches/:id route preserving token
-		return c.Redirect(fmt.Sprintf("/allmatches/%s?token=%s", id, token))
-	})
-
-	// Protected match management endpoints
-	app.Get("/endgame", handlers.EndGameHandler)
-	app.Get("/matches", handlers.GetAllMatches)
-	app.Get("/matches/:id", handlers.GetMatchByID)
-	app.Post("/api/matches/raid", handlers.ProcessRaidResult)
 
 	// RBAC: Team Owner APIs
 	app.Post("/api/teams", middleware.RoleRequired(models.RoleTeamOwner), handlers.CreateTeamHandler)
 	app.Post("/api/teams/:id/invite", middleware.RoleRequired(models.RoleTeamOwner), handlers.CreateTeamInviteHandler)
 	app.Get("/api/teams/:id/invites", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetTeamInvitesHandler)
+	app.Get("/api/owner/event-invitations", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetOwnerEventInvitesHandler)
 
 	// RBAC: Organizer APIs
 	app.Post("/api/events", middleware.RoleRequired(models.RoleOrganizer), handlers.CreateEventHandler)
+	app.Put("/api/events/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.UpdateEventHandler)
+	app.Post("/api/events/:id/complete", middleware.RoleRequired(models.RoleOrganizer), handlers.MarkEventCompletedHandler)
 	app.Post("/api/events/:id/invite", middleware.RoleRequired(models.RoleOrganizer), handlers.CreateEventInviteHandler)
 	app.Get("/api/events/:id/teams", middleware.RoleRequired(models.RoleOrganizer), handlers.GetEventTeamsHandler)
+	app.Get("/api/organizer/events", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventsHandler)
+	app.Get("/api/organizer/event-invites", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventInvitesHandler)
 
 	// RBAC: Invitations (players and team owners)
 	app.Put("/api/invitations/:id", middleware.RoleRequired(models.RolePlayer, models.RoleTeamOwner), handlers.UpdateInvitationStatusHandler)
 	app.Get("/api/invitations", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerInvitationsHandler)
 
-	// Protected team management endpoints
-	app.Get("/api/team/:id", handlers.GetTeamByID)
-	app.Get("/api/teams", handlers.GetTeams)
-	app.Get("/createteam/:id", handlers.CreateTeamPage)
-	app.Post("/createteam/:id", handlers.SubmitTeam)
+	// RBAC: Team Owner - Team Management Pages
+	app.Get("/owner/teams", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/owner-teams.html")
+	})
+	app.Get("/owner/team/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/owner-team-detail.html")
+	})
+	app.Get("/owner/team/:id/edit", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/owner-team-detail.html")
+	})
+
+	// RBAC: Organizer - Event & Match Management Pages
+	app.Get("/organizer/events", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-events.html")
+	})
+	app.Get("/organizer/event/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-event-detail.html")
+	})
+	app.Get("/organizer/event/:id/matches", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-event-matches.html")
+	})
+	app.Get("/organizer/match/:id/teams", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-match-teams.html")
+	})
+
+	app.Get("/organizer/profile/:id", handlers.OrganizerProfileHandler)
+	app.Get("/organizer/match/:id/scorer", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-scorer.html")
+	})
+
+	// RBAC: Shared Match Viewing (both team owner and organizer can view)
+	app.Get("/owner/match/:id/view", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/match-viewer.html")
+	})
+	app.Get("/organizer/match/:id/view", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/match-viewer.html")
+	})
+
+	// RBAC: Shared Match APIs
+	app.Get("/api/matches", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.GetAllMatches)
+	app.Get("/api/matches/:id", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.GetMatchByID)
+	app.Post("/api/matches/raid", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.ProcessRaidResult)
+
+	// RBAC: Invite Link APIs (Team Owner & Organizer)
+	app.Post("/api/teams/:id/generate-link", middleware.RoleRequired(models.RoleTeamOwner), handlers.GenerateTeamInviteLink)
+	app.Post("/api/events/:id/generate-link", middleware.RoleRequired(models.RoleOrganizer), handlers.GenerateEventInviteLink)
+	app.Get("/api/teams/:id/pending-approvals", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetPendingApprovalsForTeam)
+	app.Get("/api/events/:id/pending-approvals", middleware.RoleRequired(models.RoleOrganizer), handlers.GetPendingApprovalsForEvent)
+	app.Put("/api/pending-approvals/:id/approve", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.ApprovePendingApproval)
+	app.Put("/api/pending-approvals/:id/reject", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.RejectPendingApproval)
+
+	// RBAC: Invite Link Accept APIs (Public endpoints that check authentication)
+	app.Post("/api/invite-link/team/:token/accept", middleware.AuthRequired, handlers.AcceptTeamInviteLink)
+	app.Post("/api/invite-link/team/:token/claim", middleware.AuthRequired, handlers.ClaimTeamInviteLink)
+	app.Post("/api/invite-link/event/:token/accept", middleware.AuthRequired, handlers.AcceptEventInviteLink)
+
+	// RBAC: Team Owner - Team Management APIs
+	app.Get("/api/owner/teams", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetOwnerTeams)
+	app.Get("/api/owner/tournament-requests", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetOwnerTournamentRequests)
+	app.Get("/api/teams/:id", middleware.AuthRequired, handlers.GetTeamByIDDetail)
+	app.Put("/api/teams/:id", middleware.RoleRequired(models.RoleTeamOwner), handlers.UpdateTeam)
+	app.Post("/api/teams/:id/add-player", middleware.RoleRequired(models.RoleTeamOwner), handlers.AddPlayerToTeam)
+	app.Delete("/api/teams/:id/remove-player/:playerId", middleware.RoleRequired(models.RoleTeamOwner), handlers.RemovePlayerFromTeam)
+	app.Delete("/api/teams/:id", middleware.RoleRequired(models.RoleTeamOwner), handlers.DeleteTeam)
 }
 
 func main() {
@@ -180,14 +160,10 @@ func main() {
 	setupPublicRoutes(app)
 
 	// Protected routes - require JWT auth
-	app.Use("/scorer", middleware.AuthRequired)
 	app.Use("/api", middleware.AuthRequired)
-	app.Use("/matches", middleware.AuthRequired)
-	app.Use("/allmatches", middleware.AuthRequired)
-	app.Use("/playerselection", middleware.AuthRequired)
-	app.Use("/matchestype", middleware.AuthRequired)
-	app.Use("/selectteams", middleware.AuthRequired)
-	app.Use("/createteam", middleware.AuthRequired)
+	app.Use("/player", middleware.AuthRequired, middleware.RoleRequired(models.RolePlayer))
+	app.Use("/owner", middleware.AuthRequired, middleware.RoleRequired(models.RoleTeamOwner))
+	app.Use("/organizer", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer))
 	setupProtectedRoutes(app)
 
 	// WebSocket setup

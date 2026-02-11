@@ -19,6 +19,7 @@ import (
 )
 
 func LoginHandler(c *fiber.Ctx) error {
+
 	// Support both JSON and form data
 	var loginData struct {
 		Email    string `json:"email" form:"email"`
@@ -80,37 +81,43 @@ func LoginHandler(c *fiber.Ctx) error {
 	}).Decode(&existingSession)
 
 	if err == nil && time.Now().Before(existingSession.RefreshExpiryTime) {
-		// Existing valid session found for this device - REUSE it
-		// Update last_used_at timestamp
-		_, err := sessionColl.UpdateOne(ctx, bson.M{"_id": existingSession.ID},
-			bson.M{"$set": bson.M{"last_used_at": time.Now()}})
-		if err == nil {
-			// Return existing tokens
-			c.Cookie(&fiber.Cookie{
-				Name:     "token",
-				Value:    existingSession.JWTToken,
-				HTTPOnly: true,
-				Path:     "/",
-				SameSite: "Lax",
-				Expires:  existingSession.ExpiryTime,
-			})
-			c.Cookie(&fiber.Cookie{
-				Name:     "refreshToken",
-				Value:    existingSession.RefreshToken,
-				HTTPOnly: true,
-				Path:     "/",
-				SameSite: "Lax",
-				Expires:  existingSession.RefreshExpiryTime,
-			})
-			return c.JSON(fiber.Map{
-				"token":         existingSession.JWTToken,
-				"refresh_token": existingSession.RefreshToken,
-				"user_id":       user.ID.Hex(),
-				"name":          user.Name,
-				"expires":       existingSession.ExpiryTime.Unix(),
-				"reused":        true,
-			})
+		// Existing valid session found for this device
+		// But check if JWT token is still valid (not expired)
+		if time.Now().Before(existingSession.ExpiryTime) {
+			// JWT token still valid - reuse existing session
+			_, err := sessionColl.UpdateOne(ctx, bson.M{"_id": existingSession.ID},
+				bson.M{"$set": bson.M{"last_used_at": time.Now()}})
+			if err == nil {
+				// Return existing tokens
+				c.Cookie(&fiber.Cookie{
+					Name:     "token",
+					Value:    existingSession.JWTToken,
+					HTTPOnly: true,
+					Path:     "/",
+					SameSite: "Lax",
+					Expires:  existingSession.ExpiryTime,
+				})
+				c.Cookie(&fiber.Cookie{
+					Name:     "refreshToken",
+					Value:    existingSession.RefreshToken,
+					HTTPOnly: true,
+					Path:     "/",
+					SameSite: "Lax",
+					Expires:  existingSession.RefreshExpiryTime,
+				})
+
+				return c.JSON(fiber.Map{
+					"token":         existingSession.JWTToken,
+					"refresh_token": existingSession.RefreshToken,
+					"user_id":       user.ID.Hex(),
+					"name":          user.Name,
+					"role":          user.Role,
+					"expires":       existingSession.ExpiryTime.Unix(),
+					"reused":        true,
+				})
+			}
 		}
+		// JWT token expired but refresh token valid - generate new JWT
 	}
 
 	// New device: Check active session count for this user (max 5)
@@ -199,6 +206,7 @@ func LoginHandler(c *fiber.Ctx) error {
 		"refresh_token": refreshToken,
 		"user_id":       user.ID.Hex(),
 		"name":          user.Name,
+		"role":          user.Role,
 		"expires":       expiry.Unix(),
 	})
 
