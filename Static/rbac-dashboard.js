@@ -497,6 +497,7 @@ function renderOrganizerEventList(container, events, allowActions) {
     events.forEach(event => {
         const card = document.createElement('div');
         card.className = 'event-card';
+        card.style.cursor = 'pointer';
         card.innerHTML = `
             <h5>${event.eventName}</h5>
             <p><strong>Type:</strong> ${event.eventType}</p>
@@ -541,6 +542,12 @@ function renderOrganizerEventList(container, events, allowActions) {
             </div>
             ` : ''}
         `;
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('button, input, select, textarea, label, a, .event-card-actions')) {
+                return;
+            }
+            window.location.href = `/organizer/event/${event.id}`;
+        });
         container.appendChild(card);
     });
 }
@@ -663,7 +670,7 @@ async function loadOrganizerRequests() {
 
 function renderOrganizerRequestList(container, requests) {
     if (!requests || requests.length === 0) {
-        container.innerHTML = '<div class="text-muted">No requests.</div>';
+        container.innerHTML = '<div style="color: #fbbf24;">No requests.</div>';
         return;
     }
     requests.forEach(req => {

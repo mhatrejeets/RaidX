@@ -233,6 +233,236 @@ func GetOrganizerEventsHandler(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
+// GetOrganizerEventDetailHandler returns details for a single event including invite status breakdown.
+func GetOrganizerEventDetailHandler(c *fiber.Ctx) error {
+	organizerID, err := getUserIDFromLocals(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user"})
+	}
+
+	eventID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid event id"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	eventsColl := db.MongoClient.Database("raidx").Collection("events")
+	var event models.Event
+	if err := eventsColl.FindOne(ctx, bson.M{"_id": eventID, "organizer_id": organizerID}).Decode(&event); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Event not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch event"})
+	}
+
+	requiredTeams := event.MaxTeams
+	if event.EventType == models.EventTypeMatch {
+		requiredTeams = 2
+	}
+
+	invitesColl := db.MongoClient.Database("raidx").Collection("invitations")
+	invitesCursor, err := invitesColl.Find(ctx, bson.M{
+		"type":     models.InviteTypeEvent,
+		"event_id": eventID,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch invitations"})
+	}
+	defer invitesCursor.Close(ctx)
+
+	var invites []models.Invitation
+	if err := invitesCursor.All(ctx, &invites); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to decode invitations"})
+	}
+
+	playersColl := db.MongoClient.Database("raidx").Collection("players")
+	teamsColl := db.MongoClient.Database("raidx").Collection("rbac_teams")
+
+	accepted := 0
+	pending := 0
+	declined := 0
+	acceptedList := []fiber.Map{}
+	pendingList := []fiber.Map{}
+	declinedList := []fiber.Map{}
+
+	for _, invite := range invites {
+		status := invite.Status
+		item := fiber.Map{
+			"teamId":      "",
+			"teamName":    "",
+			"ownerName":   "",
+			"ownerUserId": "",
+			"status":      status,
+		}
+
+		if invite.TeamID != nil {
+			item["teamId"] = invite.TeamID.Hex()
+			var team struct {
+				TeamName string `bson:"team_name"`
+			}
+			if err := teamsColl.FindOne(ctx, bson.M{"_id": *invite.TeamID}).Decode(&team); err == nil {
+				item["teamName"] = team.TeamName
+			}
+		}
+
+		if invite.ToID != primitive.NilObjectID {
+			var owner struct {
+				FullName string `bson:"fullName"`
+				UserID   string `bson:"userId"`
+				Email    string `bson:"email"`
+			}
+			if err := playersColl.FindOne(ctx, bson.M{"_id": invite.ToID}).Decode(&owner); err == nil {
+				if owner.FullName != "" {
+					item["ownerName"] = owner.FullName
+				} else {
+					item["ownerName"] = owner.Email
+				}
+				item["ownerUserId"] = owner.UserID
+			}
+		}
+
+		switch status {
+		case models.InviteStatusAccepted:
+			accepted++
+			acceptedList = append(acceptedList, item)
+		case models.InviteStatusDeclined:
+			declined++
+			declinedList = append(declinedList, item)
+		default:
+			pending++
+			pendingList = append(pendingList, item)
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"id":            event.ID.Hex(),
+		"eventName":     event.EventName,
+		"eventType":     event.EventType,
+		"maxTeams":      event.MaxTeams,
+		"status":        event.Status,
+		"createdAt":     event.CreatedAt,
+		"updatedAt":     event.UpdatedAt,
+		"requiredTeams": requiredTeams,
+		"counts": fiber.Map{
+			"invited":  len(invites),
+			"accepted": accepted,
+			"pending":  pending,
+			"declined": declined,
+		},
+		"teams": fiber.Map{
+			"accepted": acceptedList,
+			"pending":  pendingList,
+			"declined": declinedList,
+		},
+	})
+}
+
+// GetOrganizerEventMatchStatsHandler returns latest match stats for an event (match-type only).
+func GetOrganizerEventMatchStatsHandler(c *fiber.Ctx) error {
+	organizerID, err := getUserIDFromLocals(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user"})
+	}
+
+	eventID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid event id"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Verify organizer owns event
+	eventsColl := db.MongoClient.Database("raidx").Collection("events")
+	var event models.Event
+	if err := eventsColl.FindOne(ctx, bson.M{"_id": eventID, "organizer_id": organizerID}).Decode(&event); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Event not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch event"})
+	}
+
+	// Find latest match stats for this event
+	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
+	var matchDoc bson.M
+	findErr := matchesColl.FindOne(ctx, bson.M{"eventId": eventID.Hex()}).Decode(&matchDoc)
+	if findErr == mongo.ErrNoDocuments {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Match stats not found"})
+	}
+	if findErr != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch match stats"})
+	}
+
+	return c.JSON(matchDoc)
+}
+
+// StartOrganizerEventHandler marks an event active when it has the required number of accepted teams.
+func StartOrganizerEventHandler(c *fiber.Ctx) error {
+	organizerID, err := getUserIDFromLocals(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid user"})
+	}
+
+	eventID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid event id"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	eventsColl := db.MongoClient.Database("raidx").Collection("events")
+	var event models.Event
+	if err := eventsColl.FindOne(ctx, bson.M{"_id": eventID, "organizer_id": organizerID}).Decode(&event); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Event not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch event"})
+	}
+
+	requiredTeams := event.MaxTeams
+	if event.EventType == models.EventTypeMatch {
+		requiredTeams = 2
+	}
+	if requiredTeams <= 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Event does not have a valid team limit"})
+	}
+
+	invitesColl := db.MongoClient.Database("raidx").Collection("invitations")
+	acceptedCount, err := invitesColl.CountDocuments(ctx, bson.M{
+		"type":     models.InviteTypeEvent,
+		"event_id": eventID,
+		"status":   models.InviteStatusAccepted,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to validate event teams"})
+	}
+	if int(acceptedCount) != requiredTeams {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":         "Accepted teams must equal the required team count",
+			"requiredTeams": requiredTeams,
+			"acceptedTeams": acceptedCount,
+		})
+	}
+
+	res, err := eventsColl.UpdateOne(ctx, bson.M{"_id": eventID, "organizer_id": organizerID}, bson.M{
+		"$set": bson.M{
+			"status":     models.EventStatusActive,
+			"updated_at": time.Now(),
+		},
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to start event"})
+	}
+	if res.MatchedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Event not found"})
+	}
+
+	return c.JSON(fiber.Map{"success": true})
+}
+
 func GetOrganizerEventInvitesHandler(c *fiber.Ctx) error {
 	organizerID, err := getUserIDFromLocals(c)
 	if err != nil {

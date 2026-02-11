@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Event Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      color: #f97316 !important;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    .event-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .event-title {
+      color: #fbbf24;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+    }
+
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+
+    .badge-custom {
+      background-color: #334155;
+      color: #f97316;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+    }
+
+    .summary-item {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      height: 100%;
+    }
+
+    .summary-label {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+      font-weight: 600;
+    }
+
+    .team-card {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .team-card h6 {
+      color: #fbbf24;
+      margin-bottom: 0.25rem;
+    }
+
+    .team-meta {
+      color: #cbd5e1;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary-orange {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      border: none;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      padding: 0.6rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary-orange:hover {
+      background: linear-gradient(45deg, #ea580c, #f97316);
+      color: white;
+      transform: scale(1.02);
+    }
+
+    .muted {
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body data-role="organizer">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <i class="bi bi-lightning-fill"></i> RaidX
+      </a>
+      <div class="ms-auto d-flex gap-2">
+        <a class="btn btn-outline-light btn-sm" href="/organizer/dashboard">
+          <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="event-status" class="alert alert-info d-none"></div>
+
+    <div class="event-header">
+      <div>
+        <h2 class="event-title" id="event-name">Event Details</h2>
+        <div class="muted" id="event-subtitle">Loading event information...</div>
+      </div>
+      <div>
+        <button class="btn btn-primary-orange" id="start-event-btn" disabled>Start Event</button>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="summary-item">
+          <div class="summary-label">Event Type</div>
+          <div class="summary-value" id="event-type">-</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="summary-item">
+          <div class="summary-label">Status</div>
+          <div class="summary-value"><span class="badge-custom" id="event-status-badge">-</span></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="summary-item">
+          <div class="summary-label">Teams Required</div>
+          <div class="summary-value" id="event-required-teams">-</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="summary-item">
+          <div class="summary-label">Accepted Teams</div>
+          <div class="summary-value" id="event-accepted-count">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Teams Invited</h5>
+        <div class="muted" id="event-counts"></div>
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <h6>Pending</h6>
+            <div id="event-teams-pending"></div>
+          </div>
+          <div class="col-lg-4">
+            <h6>Accepted</h6>
+            <div id="event-teams-accepted"></div>
+          </div>
+          <div class="col-lg-4">
+            <h6>Declined</h6>
+            <div id="event-teams-declined"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Start Validation</h5>
+      </div>
+      <div class="card-body">
+        <p class="mb-2" id="start-validation-text">Checking team counts...</p>
+      </div>
+    </div>
+
+    <div class="card mt-4 d-none" id="match-stats-card">
+      <div class="card-header">
+        <h5 class="mb-0">Completed Match Stats</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="summary-item">
+              <div class="summary-label" id="match-teamA-label">Team A</div>
+              <div class="summary-value" id="match-teamA-score">0</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="summary-item">
+              <div class="summary-label" id="match-teamB-label">Team B</div>
+              <div class="summary-value" id="match-teamB-score">0</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <h6 id="match-teamA-header">Team A Players</h6>
+            <div id="match-teamA-players"></div>
+          </div>
+          <div class="col-lg-6">
+            <h6 id="match-teamB-header">Team B Players</h6>
+            <div id="match-teamB-players"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const eventId = window.location.pathname.split('/').pop();
+
+    function setStatus(text, type = 'info') {
+      const el = document.getElementById('event-status');
+      if (!el) return;
+      el.textContent = text;
+      el.className = `alert alert-${type}`;
+      el.classList.remove('d-none');
+    }
+
+    function hideStatus() {
+      const el = document.getElementById('event-status');
+      if (!el) return;
+      el.classList.add('d-none');
+    }
+
+    function renderTeamList(containerId, teams) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      if (!teams || teams.length === 0) {
+        container.innerHTML = '<div class="muted">No teams</div>';
+        return;
+      }
+      container.innerHTML = teams.map(team => {
+        const name = team.teamName || 'Unknown Team';
+        const owner = team.ownerName || 'Unknown Owner';
+        const ownerId = team.ownerUserId || 'N/A';
+        return `
+          <div class="team-card">
+            <h6>${name}</h6>
+            <div class="team-meta">Owner: ${owner}</div>
+            <div class="team-meta">Owner ID: ${ownerId}</div>
+            <div class="team-meta">Team ID: ${team.teamId || 'N/A'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadEventDetails() {
+      if (!requireAuth()) return;
+      hideStatus();
+
+      try {
+        const res = await apiRequest(`/api/organizer/events/${eventId}`);
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load event');
+        }
+
+        const requiredTeams = data.requiredTeams || (data.eventType === 'match' ? 2 : data.maxTeams || 0);
+        const accepted = data.counts?.accepted || 0;
+        const pending = data.counts?.pending || 0;
+        const declined = data.counts?.declined || 0;
+        const invited = data.counts?.invited || 0;
+
+        document.getElementById('event-name').textContent = data.eventName || 'Event';
+        document.getElementById('event-subtitle').textContent = `Type: ${data.eventType || '-'} • Status: ${data.status || '-'}`;
+        document.getElementById('event-type').textContent = data.eventType || '-';
+        document.getElementById('event-status-badge').textContent = data.status || '-';
+        document.getElementById('event-required-teams').textContent = requiredTeams > 0 ? requiredTeams : 'Not set';
+        document.getElementById('event-accepted-count').textContent = accepted;
+        document.getElementById('event-counts').textContent = `Invited: ${invited} • Pending: ${pending} • Accepted: ${accepted} • Declined: ${declined}`;
+
+        renderTeamList('event-teams-pending', data.teams?.pending);
+        renderTeamList('event-teams-accepted', data.teams?.accepted);
+        renderTeamList('event-teams-declined', data.teams?.declined);
+
+        const startBtn = document.getElementById('start-event-btn');
+        const validationText = document.getElementById('start-validation-text');
+        const canStart = requiredTeams > 0 && accepted === requiredTeams;
+
+        // Hide start button if event is already completed
+        if ((data.status || '').toLowerCase() === 'completed') {
+          startBtn.style.display = 'none';
+        } else if (canStart) {
+          startBtn.disabled = false;
+          validationText.textContent = 'All required teams have accepted. You can start the event.';
+        } else {
+          startBtn.disabled = true;
+          validationText.textContent = requiredTeams > 0
+            ? `Waiting for teams. Accepted ${accepted} of ${requiredTeams}.`
+            : 'Set a valid team limit before starting.';
+        }
+
+        // If match completed, load match stats and show section
+        if ((data.eventType || '').toLowerCase() === 'match' && (data.status || '').toLowerCase() === 'completed') {
+          await loadMatchStats();
+        }
+
+        startBtn.onclick = async () => {
+          if (startBtn.disabled) return;
+          try {
+            const startRes = await apiRequest(`/api/organizer/events/${eventId}/start`, { method: 'POST' });
+            const startData = await startRes.json();
+            if (!startRes.ok) {
+              throw new Error(startData.error || 'Failed to start event');
+            }
+            if ((data.eventType || '').toLowerCase() === 'match') {
+              const acceptedTeams = (data.teams?.accepted || []).filter(team => team.teamId);
+              if (acceptedTeams.length < 2) {
+                throw new Error('Match requires exactly 2 accepted teams with team IDs.');
+              }
+              const team1Id = acceptedTeams[0].teamId;
+              const team2Id = acceptedTeams[1].teamId;
+              const token = getValidToken();
+              console.log('Token retrieved:', token ? 'Yes' : 'No', token ? token.substring(0, 20) + '...' : 'null');
+              if (!token) {
+                throw new Error('No authentication token found. Please login again.');
+              }
+              const query = new URLSearchParams({
+                team_id: team1Id,
+                team_key: 'teamA_selected',
+                team1_id: team1Id,
+                team2_id: team2Id,
+                event_id: eventId,
+                token: token
+              });
+              const redirectUrl = `/organizer/playerselection/${eventId}?${query.toString()}`;
+              console.log('Redirecting to:', redirectUrl);
+              window.location.href = redirectUrl;
+              return;
+            }
+            setStatus('Event started successfully.', 'success');
+            await loadEventDetails();
+          } catch (error) {
+            setStatus(error.message || 'Failed to start event', 'danger');
+          }
+        };
+      } catch (error) {
+        setStatus(error.message || 'Failed to load event', 'danger');
+      }
+    }
+
+    async function loadMatchStats() {
+      try {
+        const res = await apiRequest(`/api/organizer/events/${eventId}/match`);
+        const match = await res.json();
+        if (!res.ok) {
+          throw new Error(match.error || 'Failed to load match stats');
+        }
+
+        const data = match.data || match.Data || {};
+        const teamA = data.teamA || data.TeamA || {};
+        const teamB = data.teamB || data.TeamB || {};
+        const playerStats = data.playerStats || data.PlayerStats || {};
+
+        document.getElementById('match-teamA-label').textContent = teamA.name || 'Team A';
+        document.getElementById('match-teamB-label').textContent = teamB.name || 'Team B';
+        document.getElementById('match-teamA-score').textContent = teamA.score ?? 0;
+        document.getElementById('match-teamB-score').textContent = teamB.score ?? 0;
+        document.getElementById('match-teamA-header').textContent = (teamA.name || 'Team A') + ' Players';
+        document.getElementById('match-teamB-header').textContent = (teamB.name || 'Team B') + ' Players';
+
+        const teamAPlayers = (data.teamAPlayerIds || data.TeamAPlayerIDs || []).map(id => playerStats[id]).filter(Boolean);
+        const teamBPlayers = (data.teamBPlayerIds || data.TeamBPlayerIDs || []).map(id => playerStats[id]).filter(Boolean);
+
+        const renderPlayers = (containerId, players) => {
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          if (!players.length) {
+            container.innerHTML = '<div class="muted">No player stats available.</div>';
+            return;
+          }
+          container.innerHTML = players.map(p => `
+            <div class="team-card">
+              <h6>${p.name || p.Name || 'Player'}</h6>
+              <div class="team-meta">Total: ${p.totalPoints ?? p.TotalPoints ?? 0}</div>
+              <div class="team-meta">Raid: ${p.raidPoints ?? p.RaidPoints ?? 0}</div>
+              <div class="team-meta">Defence: ${p.defencePoints ?? p.DefencePoints ?? 0}</div>
+            </div>
+          `).join('');
+        };
+
+        renderPlayers('match-teamA-players', teamAPlayers);
+        renderPlayers('match-teamB-players', teamBPlayers);
+
+        document.getElementById('match-stats-card').classList.remove('d-none');
+      } catch (err) {
+        console.error('Failed to load match stats', err);
+      }
+    }
+
+    function logout() {
+      fetch('/logout', { method: 'POST' }).then(() => {
+        window.location.href = '/login';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadEventDetails);
+  </script>
+</body>
+
+</html>

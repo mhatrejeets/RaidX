@@ -164,9 +164,12 @@
     <script>
     async function handleLogin(event) {
       event.preventDefault();
+      console.log('Login form submitted');
       
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
+      
+      console.log('Email:', email, 'Password length:', password.length);
       
       if (!email || !password) {
         showError('Email and password are required');
@@ -197,10 +200,16 @@
           const returnUrlParam = new URLSearchParams(window.location.search).get('returnUrl');
           const returnUrl = returnUrlParam ? decodeURIComponent(returnUrlParam) : '';
           
+          console.log('Return URL found:', returnUrl);
+          
           if (returnUrl && !returnUrl.includes('/login')) {
-            // For returnUrl, add the freshly received token
-            const separator = returnUrl.includes('?') ? '&' : '?';
-            const authUrl = returnUrl + separator + 'token=' + data.token;
+            // For returnUrl, add the freshly received token (replace old token if exists)
+            let authUrl = returnUrl;
+            // Remove old token parameter if exists
+            authUrl = authUrl.replace(/[?&]token=[^&]*/g, '');
+            const separator = authUrl.includes('?') ? '&' : '?';
+            authUrl = authUrl + separator + 'token=' + data.token;
+            console.log('Redirecting to returnUrl:', authUrl);
             window.location.replace(authUrl);
             return;
           }

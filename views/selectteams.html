@@ -251,7 +251,7 @@
       });
 
       const playerId = window.location.pathname.split("/").pop();
-      window.location.href = `/playerselection/${playerId}?${queryParams.toString()}`;
+      window.location.href = `/organizer/playerselection/${playerId}?${queryParams.toString()}`;
     });
 
     // Add JWT token handling
@@ -312,7 +312,7 @@
         });
 
         const playerId = window.location.pathname.split("/").pop();
-        window.location.href = `/playerselection/${playerId}?${queryParams.toString()}`;
+        window.location.href = `/organizer/playerselection/${playerId}?${queryParams.toString()}`;
       });
     });
 

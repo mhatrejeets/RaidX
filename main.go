@@ -76,7 +76,10 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Post("/api/events/:id/invite", middleware.RoleRequired(models.RoleOrganizer), handlers.CreateEventInviteHandler)
 	app.Get("/api/events/:id/teams", middleware.RoleRequired(models.RoleOrganizer), handlers.GetEventTeamsHandler)
 	app.Get("/api/organizer/events", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventsHandler)
+	app.Get("/api/organizer/events/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventDetailHandler)
+	app.Get("/api/organizer/events/:id/match", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventMatchStatsHandler)
 	app.Get("/api/organizer/event-invites", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventInvitesHandler)
+	app.Post("/api/organizer/events/:id/start", middleware.RoleRequired(models.RoleOrganizer), handlers.StartOrganizerEventHandler)
 
 	// RBAC: Invitations (players and team owners)
 	app.Put("/api/invitations/:id", middleware.RoleRequired(models.RolePlayer, models.RoleTeamOwner), handlers.UpdateInvitationStatusHandler)
@@ -112,6 +115,14 @@ func setupProtectedRoutes(app *fiber.App) {
 		return c.SendFile("./Static/organizer-scorer.html")
 	})
 
+	// RBAC: Player Selection & Scorer (Organizer only)
+	app.Get("/organizer/playerselection/:id", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer), func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/playerselection.html")
+	})
+	app.Get("/scorer", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer), func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/scorer.html")
+	})
+
 	// RBAC: Shared Match Viewing (both team owner and organizer can view)
 	app.Get("/owner/match/:id/view", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/match-viewer.html")
@@ -124,6 +135,8 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/matches", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.GetAllMatches)
 	app.Get("/api/matches/:id", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.GetMatchByID)
 	app.Post("/api/matches/raid", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.ProcessRaidResult)
+	app.Get("/endgame", middleware.AuthRequired, handlers.EndGameHandler)
+	app.Get("/api/endgame", middleware.AuthRequired, handlers.EndGameHandler)
 
 	// RBAC: Invite Link APIs (Team Owner & Organizer)
 	app.Post("/api/teams/:id/generate-link", middleware.RoleRequired(models.RoleTeamOwner), handlers.GenerateTeamInviteLink)
@@ -142,6 +155,7 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/owner/teams", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetOwnerTeams)
 	app.Get("/api/owner/tournament-requests", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetOwnerTournamentRequests)
 	app.Get("/api/teams/:id", middleware.AuthRequired, handlers.GetTeamByIDDetail)
+	app.Get("/api/team/:id", middleware.AuthRequired, handlers.GetTeamByIDDetail)
 	app.Put("/api/teams/:id", middleware.RoleRequired(models.RoleTeamOwner), handlers.UpdateTeam)
 	app.Post("/api/teams/:id/add-player", middleware.RoleRequired(models.RoleTeamOwner), handlers.AddPlayerToTeam)
 	app.Delete("/api/teams/:id/remove-player/:playerId", middleware.RoleRequired(models.RoleTeamOwner), handlers.RemovePlayerFromTeam)
@@ -161,9 +175,9 @@ func main() {
 
 	// Protected routes - require JWT auth
 	app.Use("/api", middleware.AuthRequired)
-	app.Use("/player", middleware.AuthRequired, middleware.RoleRequired(models.RolePlayer))
-	app.Use("/owner", middleware.AuthRequired, middleware.RoleRequired(models.RoleTeamOwner))
-	app.Use("/organizer", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer))
+	app.Use("/player/", middleware.AuthRequired, middleware.RoleRequired(models.RolePlayer))
+	app.Use("/owner/", middleware.AuthRequired, middleware.RoleRequired(models.RoleTeamOwner))
+	app.Use("/organizer/", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer))
 	setupProtectedRoutes(app)
 
 	// WebSocket setup

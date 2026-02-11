@@ -75,7 +75,7 @@ function setupWebSocket() {
             // Server requests client to initialize game state on first connection
             if (msg.type === 'requestInit') {
                 const initialState = {
-                    type: 'gameStats',
+                    type: 'initialState',
                     data: {
                         teamA: { name: teamA.name, score: teamA.score },
                         teamB: { name: teamB.name, score: teamB.score },
@@ -244,7 +244,9 @@ function endGame() {
     try { localStorage.removeItem(MATCH_STORAGE_KEY); } catch (e) { /* ignore */ }
 
     // Send API request to end game with authentication
-    fetch(`/endgame?match_id=${encodeURIComponent(matchId)}`, {
+    const eventId = new URLSearchParams(window.location.search).get('event_id');
+    const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
+    fetch(`/api/endgame?match_id=${encodeURIComponent(matchId)}${eventParam}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -252,7 +254,11 @@ function endGame() {
     }).then(response => {
         if (response.ok) {
             // Successfully ended game, redirect to matches page
-            window.location.href = `/matches?token=${encodeURIComponent(token)}`;
+            if (eventId) {
+                window.location.href = `/organizer/event/${eventId}?token=${encodeURIComponent(token)}`;
+            } else {
+                window.location.href = `/organizer/events?token=${encodeURIComponent(token)}`;
+            }
         } else {
             throw new Error('Failed to end game');
         }
@@ -541,9 +547,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (team1Id && team2Id) {
         try {
             // 1. Fetch Team Data
+            const authToken = getValidToken && getValidToken();
+            const authHeaders = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
             const [res1, res2] = await Promise.all([
-                fetch(`/api/team/${team1Id}`),
-                fetch(`/api/team/${team2Id}`)
+                fetch(`/api/team/${team1Id}`, { headers: authHeaders }),
+                fetch(`/api/team/${team2Id}`, { headers: authHeaders })
             ]);
 
             const data1 = await res1.json();
@@ -556,12 +564,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             // 2. Initialize Teams and Players
             const team1Name = params.get("team1_name");
             const team2Name = params.get("team2_name");
-            
-            teamA.name = team1Name || data1.team_name || "Team A";
+
+            const normalizePlayer = (p) => {
+                const id = p._id || p.id || p.userId || p.user_id;
+                const name = p.name || p.fullName || p.full_name || p.email || 'Unnamed Player';
+                return { id, name, status: "in" };
+            };
+
+            teamA.name = team1Name || data1.team_name || data1.TeamName || "Team A";
             // Ensure players array contains the required 'status' field
-            teamA.players = selectedA ? selectedA.map(p => ({ ...p, status: "in" })) : [];
-            teamB.name = team2Name || data2.team_name || "Team B";
-            teamB.players = selectedB ? selectedB.map(p => ({ ...p, status: "in" })) : [];
+            teamA.players = selectedA ? selectedA.map(normalizePlayer) : [];
+            teamB.name = team2Name || data2.team_name || data2.TeamName || "Team B";
+            teamB.players = selectedB ? selectedB.map(normalizePlayer) : [];
             
             // Update the UI with team names immediately
             document.getElementById("teamA-name").textContent = teamA.name;

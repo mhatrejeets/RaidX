@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
+	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,6 +46,22 @@ func EndGameHandler(c *fiber.Ctx) error {
 	if err := json.Unmarshal([]byte(val), &gameStats); err != nil {
 		logrus.Error("Error:", "EndGameHandler:", " Failed to parse Redis JSON: %v", err)
 		return c.Status(500).SendString("Failed to parse Redis JSON: " + err.Error())
+	}
+
+	// Attach eventId if provided
+	eventIDParam := c.Query("event_id")
+	if eventIDParam != "" {
+		gameStats["eventId"] = eventIDParam
+		// Best-effort update event status to completed
+		if eventOID, err := primitive.ObjectIDFromHex(eventIDParam); err == nil {
+			eventsColl := db.MongoClient.Database("raidx").Collection("events")
+			_, _ = eventsColl.UpdateOne(ctx, bson.M{"_id": eventOID}, bson.M{
+				"$set": bson.M{
+					"status":     models.EventStatusCompleted,
+					"updated_at": time.Now(),
+				},
+			})
+		}
 	}
 
 	// Ensure matchId is stored in Mongo for shareable lookups
@@ -91,5 +109,5 @@ func EndGameHandler(c *fiber.Ctx) error {
 		logrus.Error("Error:", "EndGameHandler:", " Failed to delete Redis key for match %s: %v", matchId, err)
 	}
 
-	return c.Redirect("/matches") // or return a success message
+	return c.JSON(fiber.Map{"success": true, "matchId": matchId})
 }

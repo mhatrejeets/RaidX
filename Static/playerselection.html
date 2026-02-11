@@ -7,6 +7,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RaidX - Select Players</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
+  <!-- Extract token BEFORE auth.js loads -->
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get("token");
+      if (urlToken) {
+        localStorage.setItem('token', urlToken);
+        localStorage.setItem('jwtToken', urlToken);
+        localStorage.setItem('JWT_STORAGE_KEY', urlToken);
+        document.cookie = `token=${urlToken}; path=/; SameSite=Strict`;
+      }
+    })();
+  </script>
+  
   <script src="/static/auth.js"></script>
 
   <style>
@@ -142,28 +157,60 @@
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const teamId = params.get("team_id");
-    const teamKey = params.get("team_key");
-
-    const token = localStorage.getItem('token');
-    fetch(`/api/team/${teamId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    // Wait for DOM to be ready and ensure token is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      const params = new URLSearchParams(window.location.search);
+      const teamId = params.get("team_id");
+      const teamKey = params.get("team_key");
+      
+      // Get token from localStorage (should be saved by HEAD script)
+      const token = localStorage.getItem('token');
+      console.log('[PlayerSelection FETCH] Fetching team data with token:', token ? 'Present' : 'Missing');
+      
+      if (!token) {
+        console.error('[PlayerSelection FETCH] No token found in localStorage!');
+        return;
       }
-    })
+      
+      fetch(`/api/team/${teamId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
       .then(res => res.json())
       .then(team => {
-        document.getElementById("team-name").textContent = team.team_name;
+        const teamName = team.team_name || team.TeamName || team.teamName || 'Team';
+        document.getElementById("team-name").textContent = teamName;
 
         const list = document.getElementById("player-list");
-        team.players.forEach(player => {
+        list.innerHTML = '';
+        const players = team.players || team.Players || [];
+        if (!Array.isArray(players) || players.length === 0) {
+          list.innerHTML = '<div class="text-muted">No players found for this team.</div>';
+          return;
+        }
+
+        const normalizePlayer = (player) => {
+          const id = player._id || player.id || player.userId || player.user_id || player.ID || null;
+          const name = player.fullName || player.name || player.full_name || player.email || 'Unnamed Player';
+          return {
+            id,
+            _id: player._id || player.id || null,
+            userId: player.userId || player.user_id || null,
+            fullName: player.fullName || player.full_name || name,
+            email: player.email || null
+          };
+        };
+
+        players.forEach(player => {
+          const normalized = normalizePlayer(player);
           const div = document.createElement("div");
           div.classList.add("player-checkbox");
+          const displayName = normalized.fullName || normalized.email || 'Unnamed Player';
           div.innerHTML = `
             <label>
-              <input type="checkbox" name="players" value='${JSON.stringify(player)}' />
-              ${player.name}
+              <input type="checkbox" name="players" value='${JSON.stringify(normalized)}' />
+              ${displayName}
             </label>
           `;
           list.appendChild(div);
@@ -193,21 +240,23 @@
         const team1Id = params.get("team1_id");
         const team2Id = params.get("team2_id");
         const team1Name = document.getElementById("team-name").textContent;
-        window.location.href = `/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&token=${encodeURIComponent(token)}`;
+        const eventId = params.get("event_id");
+        const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
+        const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
+        window.location.href = `/organizer/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}${eventParam}&token=${encodeURIComponent(token)}`;
       } else {
         const team1Id = params.get("team1_id");
         const team2Id = params.get("team2_id");
         const team1Name = params.get("team1_name");
         const team2Name = document.getElementById("team-name").textContent;
-        window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&team2_name=${encodeURIComponent(team2Name)}&token=${encodeURIComponent(token)}`;
+        const eventId = params.get("event_id");
+        const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
+        const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
+        window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&team2_name=${encodeURIComponent(team2Name)}${eventParam}&token=${encodeURIComponent(token)}`;
       }
     });
-  </script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      requireAuth();
-    });
+    
+    }); // End DOMContentLoaded
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

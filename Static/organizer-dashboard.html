@@ -235,7 +235,7 @@
           <div class="card-body">
             <div id="organizer-events"></div>
             <hr>
-            <h6 class="text-muted">Completed Events</h6>
+            <h6 style="color: #fbbf24;">Completed Events</h6>
             <div id="organizer-events-completed"></div>
           </div>
         </div>
@@ -250,17 +250,31 @@
             </button>
           </div>
           <div class="card-body">
-            <div class="row g-4">
-              <div class="col-lg-4">
-                <h6>Pending</h6>
+            <ul class="nav nav-tabs" id="requestsTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-requests" type="button">
+                  <i class="bi bi-clock"></i> Pending
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted-requests" type="button">
+                  <i class="bi bi-check-circle"></i> Accepted
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="declined-tab" data-bs-toggle="tab" data-bs-target="#declined-requests" type="button">
+                  <i class="bi bi-x-circle"></i> Declined
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content mt-3">
+              <div class="tab-pane fade show active" id="pending-requests" role="tabpanel">
                 <div id="organizer-requests-pending"></div>
               </div>
-              <div class="col-lg-4">
-                <h6>Accepted</h6>
+              <div class="tab-pane fade" id="accepted-requests" role="tabpanel">
                 <div id="organizer-requests-accepted"></div>
               </div>
-              <div class="col-lg-4">
-                <h6>Declined</h6>
+              <div class="tab-pane fade" id="declined-requests" role="tabpanel">
                 <div id="organizer-requests-declined"></div>
               </div>
             </div>

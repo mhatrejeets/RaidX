@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"strings"
@@ -26,6 +27,8 @@ func AuthRequired(c *fiber.Ctx) error {
 		if strings.HasPrefix(c.Path(), "/api") {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing JWT token"})
 		}
+		if strings.Contains(c.Path(), "playerselection") || strings.Contains(c.Path(), "scorer") {
+		}
 		returnUrl := c.OriginalURL()
 		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
 	}
@@ -39,6 +42,9 @@ func AuthRequired(c *fiber.Ctx) error {
 		if strings.HasPrefix(c.Path(), "/api") {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid or expired JWT token"})
 		}
+		if strings.Contains(c.Path(), "playerselection") || strings.Contains(c.Path(), "scorer") {
+			println("[DEBUG] Redirecting to login (invalid token). Path:", c.Path(), "URL:", c.OriginalURL())
+		}
 		returnUrl := c.OriginalURL()
 		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
 	}
@@ -46,6 +52,9 @@ func AuthRequired(c *fiber.Ctx) error {
 	if !ok {
 		if strings.HasPrefix(c.Path(), "/api") {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid JWT claims"})
+		}
+		if strings.Contains(c.Path(), "playerselection") || strings.Contains(c.Path(), "scorer") {
+			println("[DEBUG] Redirecting to login (invalid claims). Path:", c.Path(), "URL:", c.OriginalURL())
 		}
 		returnUrl := c.OriginalURL()
 		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
@@ -56,13 +65,19 @@ func AuthRequired(c *fiber.Ctx) error {
 		if strings.HasPrefix(c.Path(), "/api") {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "JWT expired"})
 		}
+		if strings.Contains(c.Path(), "playerselection") || strings.Contains(c.Path(), "scorer") {
+			println("[DEBUG] Redirecting to login (expired token). Path:", c.Path(), "URL:", c.OriginalURL())
+		}
 		returnUrl := c.OriginalURL()
 		return c.Redirect("/login?returnUrl=" + url.QueryEscape(returnUrl))
 	}
 	// Attach user info to context
-	c.Locals("user_id", claims["user_id"])
-	c.Locals("role", claims["role"])
-	c.Locals("session_id", claims["session_id"])
+	userID := fmt.Sprint(claims["user_id"])
+	role := strings.ToLower(fmt.Sprint(claims["role"]))
+	sessionID := fmt.Sprint(claims["session_id"])
+	c.Locals("user_id", userID)
+	c.Locals("role", role)
+	c.Locals("session_id", sessionID)
 	return c.Next()
 }
 
