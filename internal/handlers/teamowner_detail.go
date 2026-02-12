@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -271,8 +272,8 @@ func UpdateTeam(c *fiber.Ctx) error {
 	// Update team
 	_, err = teamsCollection.UpdateOne(ctx, bson.M{"_id": teamOID}, bson.M{
 		"$set": bson.M{
-			"teamName": updateData.TeamName,
-			"city":     updateData.City,
+			"team_name": updateData.TeamName,
+			"city":      updateData.City,
 		},
 	})
 	if err != nil {
@@ -313,6 +314,19 @@ func AddPlayerToTeam(c *fiber.Ctx) error {
 
 	if team.OwnerID != ownerID {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+
+	// Check if team is in any active events
+	hasActiveEvents, eventNames, err := checkTeamActiveEvents(ctx, teamOID)
+	if err != nil {
+		logrus.Error("AddPlayerToTeam: Failed to check active events:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to verify team status"})
+	}
+	if hasActiveEvents {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":  "Cannot modify team while participating in active events",
+			"events": eventNames,
+		})
 	}
 
 	// Parse request
@@ -393,6 +407,19 @@ func RemovePlayerFromTeam(c *fiber.Ctx) error {
 
 	if team.OwnerID != ownerID {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+
+	// Check if team is in any active events
+	hasActiveEvents, eventNames, err := checkTeamActiveEvents(ctx, teamOID)
+	if err != nil {
+		logrus.Error("RemovePlayerFromTeam: Failed to check active events:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to verify team status"})
+	}
+	if hasActiveEvents {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":  "Cannot modify team while participating in active events",
+			"events": eventNames,
+		})
 	}
 
 	// Remove player from team
@@ -540,4 +567,56 @@ func GetOwnerTournamentRequests(c *fiber.Ctx) error {
 		"tournaments":     tournaments,
 		"pendingRequests": enrichedRequests,
 	})
+}
+
+// checkTeamActiveEvents checks if a team is participating in any active or ongoing events
+func checkTeamActiveEvents(ctx context.Context, teamID primitive.ObjectID) (bool, []string, error) {
+	invitationsCollection := db.MongoClient.Database("raidx").Collection("invitations")
+
+	// Find all accepted invitations for this team
+	cursor, err := invitationsCollection.Find(ctx, bson.M{
+		"team_id": teamID,
+		"status":  models.InviteStatusAccepted,
+		"type":    models.InviteTypeEvent,
+	})
+	if err != nil {
+		return false, nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var invitations []models.Invitation
+	if err = cursor.All(ctx, &invitations); err != nil {
+		return false, nil, err
+	}
+
+	if len(invitations) == 0 {
+		return false, nil, nil
+	}
+
+	// Check if any of the events are active or ongoing
+	eventsCollection := db.MongoClient.Database("raidx").Collection("events")
+	eventNames := []string{}
+
+	for _, inv := range invitations {
+		if inv.EventID == nil {
+			continue
+		}
+
+		var event models.Event
+		err := eventsCollection.FindOne(ctx, bson.M{
+			"_id":    *inv.EventID,
+			"status": bson.M{"$in": []string{"active", "ongoing"}},
+		}).Decode(&event)
+
+		if err == nil {
+			// Event found with active/ongoing status
+			eventNames = append(eventNames, fmt.Sprintf("%s (%s)", event.EventName, event.Status))
+		}
+	}
+
+	if len(eventNames) > 0 {
+		return true, eventNames, nil
+	}
+
+	return false, nil, nil
 }

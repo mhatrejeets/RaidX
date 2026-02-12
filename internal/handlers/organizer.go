@@ -517,16 +517,16 @@ func GetOrganizerEventInvitesHandler(c *fiber.Ctx) error {
 	response := make([]fiber.Map, 0, len(invites))
 	for _, invite := range invites {
 		item := fiber.Map{
-			"id":          invite.ID.Hex(),
-			"status":      invite.Status,
+			"id":            invite.ID.Hex(),
+			"status":        invite.Status,
 			"declineReason": invite.DeclineReason,
-			"eventId":     "",
-			"eventName":   "",
-			"ownerName":   "Unknown",
-			"ownerUserId": "",
-			"teamId":      "Unassigned",
-			"teamName":    "",
-			"createdAt":   invite.CreatedAt,
+			"eventId":       "",
+			"eventName":     "",
+			"ownerName":     "Unknown",
+			"ownerUserId":   "",
+			"teamId":        "Unassigned",
+			"teamName":      "",
+			"createdAt":     invite.CreatedAt,
 		}
 		if invite.EventID != nil {
 			item["eventId"] = invite.EventID.Hex()

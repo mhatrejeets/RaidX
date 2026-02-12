@@ -48,15 +48,15 @@ func GetPlayerInvitationsHandler(c *fiber.Ctx) error {
 	response := make([]fiber.Map, 0, len(invites))
 	for _, invite := range invites {
 		item := fiber.Map{
-			"id":        invite.ID.Hex(),
-			"type":      invite.Type,
-			"status":    invite.Status,
+			"id":            invite.ID.Hex(),
+			"type":          invite.Type,
+			"status":        invite.Status,
 			"declineReason": invite.DeclineReason,
-			"teamId":    "",
-			"teamName":  "",
-			"ownerName": "",
-			"createdAt": invite.CreatedAt,
-			"expiresAt": invite.ExpiresAt,
+			"teamId":        "",
+			"teamName":      "",
+			"ownerName":     "",
+			"createdAt":     invite.CreatedAt,
+			"expiresAt":     invite.ExpiresAt,
 		}
 
 		if invite.TeamID != nil && invite.TeamID != &primitive.NilObjectID {

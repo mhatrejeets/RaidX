@@ -388,7 +388,7 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 		}
 		teamsColl := db.MongoClient.Database("raidx").Collection("rbac_teams")
 		var team struct {
-			OwnerID primitive.ObjectID `bson:"owner_id"`
+			OwnerID primitive.ObjectID   `bson:"owner_id"`
 			Players []primitive.ObjectID `bson:"players"`
 		}
 		if err := teamsColl.FindOne(ctx, bson.M{"_id": teamOID}).Decode(&team); err != nil {
@@ -428,10 +428,10 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 					}
 					reason := fmt.Sprintf("Maximum number of teams for the %s reached", label)
 					declineUpdate := bson.M{"$set": bson.M{
-						"status":          models.InviteStatusDeclined,
-						"decline_reason":  reason,
-						"to_id":           userID,
-						"team_id":         teamOID,
+						"status":         models.InviteStatusDeclined,
+						"decline_reason": reason,
+						"to_id":          userID,
+						"team_id":        teamOID,
 					}}
 					_, _ = invitesColl.UpdateOne(ctx, bson.M{"_id": invID}, declineUpdate)
 					return c.JSON(fiber.Map{
