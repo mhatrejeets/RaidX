@@ -294,11 +294,17 @@
         const eventId = normalizeParam(params.get("event_id"));
         const tournamentId = normalizeParam(params.get("tournament_id")) || normalizeParam(params.get("tournamentId"));
         const fixtureId = normalizeParam(params.get("fixture_id")) || normalizeParam(params.get("fixtureId"));
+        const championshipId = normalizeParam(params.get("championship_id")) || normalizeParam(params.get("championshipId"));
+        const championshipFixtureId = normalizeParam(params.get("championship_fixture_id")) || normalizeParam(params.get("championshipFixtureId"));
+        const matchId = normalizeParam(params.get("match_id"));
         const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
         const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
         const tournamentParam = tournamentId ? `&tournament_id=${encodeURIComponent(tournamentId)}` : '';
         const fixtureParam = fixtureId ? `&fixture_id=${encodeURIComponent(fixtureId)}` : '';
-        window.location.href = `/organizer/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&match_id=${encodeURIComponent(playerId)}${eventParam}${tournamentParam}${fixtureParam}&token=${encodeURIComponent(token)}`;
+        const championshipParam = championshipId ? `&championship_id=${encodeURIComponent(championshipId)}` : '';
+        const championshipFixtureParam = championshipFixtureId ? `&championship_fixture_id=${encodeURIComponent(championshipFixtureId)}` : '';
+        const matchIdParam = matchId || championshipFixtureId || fixtureId || (`m-${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}`);
+        window.location.href = `/organizer/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&match_id=${encodeURIComponent(matchIdParam)}${eventParam}${tournamentParam}${fixtureParam}${championshipParam}${championshipFixtureParam}&token=${encodeURIComponent(token)}`;
       } else {
         const team1Id = resolvedTeam1Id || normalizeParam(params.get("team1_id"));
         const team2Id = resolvedTeam2Id || normalizeParam(params.get("team2_id"));
@@ -311,11 +317,17 @@
         const eventId = normalizeParam(params.get("event_id"));
         const tournamentId = normalizeParam(params.get("tournament_id")) || normalizeParam(params.get("tournamentId"));
         const fixtureId = normalizeParam(params.get("fixture_id")) || normalizeParam(params.get("fixtureId"));
+        const championshipId = normalizeParam(params.get("championship_id")) || normalizeParam(params.get("championshipId"));
+        const championshipFixtureId = normalizeParam(params.get("championship_fixture_id")) || normalizeParam(params.get("championshipFixtureId"));
+        const matchId = normalizeParam(params.get("match_id"));
         const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
         const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
         const tournamentParam = tournamentId ? `&tournament_id=${encodeURIComponent(tournamentId)}` : '';
         const fixtureParam = fixtureId ? `&fixture_id=${encodeURIComponent(fixtureId)}` : '';
-        window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&team2_name=${encodeURIComponent(team2Name)}&match_id=${encodeURIComponent(playerId)}${eventParam}${tournamentParam}${fixtureParam}&token=${encodeURIComponent(token)}`;
+        const championshipParam = championshipId ? `&championship_id=${encodeURIComponent(championshipId)}` : '';
+        const championshipFixtureParam = championshipFixtureId ? `&championship_fixture_id=${encodeURIComponent(championshipFixtureId)}` : '';
+        const matchIdParam = matchId || championshipFixtureId || fixtureId || (`m-${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}`);
+        window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&team2_name=${encodeURIComponent(team2Name)}&match_id=${encodeURIComponent(matchIdParam)}${eventParam}${tournamentParam}${fixtureParam}${championshipParam}${championshipFixtureParam}&token=${encodeURIComponent(token)}`;
       }
     });
     

@@ -79,7 +79,8 @@ func EndGameHandler(c *fiber.Ctx) error {
 	// 3. Insert full gameStats into matches collection
 	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
 	logrus.Debug("EndGame Handler will insert ", gameStats)
-	if _, err := matchesColl.InsertOne(ctx, gameStats); err != nil {
+	_, err = matchesColl.InsertOne(ctx, gameStats)
+	if err != nil {
 		logrus.Error("Error:", "EndGameHandler:", " Failed to insert into matches: %v", err)
 		return c.Status(500).SendString("Failed to insert into matches: " + err.Error())
 	}
@@ -125,6 +126,17 @@ func EndGameHandler(c *fiber.Ctx) error {
 	if tournamentIDParam != "" && fixtureIDParam != "" {
 		if err := updateTournamentAfterMatch(ctx, tournamentIDParam, fixtureIDParam, gameStats); err != nil {
 			logrus.Error("Error:", "EndGameHandler:", " Failed to update tournament: %v", err)
+			// Don't fail the whole endgame, just log the error
+		}
+	}
+
+	// 7. Handle championship match completion
+	championshipIDParam := c.Query("championship_id")
+	championshipFixtureIDParam := c.Query("championship_fixture_id")
+
+	if championshipIDParam != "" && championshipFixtureIDParam != "" {
+		if err := updateChampionshipAfterMatch(ctx, championshipIDParam, championshipFixtureIDParam, gameStats); err != nil {
+			logrus.Error("Error:", "EndGameHandler:", " Failed to update championship: %v", err)
 			// Don't fail the whole endgame, just log the error
 		}
 	}

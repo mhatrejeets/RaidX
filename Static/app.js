@@ -247,10 +247,14 @@ function endGame() {
     const eventId = new URLSearchParams(window.location.search).get('event_id');
     const tournamentId = new URLSearchParams(window.location.search).get('tournament_id');
     const fixtureId = new URLSearchParams(window.location.search).get('fixture_id');
+    const championshipId = new URLSearchParams(window.location.search).get('championship_id');
+    const championshipFixtureId = new URLSearchParams(window.location.search).get('championship_fixture_id');
     const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
     const tournamentParam = tournamentId ? `&tournament_id=${encodeURIComponent(tournamentId)}` : '';
     const fixtureParam = fixtureId ? `&fixture_id=${encodeURIComponent(fixtureId)}` : '';
-    fetch(`/api/endgame?match_id=${encodeURIComponent(matchId)}${eventParam}${tournamentParam}${fixtureParam}`, {
+    const championshipParam = championshipId ? `&championship_id=${encodeURIComponent(championshipId)}` : '';
+    const championshipFixtureParam = championshipFixtureId ? `&championship_fixture_id=${encodeURIComponent(championshipFixtureId)}` : '';
+    fetch(`/api/endgame?match_id=${encodeURIComponent(matchId)}${eventParam}${tournamentParam}${fixtureParam}${championshipParam}${championshipFixtureParam}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -261,6 +265,9 @@ function endGame() {
             if (tournamentId) {
                 // Redirect to tournament dashboard
                 window.location.href = `/organizer/tournament?id=${tournamentId}&token=${encodeURIComponent(token)}`;
+            } else if (championshipId) {
+                // Redirect to championship dashboard
+                window.location.href = `/organizer/championship?id=${championshipId}&token=${encodeURIComponent(token)}`;
             } else if (eventId) {
                 window.location.href = `/organizer/event/${eventId}?token=${encodeURIComponent(token)}`;
             } else {
@@ -670,23 +677,30 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
             }
 
-            // If match_id is provided in URL, auto-join using that id (tournament flow)
+            // If match_id is provided in URL, prefill it.
+            // Only auto-join when resume=1 is explicitly set.
             if (prefillMatchId) {
                 matchId = prefillMatchId.trim();
                 if (matchInput) matchInput.value = matchId;
                 try { localStorage.setItem(MATCH_STORAGE_KEY, matchId); } catch (e) { console.warn('Failed to persist match id', e); }
-                setMatchIdDisplay(matchId);
-                const overlay = document.getElementById('match-setup');
-                if (overlay) overlay.style.display = 'none';
-                setupWebSocket();
-                if (socket) {
-                    socket.onopen = () => {
-                        socket.send(JSON.stringify({ type: 'join', matchId }));
-                        setConnectionStatus('Connected');
-                        console.log('Auto-joined match:', matchId);
-                    };
+                if (resumeFlag) {
+                    setMatchIdDisplay(matchId);
+                    const overlay = document.getElementById('match-setup');
+                    if (overlay) overlay.style.display = 'none';
+                    setupWebSocket();
+                    if (socket) {
+                        socket.onopen = () => {
+                            socket.send(JSON.stringify({ type: 'join', matchId }));
+                            setConnectionStatus('Connected');
+                            console.log('Auto-joined match:', matchId);
+                        };
+                    }
+                    autoJoinedFromPrefill = true;
+                } else {
+                    setMatchIdDisplay('—');
+                    const overlay = document.getElementById('match-setup');
+                    if (overlay) overlay.style.display = 'flex';
                 }
-                autoJoinedFromPrefill = true;
             }
 
             // If a match id was previously stored, auto-join that match (persistence across refreshes)
@@ -695,7 +709,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 matchId = stored.trim();
                 if (matchInput) matchInput.value = matchId;
                 // Only auto-join (and hide overlay) if explicitly allowed via URL (prefill/resume)
-                const allowAutoJoin = !!prefillMatchId || resumeFlag;
+                const allowAutoJoin = resumeFlag;
                 if (allowAutoJoin) {
                     const overlay = document.getElementById('match-setup');
                     if (overlay) overlay.style.display = 'none';

@@ -383,7 +383,21 @@
               }
               setStatus('Tournament initialized successfully!', 'success');
               // Redirect to tournament dashboard
-              window.location.href = `/organizer/tournament?id=${initData.tournamentId}`;
+              window.location.href = `/organizer/tournament?id=${initData.tournament.id}`;
+              return;
+            }
+
+            // Handle championship initialization
+            if ((data.eventType || '').toLowerCase() === 'championship') {
+              setStatus('Initializing championship...', 'info');
+              const initRes = await apiRequest(`/api/championships/initialize/${eventId}`, { method: 'POST' });
+              const initData = await initRes.json();
+              if (!initRes.ok) {
+                throw new Error(initData.error || 'Failed to initialize championship');
+              }
+              setStatus('Championship initialized successfully!', 'success');
+              // Redirect to championship dashboard
+              window.location.href = `/organizer/championship?id=${initData.championship.id}`;
               return;
             }
 

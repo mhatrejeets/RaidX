@@ -87,6 +87,13 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/tournaments/:id/standings", middleware.RoleRequired(models.RoleOrganizer), handlers.GetTournamentStandingsHandler)
 	app.Post("/api/tournaments/:id/start-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.StartTournamentMatchHandler)
 
+	// RBAC: Championship APIs
+	app.Post("/api/championships/initialize/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.InitializeChampionshipHandler)
+	app.Get("/api/championships/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.GetChampionshipByIDHandler)
+	app.Get("/api/championships/:id/fixtures", middleware.RoleRequired(models.RoleOrganizer), handlers.GetChampionshipFixturesHandler)
+	app.Get("/api/championships/:id/stats", middleware.RoleRequired(models.RoleOrganizer), handlers.GetChampionshipStatsHandler)
+	app.Post("/api/championships/:id/start-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.StartChampionshipMatchHandler)
+
 	// RBAC: Invitations (players and team owners)
 	app.Put("/api/invitations/:id", middleware.RoleRequired(models.RolePlayer, models.RoleTeamOwner), handlers.UpdateInvitationStatusHandler)
 	app.Get("/api/invitations", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerInvitationsHandler)
@@ -104,13 +111,16 @@ func setupProtectedRoutes(app *fiber.App) {
 
 	// RBAC: Organizer - Event & Match Management Pages
 	app.Get("/organizer/events", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-events.html")
+		return c.SendFile("./Static/organizer-event-detail.html")
 	})
 	app.Get("/organizer/event/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/organizer-event-detail.html")
 	})
 	app.Get("/organizer/tournament", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/organizer-tournament-detail.html")
+	})
+	app.Get("/organizer/championship", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-championship-detail.html")
 	})
 	app.Get("/organizer/event/:id/matches", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/organizer-event-matches.html")

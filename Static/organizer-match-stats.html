@@ -167,11 +167,15 @@
       const matchId = pathParts[pathParts.indexOf('match') + 1];
       const params = new URLSearchParams(window.location.search);
       const tournamentId = normalizeParam(params.get('tournament_id')) || normalizeParam(params.get('tournamentId'));
+      const championshipId = normalizeParam(params.get('championship_id')) || normalizeParam(params.get('championshipId'));
 
       const backBtn = document.getElementById('back-to-tournament');
       if (backBtn) {
         if (tournamentId) {
           backBtn.href = `/organizer/tournament?id=${encodeURIComponent(tournamentId)}`;
+        } else if (championshipId) {
+          backBtn.href = `/organizer/championship?id=${encodeURIComponent(championshipId)}`;
+          backBtn.innerHTML = '<i class="bi bi-arrow-left"></i> Back to Championship';
         } else {
           backBtn.style.display = 'none';
         }

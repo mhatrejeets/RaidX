@@ -18,6 +18,11 @@ var TournamentsCollection *mongo.Collection
 var FixturesCollection *mongo.Collection
 var PointsTableCollection *mongo.Collection
 
+// Championship collections
+var ChampionshipsCollection *mongo.Collection
+var ChampionshipFixturesCollection *mongo.Collection
+var ChampionshipStatsCollection *mongo.Collection
+
 // Other collections
 var TeamsCollection *mongo.Collection
 var EventsCollection *mongo.Collection
@@ -53,6 +58,9 @@ func InitDB() {
 	TournamentsCollection = raidxDB.Collection("tournaments")
 	FixturesCollection = raidxDB.Collection("fixtures")
 	PointsTableCollection = raidxDB.Collection("points_table")
+	ChampionshipsCollection = raidxDB.Collection("championships")
+	ChampionshipFixturesCollection = raidxDB.Collection("championship_fixtures")
+	ChampionshipStatsCollection = raidxDB.Collection("championship_stats")
 	TeamsCollection = raidxDB.Collection("rbac_teams")
 	EventsCollection = raidxDB.Collection("events")
 	InvitationsCollection = raidxDB.Collection("invitations")

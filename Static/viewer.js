@@ -2,7 +2,7 @@
 let ws = null;
 let matchId = null;
 // Optional token (viewer is allowed without auth)
-let jwtToken = (typeof getValidToken === 'function') ? getValidToken() : null;
+let jwtToken = null;
 let matchEnded = false;
 
 function joinMatch(id) {
@@ -174,6 +174,8 @@ function fetchMatchScore() {
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const urlMatch = params.get('match_id');
+    const urlToken = params.get('token');
+    jwtToken = urlToken || null;
     const joinInput = document.getElementById('viewer-match-id-input');
     const joinBtn = document.getElementById('viewer-join-btn');
     const info = document.getElementById('viewer-info');

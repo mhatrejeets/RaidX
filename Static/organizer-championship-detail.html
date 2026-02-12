@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Championship Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      color: #f97316 !important;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      max-width: 1400px;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      color: #fbbf24;
+      font-weight: bold;
+    }
+
+    .page-header .subtitle {
+      color: #cbd5e1;
+    }
+
+    .badge-round {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-tabs {
+      border-bottom: 2px solid #334155;
+      margin-bottom: 2rem;
+    }
+
+    .nav-tabs .nav-link {
+      color: #cbd5e1;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 1rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+      color: #f97316;
+      border-bottom-color: #f97316;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: #f97316;
+      border-bottom-color: #f97316;
+      background-color: transparent;
+    }
+
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+
+    .fixture-card {
+      background-color: rgba(30, 41, 59, 0.8);
+      border: 2px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .fixture-card:hover {
+      border-color: #f97316;
+      box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+    }
+
+    .fixture-card h5 {
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+    }
+
+    .fixture-card .score {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fbbf24;
+    }
+
+    .fixture-card.bye-card {
+      background-color: rgba(100, 116, 139, 0.3);
+      border-color: #64748b;
+    }
+
+    .btn-primary-orange {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      border: none;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary-orange:hover {
+      background: linear-gradient(45deg, #ea580c, #f97316);
+      color: white;
+      transform: scale(1.02);
+    }
+
+    .btn-primary-orange:disabled {
+      background: #475569;
+      transform: none;
+    }
+
+    .table {
+      color: white;
+    }
+
+    .table thead {
+      background-color: #0f172a;
+    }
+
+    .table tbody tr {
+      background-color: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+
+    .table tbody tr:hover {
+      background-color: #334155;
+    }
+
+    .badge-status {
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+    }
+
+    .badge-pending {
+      background-color: #64748b;
+    }
+
+    .badge-ongoing {
+      background-color: #3b82f6;
+    }
+
+    .badge-completed {
+      background-color: #22c55e;
+    }
+
+    /* Bracket Tree View */
+    .bracket-tree {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 3rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+      padding: 2rem;
+    }
+
+    .bracket-round-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .bracket-arrow {
+      color: #94a3b8;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+    }
+
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      min-width: 250px;
+    }
+
+    .bracket-round-title {
+      color: #fbbf24;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .bracket-match {
+      background-color: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .bracket-match:hover {
+      border-color: #f97316;
+    }
+
+    .bracket-match.bye-match {
+      background-color: rgba(100, 116, 139, 0.2);
+      border-color: #64748b;
+    }
+
+    .bracket-match h6 {
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .bracket-team {
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      background-color: rgba(15, 23, 42, 0.5);
+      border-radius: 0.25rem;
+    }
+
+    .bracket-team.winner {
+      background-color: rgba(34, 197, 94, 0.2);
+      border: 1px solid #22c55e;
+    }
+
+    .winner-badge {
+      background: linear-gradient(45deg, #fbbf24, #f59e0b);
+      color: #0f172a;
+      padding: 1.5rem 2.5rem;
+      border-radius: 0.75rem;
+      font-size: 1.8rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body data-role="organizer">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <i class="bi bi-lightning-fill"></i> RaidX
+      </a>
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a class="btn btn-outline-light btn-sm" href="/organizer/dashboard">
+          <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 id="championship-name"><i class="bi bi-trophy"></i> Championship</h1>
+          <p class="subtitle" id="championship-subtitle">Loading...</p>
+        </div>
+        <div>
+          <span class="badge-round" id="championship-round">Round 1</span>
+        </div>
+      </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="championshipTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="fixtures-tab" data-bs-toggle="tab" data-bs-target="#fixtures" type="button">
+          <i class="bi bi-calendar-event"></i> Fixtures
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button">
+          <i class="bi bi-bar-chart"></i> Team Stats
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="bracket-tab" data-bs-toggle="tab" data-bs-target="#bracket" type="button">
+          <i class="bi bi-diagram-3"></i> Knockout Tree
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Fixtures Tab -->
+      <div class="tab-pane fade show active" id="fixtures" role="tabpanel">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Championship Fixtures</h5>
+            <button class="btn btn-primary-orange btn-sm" onclick="loadFixtures()">
+              <i class="bi bi-arrow-repeat"></i> Refresh
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="fixtures-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Tab -->
+      <div class="tab-pane fade" id="stats" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Team NRR Statistics</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Team</th>
+                    <th>Matches Played</th>
+                    <th>Points Scored</th>
+                    <th>Points Conceded</th>
+                    <th>NRR</th>
+                  </tr>
+                </thead>
+                <tbody id="stats-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bracket Tab -->
+      <div class="tab-pane fade" id="bracket" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Knockout Tree</h5>
+          </div>
+          <div class="card-body">
+            <div id="bracket-view"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const championshipId = new URLSearchParams(window.location.search).get('id');
+
+    if (!championshipId) {
+      alert('No championship ID provided');
+      window.location.href = '/organizer/dashboard';
+    }
+
+    async function apiRequest(url, options = {}) {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...options.headers,
+      };
+      return fetch(url, { ...options, headers });
+    }
+
+    let headerLoaded = false;
+    let currentChampionship = null;
+
+    async function loadChampionshipHeader(championship) {
+      if (headerLoaded || !championship?.eventId) return;
+      try {
+        const res = await apiRequest(`/api/organizer/events/${championship.eventId}`);
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('championship-name').textContent = data.eventName || 'Championship';
+          document.getElementById('championship-subtitle').textContent = `Type: ${data.eventType || 'championship'} • Status: ${data.status || '-'}`;
+          headerLoaded = true;
+        }
+      } catch (err) {
+        // leave loading text if it fails
+      }
+    }
+
+    async function loadChampionshipInfo() {
+      try {
+        const res = await apiRequest(`/api/championships/${championshipId}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load championship');
+        }
+
+        currentChampionship = data;
+        loadChampionshipHeader(data);
+
+        // Update header
+        document.getElementById('championship-round').textContent = `Round ${data.currentRound} of ${data.totalRounds}`;
+      } catch (error) {
+        console.error('Failed to load championship info:', error);
+      }
+    }
+
+    async function loadFixtures() {
+      try {
+        const res = await apiRequest(`/api/championships/${championshipId}/fixtures`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load fixtures');
+        }
+
+        const fixtures = data || [];
+
+        // Group fixtures by round
+        const fixturesByRound = {};
+        fixtures.forEach(f => {
+          if (!fixturesByRound[f.roundNumber]) {
+            fixturesByRound[f.roundNumber] = [];
+          }
+          fixturesByRound[f.roundNumber].push(f);
+        });
+
+        // Render rounds in descending order (latest first)
+        const rounds = Object.keys(fixturesByRound).sort((a, b) => b - a);
+        
+        let html = '';
+        rounds.forEach(roundNum => {
+          const roundFixtures = fixturesByRound[roundNum];
+          const roundName = getRoundName(parseInt(roundNum), currentChampionship?.totalRounds);
+          html += `<h6 style="color: #fbbf24; margin-top: ${html ? '2rem' : '0'};">${roundName}</h6>`;
+          roundFixtures.forEach(f => html += renderFixture(f));
+        });
+
+        document.getElementById('fixtures-list').innerHTML = html || '<p style="color: #fbbf24;">No fixtures available.</p>';
+      } catch (error) {
+        console.error('Failed to load fixtures:', error);
+        document.getElementById('fixtures-list').innerHTML = '<p style="color: #ef4444;">Failed to load fixtures.</p>';
+      }
+    }
+
+    function getRoundName(roundNum, totalRounds) {
+      if (!totalRounds) return `Round ${roundNum}`;
+      const remainingRounds = totalRounds - roundNum;
+      if (remainingRounds === 0) return 'Final';
+      if (remainingRounds === 1) return 'Semifinal';
+      if (remainingRounds === 2) return 'Quarterfinal';
+      return `Round ${roundNum}`;
+    }
+
+    function renderFixture(fixture) {
+      const statusBadge = {
+        pending: 'badge-pending',
+        ongoing: 'badge-ongoing',
+        completed: 'badge-completed',
+      }[fixture.status] || 'badge-pending';
+
+      if (fixture.isBye) {
+        return `
+          <div class="fixture-card bye-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="flex-grow-1">
+                <h5>${fixture.team1?.team_name || 'Team'} - BYE</h5>
+                <p style="color: #cbd5e1; margin: 0;">Advances to next round automatically</p>
+                <span class="badge badge-status badge-completed">BYE</span>
+              </div>
+              <div>
+                <i class="bi bi-check-circle" style="font-size: 2rem; color: #22c55e;"></i>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      let scoreDisplay = '';
+      if (fixture.status === 'completed') {
+        const winner = fixture.winnerId === fixture.team1Id ? fixture.team1?.team_name : fixture.team2?.team_name;
+        scoreDisplay = `
+          <div class="score">${fixture.team1Score || 0} - ${fixture.team2Score || 0}</div>
+          <div style="color:#fbbf24; font-weight:600;">Winner: ${winner || 'TBD'}</div>
+        `;
+      }
+
+      let actionBtn = '';
+      if (fixture.status === 'pending') {
+        actionBtn = `<button class="btn btn-primary-orange btn-sm" onclick="startMatch('${fixture.id}')">
+          <i class="bi bi-play-fill"></i> Start Match
+        </button>`;
+      } else if (fixture.status === 'completed' && fixture.matchId) {
+        actionBtn = `<button class="btn btn-outline-light btn-sm" onclick="viewMatchStats('${fixture.matchId}')">
+          <i class="bi bi-bar-chart"></i> View Stats
+        </button>`;
+      }
+
+      return `
+        <div class="fixture-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+              <h5>${fixture.team1?.team_name || 'Team 1'} vs ${fixture.team2?.team_name || 'Team 2'}</h5>
+              ${scoreDisplay}
+              <span class="badge badge-status ${statusBadge}">${fixture.status.toUpperCase()}</span>
+            </div>
+            <div>
+              ${actionBtn}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function startMatch(fixtureId) {
+      try {
+        const res = await apiRequest(`/api/championships/${championshipId}/start-match/${fixtureId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to start match');
+        }
+
+        // Redirect to player selection with match_id for stats
+        window.location.href = `/organizer/playerselection/match?team1_id=${data.team1Id}&team2_id=${data.team2Id}&match_id=${encodeURIComponent(data.matchId)}&championship_id=${championshipId}&championship_fixture_id=${fixtureId}`;
+      } catch (error) {
+        console.error('Failed to start match:', error);
+        alert('Failed to start match: ' + error.message);
+      }
+    }
+
+    function viewMatchStats(matchId) {
+      const params = new URLSearchParams();
+      if (championshipId) params.set('championship_id', championshipId);
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      window.location.href = `/organizer/match/${matchId}/stats${suffix}`;
+    }
+
+    async function loadStats() {
+      try {
+        const res = await apiRequest(`/api/championships/${championshipId}/stats`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load stats');
+        }
+
+        const stats = data || [];
+        
+        // Sort by NRR descending
+        stats.sort((a, b) => b.nrr - a.nrr);
+
+        const tbody = document.getElementById('stats-table');
+        tbody.innerHTML = stats.map(stat => `
+          <tr>
+            <td><strong>${stat.team?.team_name || 'Unknown Team'}</strong></td>
+            <td>${stat.matchesPlayed}</td>
+            <td>${stat.pointsScored}</td>
+            <td>${stat.pointsConceded}</td>
+            <td><strong>${stat.nrr.toFixed(2)}</strong></td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+        document.getElementById('stats-table').innerHTML = '<tr><td colspan="5" style="color: #ef4444;">Failed to load stats.</td></tr>';
+      }
+    }
+
+    async function loadBracket() {
+      try {
+        const res = await apiRequest(`/api/championships/${championshipId}/fixtures`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load bracket');
+        }
+
+        const fixtures = data || [];
+
+        if (fixtures.length === 0) {
+          document.getElementById('bracket-view').innerHTML = '<p style="color: #fbbf24;">No fixtures generated yet.</p>';
+          return;
+        }
+
+        // Group fixtures by round
+        const fixturesByRound = {};
+        fixtures.forEach(f => {
+          if (!fixturesByRound[f.roundNumber]) {
+            fixturesByRound[f.roundNumber] = [];
+          }
+          fixturesByRound[f.roundNumber].push(f);
+        });
+
+        // Render rounds in ascending order (R1 first)
+        const rounds = Object.keys(fixturesByRound).sort((a, b) => a - b);
+        
+        let html = '<div class="bracket-tree">';
+        rounds.forEach((roundNum, idx) => {
+          const roundFixtures = fixturesByRound[roundNum];
+          const roundName = getRoundName(parseInt(roundNum), currentChampionship?.totalRounds);
+
+          html += '<div class="bracket-round-wrapper">';
+          html += '<div class="bracket-round">';
+          html += `<div class="bracket-round-title">${roundName}</div>`;
+          
+          roundFixtures.forEach(fixture => {
+            const isBye = fixture.isBye;
+            const matchClass = isBye ? 'bracket-match bye-match' : 'bracket-match';
+            
+            html += `<div class="${matchClass}">`;
+            
+            if (isBye) {
+              html += `<div class="bracket-team winner">${fixture.team1?.team_name || 'Team'} (BYE)</div>`;
+            } else {
+              const team1Class = fixture.winnerId === fixture.team1Id ? 'bracket-team winner' : 'bracket-team';
+              const team2Class = fixture.winnerId === fixture.team2Id ? 'bracket-team winner' : 'bracket-team';
+              
+              html += `<div class="${team1Class}">${fixture.team1?.team_name || 'Team 1'}${fixture.status === 'completed' ? ` (${fixture.team1Score || 0})` : ''}</div>`;
+              html += `<div class="${team2Class}">${fixture.team2?.team_name || 'Team 2'}${fixture.status === 'completed' ? ` (${fixture.team2Score || 0})` : ''}</div>`;
+            }
+            
+            html += '</div>';
+          });
+
+          html += '</div>';
+          if (idx < rounds.length - 1) {
+            html += '<div class="bracket-arrow"><i class="bi bi-arrow-right"></i></div>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+
+        if (currentChampionship?.status === 'completed' && currentChampionship?.winnerId) {
+          const winnerFixture = fixtures.find(f => f.winnerId === currentChampionship.winnerId);
+          const winnerTeam = winnerFixture
+            ? (winnerFixture.team1Id === currentChampionship.winnerId ? winnerFixture.team1?.team_name : winnerFixture.team2?.team_name)
+            : null;
+          const winnerText = winnerTeam ? `Championship Winner: ${winnerTeam}` : 'Championship Winner!';
+          html += `<div class="text-center"><div class="winner-badge"><i class="bi bi-trophy-fill"></i> ${winnerText}</div></div>`;
+        }
+
+        document.getElementById('bracket-view').innerHTML = html;
+      } catch (error) {
+        console.error('Failed to load bracket:', error);
+        document.getElementById('bracket-view').innerHTML = '<p style="color: #ef4444;">Failed to load bracket.</p>';
+      }
+    }
+
+    // Load initial data
+    loadChampionshipInfo();
+    loadFixtures();
+    loadStats();
+    loadBracket();
+
+    // Refresh on tab change
+    document.getElementById('stats-tab').addEventListener('click', loadStats);
+    document.getElementById('bracket-tab').addEventListener('click', loadBracket);
+  </script>
+</body>
+</html>
