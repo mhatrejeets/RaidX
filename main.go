@@ -133,6 +133,7 @@ func setupProtectedRoutes(app *fiber.App) {
 	})
 
 	app.Get("/organizer/profile/:id", handlers.OrganizerProfileHandler)
+	app.Get("/owner/profile/:id", handlers.OwnerProfileHandler)
 	app.Get("/organizer/match/:id/scorer", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/organizer-scorer.html")
 	})
@@ -143,6 +144,25 @@ func setupProtectedRoutes(app *fiber.App) {
 	})
 	app.Get("/scorer", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer), func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/scorer.html")
+	})
+
+	// RBAC: Organizer - Event-specific Pending Approvals & Invite Links
+	app.Get("/organizer/events/:id/pending-approvals", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-event-pending-approvals.html")
+	})
+	app.Get("/organizer/event/:id/pending-approvals", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-event-pending-approvals.html")
+	})
+	app.Get("/organizer/invite-links", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-invite-links.html")
+	})
+
+	// RBAC: Team Owner - Team-specific Pending Approvals & Invite Links
+	app.Get("/owner/teams/:id/pending-approvals", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/owner-team-pending-approvals.html")
+	})
+	app.Get("/owner/invite-links", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/owner-invite-links.html")
 	})
 
 	// RBAC: Shared Match Viewing (both team owner and organizer can view)
@@ -168,10 +188,21 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Put("/api/pending-approvals/:id/approve", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.ApprovePendingApproval)
 	app.Put("/api/pending-approvals/:id/reject", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.RejectPendingApproval)
 
+	// RBAC: Organizer Invite Link Management APIs
+	app.Post("/api/organizer/invite-links", middleware.RoleRequired(models.RoleOrganizer), handlers.CreateOrganizerInviteLink)
+	app.Get("/api/organizer/invite-links", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerInviteLinks)
+	app.Delete("/api/organizer/invite-links/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.DeleteOrganizerInviteLink)
+
+	// RBAC: Team Owner Invite Link Management APIs
+	app.Post("/api/owner/invite-links", middleware.RoleRequired(models.RoleTeamOwner), handlers.CreateOwnerInviteLink)
+	app.Get("/api/owner/invite-links", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetOwnerInviteLinks)
+	app.Delete("/api/owner/invite-links/:id", middleware.RoleRequired(models.RoleTeamOwner), handlers.DeleteOwnerInviteLink)
+
 	// RBAC: Invite Link Accept APIs (Public endpoints that check authentication)
 	app.Post("/api/invite-link/team/:token/accept", middleware.AuthRequired, handlers.AcceptTeamInviteLink)
 	app.Post("/api/invite-link/team/:token/claim", middleware.AuthRequired, handlers.ClaimTeamInviteLink)
 	app.Post("/api/invite-link/event/:token/accept", middleware.AuthRequired, handlers.AcceptEventInviteLink)
+	app.Post("/api/invite-link/event/:token/claim", middleware.AuthRequired, handlers.ClaimEventInviteLink)
 
 	// RBAC: Team Owner - Team Management APIs
 	app.Get("/api/owner/teams", middleware.RoleRequired(models.RoleTeamOwner), handlers.GetOwnerTeams)

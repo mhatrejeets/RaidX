@@ -51,6 +51,7 @@ func GetPlayerInvitationsHandler(c *fiber.Ctx) error {
 			"id":        invite.ID.Hex(),
 			"type":      invite.Type,
 			"status":    invite.Status,
+			"declineReason": invite.DeclineReason,
 			"teamId":    "",
 			"teamName":  "",
 			"ownerName": "",

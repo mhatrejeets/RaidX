@@ -10,9 +10,10 @@ const (
 	InviteTypeTeam  = "team_invite"
 	InviteTypeEvent = "event_invite"
 
-	InviteStatusPending  = "pending"
-	InviteStatusAccepted = "accepted"
-	InviteStatusDeclined = "declined"
+	InviteStatusPending        = "pending"
+	InviteStatusAccepted       = "accepted"
+	InviteStatusDeclined       = "declined"
+	InviteStatusInvitedViaLink = "invited_via_link"
 )
 
 // Invitation represents a team or event invitation.
@@ -25,6 +26,8 @@ type Invitation struct {
 	EventID     *primitive.ObjectID `bson:"event_id,omitempty" json:"event_id,omitempty"`
 	InviteToken string              `bson:"invite_token" json:"invite_token"`
 	Status      string              `bson:"status" json:"status"`
+	DeclineReason string            `bson:"decline_reason,omitempty" json:"decline_reason,omitempty"`
+	Source      string              `bson:"source,omitempty" json:"source,omitempty"`
 	CreatedAt   time.Time           `bson:"created_at" json:"created_at"`
 	ExpiresAt   time.Time           `bson:"expires_at" json:"expires_at"`
 }

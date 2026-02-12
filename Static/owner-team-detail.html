@@ -204,6 +204,11 @@
           <i class="bi bi-pencil"></i> Edit Team
         </button>
       </li>
+      <li class="nav-item">
+        <button class="nav-link" id="approvals-tab" data-bs-toggle="tab" data-bs-target="#approvals" type="button">
+          <i class="bi bi-clipboard-check"></i> Pending Approvals
+        </button>
+      </li>
     </ul>
 
     <!-- Tab Content -->
@@ -279,6 +284,21 @@
           </div>
         </div>
       </div>
+
+      <!-- Pending Approvals Tab -->
+      <div class="tab-pane fade" id="approvals" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Pending Approvals</h5>
+          </div>
+          <div class="card-body text-center" style="padding: 3rem;">
+            <p class="text-white mb-3">Review and approve pending player join requests</p>
+            <button class="btn btn-primary-orange btn-lg" onclick="openPendingApprovals()">
+              <i class="bi bi-clipboard-check"></i> View Pending Approvals
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -287,6 +307,10 @@
   <script>
     const teamId = window.location.pathname.split('/')[3];
     const isEditMode = window.location.pathname.includes('/edit');
+
+    function openPendingApprovals() {
+      window.location.href = `/owner/teams/${teamId}/pending-approvals`;
+    }
     
     console.log('Page URL:', window.location.pathname);
     console.log('Extracted TeamID:', teamId);

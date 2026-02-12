@@ -13,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // generateToken creates a secure random token
@@ -109,7 +110,7 @@ func GenerateEventInviteLink(c *fiber.Ctx) error {
 	defer cancel()
 
 	// Verify event exists and user is organizer
-	eventsCollection := db.MongoClient.Database("raidx").Collection("rbac_events")
+	eventsCollection := db.MongoClient.Database("raidx").Collection("events")
 	var event models.Event
 	err = eventsCollection.FindOne(ctx, bson.M{"_id": eventOID, "organizer_id": organizerID}).Decode(&event)
 	if err != nil {
@@ -218,13 +219,32 @@ func ClaimTeamInviteLink(c *fiber.Ctx) error {
 	}
 
 	invitesCollection := db.MongoClient.Database("raidx").Collection("invitations")
+	// Prevent duplicate invitations for same team and player (allow if previously declined)
+	if inviteLink.TeamID != "" {
+		if teamOID, err := primitive.ObjectIDFromHex(inviteLink.TeamID); err == nil {
+			dupErr := invitesCollection.FindOne(ctx, bson.M{
+				"type":    models.InviteTypeTeam,
+				"team_id": teamOID,
+				"to_id":   userOID,
+				"status":  bson.M{"$ne": models.InviteStatusDeclined},
+			}).Err()
+			if dupErr == nil {
+				return c.JSON(fiber.Map{
+					"success":       true,
+					"invitation_id": "",
+					"message":       "Invitation already exists",
+				})
+			}
+		}
+	}
 
-	// If an invitation already exists for this token and user, return success.
+	// If an invitation already exists for this token and user, return success (unless declined).
 	var existing models.Invitation
 	err = invitesCollection.FindOne(ctx, bson.M{
 		"invite_token": token,
 		"type":         models.InviteTypeTeam,
 		"to_id":        userOID,
+		"status":       bson.M{"$ne": models.InviteStatusDeclined},
 	}).Decode(&existing)
 	if err == nil {
 		return c.JSON(fiber.Map{
@@ -270,6 +290,128 @@ func ClaimTeamInviteLink(c *fiber.Ctx) error {
 		TeamID:      &teamOID,
 		InviteToken: token,
 		Status:      models.InviteStatusPending,
+		Source:      "invite_link",
+		CreatedAt:   time.Now(),
+		ExpiresAt:   inviteLink.ExpiresAt,
+	}
+
+	if _, err := invitesCollection.InsertOne(ctx, invitation); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to claim invite"})
+	}
+
+	return c.JSON(fiber.Map{
+		"success":       true,
+		"invitation_id": invitation.ID.Hex(),
+	})
+}
+
+// ClaimEventInviteLink assigns an event invite link to the logged-in team owner.
+func ClaimEventInviteLink(c *fiber.Ctx) error {
+	token := c.Params("token")
+	userID := c.Locals("user_id").(string)
+	roleVal := c.Locals("role")
+	roleStr, _ := roleVal.(string)
+	roleStr = strings.ToLower(strings.TrimSpace(roleStr))
+	if roleStr != models.RoleTeamOwner {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Only team owner accounts can claim event invites"})
+	}
+
+	userOID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	var inviteLink models.InviteLink
+	err = linksCollection.FindOne(ctx, bson.M{
+		"token":    token,
+		"type":     models.InviteLinkTypeEvent,
+		"isActive": true,
+	}).Decode(&inviteLink)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Invalid or expired invite link"})
+	}
+
+	if time.Now().After(inviteLink.ExpiresAt) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invite link has expired"})
+	}
+
+	invitesCollection := db.MongoClient.Database("raidx").Collection("invitations")
+	// Prevent duplicate invitations for same event and owner (allow if previously declined)
+	if inviteLink.EventID != "" {
+		if eventOID, err := primitive.ObjectIDFromHex(inviteLink.EventID); err == nil {
+			dupErr := invitesCollection.FindOne(ctx, bson.M{
+				"type":     models.InviteTypeEvent,
+				"event_id": eventOID,
+				"to_id":    userOID,
+				"status":   bson.M{"$ne": models.InviteStatusDeclined},
+			}).Err()
+			if dupErr == nil {
+				return c.JSON(fiber.Map{
+					"success":       true,
+					"invitation_id": "",
+					"message":       "Invitation already exists",
+				})
+			}
+		}
+	}
+
+	// If an invitation already exists for this token and user, return success (unless declined).
+	var existing models.Invitation
+	err = invitesCollection.FindOne(ctx, bson.M{
+		"invite_token": token,
+		"type":         models.InviteTypeEvent,
+		"to_id":        userOID,
+		"status":       bson.M{"$ne": models.InviteStatusDeclined},
+	}).Decode(&existing)
+	if err == nil {
+		return c.JSON(fiber.Map{
+			"success":       true,
+			"invitation_id": existing.ID.Hex(),
+		})
+	}
+
+	// If an invitation exists but is unassigned, assign it to the user.
+	var unassigned models.Invitation
+	err = invitesCollection.FindOne(ctx, bson.M{
+		"invite_token": token,
+		"type":         models.InviteTypeEvent,
+		"to_id":        primitive.NilObjectID,
+	}).Decode(&unassigned)
+	if err == nil {
+		if _, err := invitesCollection.UpdateOne(ctx, bson.M{"_id": unassigned.ID}, bson.M{
+			"$set": bson.M{"to_id": userOID, "source": "invite_link"},
+		}); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to claim invite"})
+		}
+		return c.JSON(fiber.Map{
+			"success":       true,
+			"invitation_id": unassigned.ID.Hex(),
+		})
+	}
+
+	eventOID, err := primitive.ObjectIDFromHex(inviteLink.EventID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid event ID"})
+	}
+
+	fromOID, err := primitive.ObjectIDFromHex(inviteLink.FromID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid organizer ID"})
+	}
+
+	invitation := models.Invitation{
+		ID:          primitive.NewObjectID(),
+		Type:        models.InviteTypeEvent,
+		FromID:      fromOID,
+		ToID:        userOID,
+		EventID:     &eventOID,
+		InviteToken: token,
+		Status:      models.InviteStatusPending,
+		Source:      "invite_link",
 		CreatedAt:   time.Now(),
 		ExpiresAt:   inviteLink.ExpiresAt,
 	}
@@ -377,7 +519,7 @@ func AcceptTeamInviteLink(c *fiber.Ctx) error {
 		AcceptorID:   userID,
 		AcceptorName: playerName,
 		AcceptorRole: models.RolePlayer,
-		Status:       "pending",
+		Status:       "invited_via_link",
 		CreatedAt:    time.Now(),
 	}
 
@@ -451,7 +593,7 @@ func AcceptEventInviteLink(c *fiber.Ctx) error {
 		AcceptorID:   userID,
 		AcceptorName: teamOwner.FullName,
 		AcceptorRole: models.RoleTeamOwner,
-		Status:       "pending",
+		Status:       "invited_via_link",
 		CreatedAt:    time.Now(),
 	}
 
@@ -477,7 +619,7 @@ func GetPendingApprovalsForTeam(c *fiber.Ctx) error {
 	teamID := c.Params("id")
 	userID := c.Locals("user_id").(string)
 
-	// Convert IDs to ObjectID
+	// Convert IDs to ObjectID for team/user verification
 	teamOID, err := primitive.ObjectIDFromHex(teamID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid team ID"})
@@ -499,11 +641,11 @@ func GetPendingApprovalsForTeam(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Unauthorized"})
 	}
 
-	// Get pending approvals
+	// Get pending approvals (teamId is stored as string in pending_approvals collection)
 	approvalsCollection := db.MongoClient.Database("raidx").Collection("pending_approvals")
 	cursor, err := approvalsCollection.Find(ctx, bson.M{
-		"teamId": teamOID,
-		"status": "pending",
+		"teamId": teamID,
+		"status": bson.M{"$in": []string{"pending", "invited_via_link"}},
 	})
 	if err != nil {
 		logrus.Error("GetPendingApprovalsForTeam: Failed to fetch approvals:", err)
@@ -525,7 +667,7 @@ func GetPendingApprovalsForEvent(c *fiber.Ctx) error {
 	eventID := c.Params("id")
 	userID := c.Locals("user_id").(string)
 
-	// Convert IDs to ObjectID
+	// Convert IDs to ObjectID for event/user verification
 	eventOID, err := primitive.ObjectIDFromHex(eventID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid event ID"})
@@ -539,19 +681,28 @@ func GetPendingApprovalsForEvent(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Verify user is the organizer
-	eventsCollection := db.MongoClient.Database("raidx").Collection("rbac_events")
-	err = eventsCollection.FindOne(ctx, bson.M{"_id": eventOID, "organizer_id": organizerID}).Err()
+	// Verify user is the organizer (support ObjectID or string organizer_id)
+	eventsCollection := db.MongoClient.Database("raidx").Collection("events")
+	organizerIDStr := organizerID.Hex()
+	err = eventsCollection.FindOne(ctx, bson.M{
+		"_id": eventOID,
+		"$or": []bson.M{
+			{"organizer_id": organizerID},
+			{"organizer_id": organizerIDStr},
+			{"organizerId": organizerID},
+			{"organizerId": organizerIDStr},
+		},
+	}).Err()
 	if err != nil {
 		logrus.Warn("GetPendingApprovalsForEvent: Event not found or unauthorized")
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Unauthorized"})
 	}
 
-	// Get pending approvals
+	// Get pending approvals (eventId is stored as string in pending_approvals collection)
 	approvalsCollection := db.MongoClient.Database("raidx").Collection("pending_approvals")
 	cursor, err := approvalsCollection.Find(ctx, bson.M{
-		"eventId": eventOID,
-		"status":  "pending",
+		"eventId": eventID,
+		"status":  bson.M{"$in": []string{"pending", "invited_via_link"}},
 	})
 	if err != nil {
 		logrus.Error("GetPendingApprovalsForEvent: Failed to fetch approvals:", err)
@@ -611,8 +762,13 @@ func ApprovePendingApproval(c *fiber.Ctx) error {
 	// Now add the player/team to the team/event based on type
 	if approval.Type == models.InviteLinkTypeTeam {
 		// Add player to team
+		teamOID, err := primitive.ObjectIDFromHex(approval.TeamID)
+		if err != nil {
+			logrus.Error("ApprovePendingApproval: Invalid team ID:", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Invalid team ID"})
+		}
 		teamsCollection := db.MongoClient.Database("raidx").Collection("rbac_teams")
-		_, err = teamsCollection.UpdateOne(ctx, bson.M{"_id": approval.TeamID}, bson.M{
+		_, err = teamsCollection.UpdateOne(ctx, bson.M{"_id": teamOID}, bson.M{
 			"$addToSet": bson.M{"players": approval.AcceptorID},
 		})
 		if err != nil {
@@ -621,8 +777,13 @@ func ApprovePendingApproval(c *fiber.Ctx) error {
 		}
 	} else if approval.Type == models.InviteLinkTypeEvent {
 		// Add team to event
+		eventOID, err := primitive.ObjectIDFromHex(approval.EventID)
+		if err != nil {
+			logrus.Error("ApprovePendingApproval: Invalid event ID:", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Invalid event ID"})
+		}
 		eventsCollection := db.MongoClient.Database("raidx").Collection("rbac_events")
-		_, err = eventsCollection.UpdateOne(ctx, bson.M{"_id": approval.EventID}, bson.M{
+		_, err = eventsCollection.UpdateOne(ctx, bson.M{"_id": eventOID}, bson.M{
 			"$addToSet": bson.M{"participating_teams": approval.AcceptorID},
 		})
 		if err != nil {
@@ -630,6 +791,13 @@ func ApprovePendingApproval(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to add team to event"})
 		}
 	}
+
+	// Update invitation status with appropriate status message
+	statusMsg := "accepted_by_owner"
+	if approval.Type == models.InviteLinkTypeEvent {
+		statusMsg = "accepted_by_organizer"
+	}
+	_ = updateInvitationStatusByLink(ctx, approval, statusMsg)
 
 	return c.JSON(fiber.Map{
 		"success": true,
@@ -674,8 +842,377 @@ func RejectPendingApproval(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to reject"})
 	}
 
+	// Update invitation status with appropriate status message
+	statusMsg := "declined_by_owner"
+	if approval.Type == models.InviteLinkTypeEvent {
+		statusMsg = "declined_by_organizer"
+	}
+	_ = updateInvitationStatusByLink(ctx, approval, statusMsg)
+
 	return c.JSON(fiber.Map{
 		"success": true,
 		"message": "Request rejected.",
 	})
+}
+
+func updateInvitationStatusByLink(ctx context.Context, approval models.PendingApproval, status string) error {
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	var link models.InviteLink
+	if err := linksCollection.FindOne(ctx, bson.M{"_id": approval.InviteLinkID}).Decode(&link); err != nil {
+		return err
+	}
+
+	acceptorOID, err := primitive.ObjectIDFromHex(approval.AcceptorID)
+	if err != nil {
+		return err
+	}
+
+	invitesCollection := db.MongoClient.Database("raidx").Collection("invitations")
+	_, err = invitesCollection.UpdateOne(ctx, bson.M{
+		"invite_token": link.Token,
+		"to_id":        acceptorOID,
+	}, bson.M{"$set": bson.M{"status": status}})
+	return err
+}
+
+type organizerInviteLinkRequest struct {
+	Type      string `json:"type"`
+	TargetID  string `json:"targetId"`
+	ExpiresIn string `json:"expiresIn"`
+	MaxUses   *int   `json:"maxUses"`
+}
+
+type ownerInviteLinkRequest struct {
+	TeamID    string `json:"teamId"`
+	ExpiresIn string `json:"expiresIn"`
+	MaxUses   *int   `json:"maxUses"`
+}
+
+type inviteLinkResponse struct {
+	ID         string    `json:"id"`
+	Code       string    `json:"code"`
+	Type       string    `json:"type"`
+	TargetID   string    `json:"targetId"`
+	TargetName string    `json:"targetName"`
+	ExpiresAt  time.Time `json:"expiresAt"`
+	MaxUses    int       `json:"maxUses"`
+	UsesCount  int       `json:"usesCount"`
+	Message    string    `json:"message"`
+}
+
+func resolveInviteExpiry(expiresIn string) time.Time {
+	value := strings.ToLower(strings.TrimSpace(expiresIn))
+	if value == "" {
+		return time.Now().AddDate(0, 0, 30)
+	}
+
+	switch value {
+	case "1h":
+		return time.Now().Add(1 * time.Hour)
+	case "24h":
+		return time.Now().Add(24 * time.Hour)
+	case "7d":
+		return time.Now().AddDate(0, 0, 7)
+	case "30d":
+		return time.Now().AddDate(0, 0, 30)
+	case "never":
+		return time.Now().AddDate(10, 0, 0)
+	default:
+		return time.Now().AddDate(0, 0, 30)
+	}
+}
+
+// CreateOrganizerInviteLink creates an invite link for an organizer's event
+func CreateOrganizerInviteLink(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+
+	var req organizerInviteLinkRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+	}
+
+	if strings.ToLower(strings.TrimSpace(req.Type)) != models.InviteLinkTypeEvent {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Only event invite links are supported"})
+	}
+
+	if strings.TrimSpace(req.TargetID) == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Event ID is required"})
+	}
+
+	organizerID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+
+	eventOID, err := primitive.ObjectIDFromHex(req.TargetID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid event ID"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Verify event exists and user is organizer
+	eventsCollection := db.MongoClient.Database("raidx").Collection("events")
+	var event models.Event
+	if err := eventsCollection.FindOne(ctx, bson.M{"_id": eventOID, "organizer_id": organizerID}).Decode(&event); err != nil {
+		logrus.Warn("CreateOrganizerInviteLink: Event not found or unauthorized:", err)
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Event not found or unauthorized"})
+	}
+
+	token, err := generateToken()
+	if err != nil {
+		logrus.Error("CreateOrganizerInviteLink: Failed to generate token:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create link"})
+	}
+
+	maxUses := 0
+	if req.MaxUses != nil && *req.MaxUses > 0 {
+		maxUses = *req.MaxUses
+	}
+
+	inviteLink := models.InviteLink{
+		ID:        primitive.NewObjectID(),
+		Token:     token,
+		Type:      models.InviteLinkTypeEvent,
+		FromID:    organizerID.Hex(),
+		EventID:   eventOID.Hex(),
+		EventName: event.EventName,
+		CreatedAt: time.Now(),
+		ExpiresAt: resolveInviteExpiry(req.ExpiresIn),
+		MaxUses:   maxUses,
+		UsedCount: 0,
+		IsActive:  true,
+	}
+
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	if _, err := linksCollection.InsertOne(ctx, inviteLink); err != nil {
+		logrus.Error("CreateOrganizerInviteLink: Failed to create invite link:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create link"})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"link":    "/invite/event/" + token,
+		"token":   token,
+	})
+}
+
+// GetOrganizerInviteLinks lists invite links created by the organizer
+func GetOrganizerInviteLinks(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	options := options.Find().SetSort(bson.M{"createdAt": -1})
+	cursor, err := linksCollection.Find(ctx, bson.M{
+		"fromId":   userID,
+		"type":     models.InviteLinkTypeEvent,
+		"isActive": true,
+	}, options)
+	if err != nil {
+		logrus.Error("GetOrganizerInviteLinks: Failed to fetch invite links:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch invite links"})
+	}
+	defer cursor.Close(ctx)
+
+	var links []models.InviteLink
+	if err := cursor.All(ctx, &links); err != nil {
+		logrus.Error("GetOrganizerInviteLinks: Failed to decode invite links:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to decode invite links"})
+	}
+
+	responses := make([]inviteLinkResponse, 0, len(links))
+	for _, link := range links {
+		responses = append(responses, inviteLinkResponse{
+			ID:         link.ID.Hex(),
+			Code:       link.Token,
+			Type:       link.Type,
+			TargetID:   link.EventID,
+			TargetName: link.EventName,
+			ExpiresAt:  link.ExpiresAt,
+			MaxUses:    link.MaxUses,
+			UsesCount:  link.UsedCount,
+			Message:    "",
+		})
+	}
+
+	return c.JSON(fiber.Map{"data": responses})
+}
+
+// DeleteOrganizerInviteLink deactivates an invite link created by organizer
+func DeleteOrganizerInviteLink(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	linkID := c.Params("id")
+
+	linkOID, err := primitive.ObjectIDFromHex(linkID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid link ID"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	result, err := linksCollection.UpdateOne(ctx, bson.M{
+		"_id":    linkOID,
+		"fromId": userID,
+		"type":   models.InviteLinkTypeEvent,
+	}, bson.M{"$set": bson.M{"isActive": false}})
+	if err != nil {
+		logrus.Error("DeleteOrganizerInviteLink: Failed to delete invite link:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete invite link"})
+	}
+
+	if result.MatchedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Invite link not found"})
+	}
+
+	return c.JSON(fiber.Map{"success": true})
+}
+
+// CreateOwnerInviteLink creates an invite link for a team owner team
+func CreateOwnerInviteLink(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+
+	var req ownerInviteLinkRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+	}
+
+	if strings.TrimSpace(req.TeamID) == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Team ID is required"})
+	}
+
+	ownerID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+
+	teamOID, err := primitive.ObjectIDFromHex(req.TeamID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid team ID"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	teamsCollection := db.MongoClient.Database("raidx").Collection("rbac_teams")
+	var team models.TeamProfile
+	if err := teamsCollection.FindOne(ctx, bson.M{"_id": teamOID, "owner_id": ownerID}).Decode(&team); err != nil {
+		logrus.Warn("CreateOwnerInviteLink: Team not found or unauthorized:", err)
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Team not found or unauthorized"})
+	}
+
+	token, err := generateToken()
+	if err != nil {
+		logrus.Error("CreateOwnerInviteLink: Failed to generate token:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create link"})
+	}
+
+	maxUses := 0
+	if req.MaxUses != nil && *req.MaxUses > 0 {
+		maxUses = *req.MaxUses
+	}
+
+	inviteLink := models.InviteLink{
+		ID:        primitive.NewObjectID(),
+		Token:     token,
+		Type:      models.InviteLinkTypeTeam,
+		FromID:    ownerID.Hex(),
+		TeamID:    teamOID.Hex(),
+		TeamName:  team.TeamName,
+		CreatedAt: time.Now(),
+		ExpiresAt: resolveInviteExpiry(req.ExpiresIn),
+		MaxUses:   maxUses,
+		UsedCount: 0,
+		IsActive:  true,
+	}
+
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	if _, err := linksCollection.InsertOne(ctx, inviteLink); err != nil {
+		logrus.Error("CreateOwnerInviteLink: Failed to create invite link:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create link"})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"link":    "/invite/team/" + token,
+		"token":   token,
+	})
+}
+
+// GetOwnerInviteLinks lists invite links created by the team owner
+func GetOwnerInviteLinks(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	options := options.Find().SetSort(bson.M{"createdAt": -1})
+	cursor, err := linksCollection.Find(ctx, bson.M{
+		"fromId":   userID,
+		"type":     models.InviteLinkTypeTeam,
+		"isActive": true,
+	}, options)
+	if err != nil {
+		logrus.Error("GetOwnerInviteLinks: Failed to fetch invite links:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch invite links"})
+	}
+	defer cursor.Close(ctx)
+
+	var links []models.InviteLink
+	if err := cursor.All(ctx, &links); err != nil {
+		logrus.Error("GetOwnerInviteLinks: Failed to decode invite links:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to decode invite links"})
+	}
+
+	responses := make([]inviteLinkResponse, 0, len(links))
+	for _, link := range links {
+		responses = append(responses, inviteLinkResponse{
+			ID:         link.ID.Hex(),
+			Code:       link.Token,
+			Type:       link.Type,
+			TargetID:   link.TeamID,
+			TargetName: link.TeamName,
+			ExpiresAt:  link.ExpiresAt,
+			MaxUses:    link.MaxUses,
+			UsesCount:  link.UsedCount,
+			Message:    "",
+		})
+	}
+
+	return c.JSON(fiber.Map{"data": responses})
+}
+
+// DeleteOwnerInviteLink deactivates an invite link created by team owner
+func DeleteOwnerInviteLink(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	linkID := c.Params("id")
+
+	linkOID, err := primitive.ObjectIDFromHex(linkID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid link ID"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	result, err := linksCollection.UpdateOne(ctx, bson.M{
+		"_id":    linkOID,
+		"fromId": userID,
+		"type":   models.InviteLinkTypeTeam,
+	}, bson.M{"$set": bson.M{"isActive": false}})
+	if err != nil {
+		logrus.Error("DeleteOwnerInviteLink: Failed to delete invite link:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete invite link"})
+	}
+
+	if result.MatchedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Invite link not found"})
+	}
+
+	return c.JSON(fiber.Map{"success": true})
 }

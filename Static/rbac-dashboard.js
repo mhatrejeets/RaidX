@@ -53,6 +53,33 @@ function getInviteField(invite, camelName, snakeName) {
     return invite?.[camelName] || invite?.[snakeName] || '';
 }
 
+async function updateInvite(inviteId, status, extra = {}) {
+    try {
+        const res = await apiRequest(`/api/invitations/${inviteId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, ...extra })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Failed to update invite');
+
+        if (document.getElementById('player-invites-pending')) {
+            await loadPlayerInvites();
+        }
+        if (document.getElementById('owner-event-invites-pending') || document.getElementById('owner-event-invites-accepted') || document.getElementById('owner-event-invites-declined') || document.getElementById('owner-event-invites')) {
+            await loadOwnerEventInvites();
+        }
+    } catch (e) {
+        const statusEl = document.getElementById('player-status') || document.getElementById('owner-status');
+        if (statusEl) {
+            const statusId = statusEl.id;
+            setStatus(statusId, e.message || 'Failed to update invite', 'danger');
+        } else {
+            console.error('Failed to update invite:', e);
+        }
+    }
+}
+
 async function initPlayerDashboard() {
     const profileLink = document.getElementById('player-profile-link');
     if (profileLink) {
@@ -85,9 +112,9 @@ async function loadPlayerInvites() {
             declinedList.innerHTML = '<div class="text-white">No declined invitations.</div>';
             return;
         }
-        const pendingInvites = data.filter(inv => (inv.status || inv.Status) === 'pending');
-        const acceptedInvites = data.filter(inv => (inv.status || inv.Status) === 'accepted');
-        const declinedInvites = data.filter(inv => (inv.status || inv.Status) === 'declined');
+        const pendingInvites = data.filter(inv => ['pending', 'invited_via_link'].includes((inv.status || inv.Status)));
+        const acceptedInvites = data.filter(inv => (inv.status || inv.Status) === 'accepted' || (inv.status || inv.Status) === 'accepted_by_owner');
+        const declinedInvites = data.filter(inv => (inv.status || inv.Status) === 'declined' || (inv.status || inv.Status) === 'declined_by_owner');
 
         renderPlayerInviteList(pendingList, pendingInvites, true);
         renderPlayerInviteList(acceptedList, acceptedInvites, false);
@@ -105,29 +132,36 @@ function renderPlayerInviteList(container, invites, showActions) {
     }
 
     invites.forEach(invite => {
-            const card = document.createElement('div');
-            card.className = 'invite-card mb-3';
-            const inviteId = invite?.id || getInviteId(invite);
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        const inviteId = invite?.id || getInviteId(invite);
         const statusValue = invite.status || invite.Status || 'pending';
-            card.innerHTML = `
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                    <div>
-                        <div class="fw-semibold fs-5">Team Invite</div>
-                        <div class="invite-meta">Team: ${invite.teamName || 'Unknown'}</div>
-                        <div class="invite-meta">Owner: ${invite.ownerName || 'Unknown'}</div>
-                        <div class="invite-meta">Invite ID: ${formatId(inviteId)}</div>
-                        <div class="invite-meta">Team ID: ${formatId(invite.teamId || getInviteField(invite, 'TeamID', 'team_id'))}</div>
-                    <div class="invite-meta">Status: ${statusValue}</div>
-                    </div>
-                ${showActions ? `
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-success">Accept</button>
-                    <button class="btn btn-sm btn-outline-danger">Decline</button>
-                </div>
-                ` : ''}
-                </div>
-            `;
-        if (showActions) {
+        const statusDisplay = {
+            'invited_via_link': 'waiting for owner approval',
+            'accepted_by_owner': 'accepted by owner',
+            'declined_by_owner': 'declined by owner',
+            'pending': 'pending',
+            'accepted': 'accepted',
+            'declined': 'declined'
+        }[statusValue] || statusValue;
+        const canAct = showActions && statusValue !== 'invited_via_link';
+        const declineReason = invite.declineReason || invite.decline_reason || invite.DeclineReason || '';
+        card.innerHTML = `
+            <h6>Team Invite</h6>
+            <p class="mb-1">Team: ${invite.teamName || 'Unknown'}</p>
+            <p class="mb-1">Owner: ${invite.ownerName || 'Unknown'}</p>
+            <p class="mb-1">Invite ID: <span class="text-white">${formatId(inviteId)}</span></p>
+            <p class="mb-1">Team ID: <span class="text-white">${formatId(invite.teamId || getInviteField(invite, 'TeamID', 'team_id'))}</span></p>
+            <p>Status: <span class="badge-custom">${statusDisplay}</span></p>
+            ${declineReason && statusValue.startsWith('declined') ? `<p class="mb-1">Reason: <span class="text-white">${declineReason}</span></p>` : ''}
+            ${canAct ? `
+            <div class="request-actions">
+                <button class="btn btn-sm btn-success">Accept</button>
+                <button class="btn btn-sm btn-outline-danger">Decline</button>
+            </div>
+            ` : ''}
+        `;
+        if (canAct) {
             const [acceptBtn, declineBtn] = card.querySelectorAll('button');
             acceptBtn.addEventListener('click', () => updateInvite(inviteId, 'accepted'));
             declineBtn.addEventListener('click', () => updateInvite(inviteId, 'declined'));
@@ -136,38 +170,12 @@ function renderPlayerInviteList(container, invites, showActions) {
     });
 }
 
-async function updateInvite(inviteId, status, extra = {}) {
-    try {
-        if (!inviteId) {
-            throw new Error('Invalid invitation id');
-        }
-        const url = `/api/invitations/${formatId(inviteId)}`;
-        const res = await apiRequest(url, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status, ...extra })
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || `Failed to update invite (${res.status})`);
-        }
-        const responseData = await res.json();
-        await loadPlayerInvites();
-        if (document.getElementById('owner-event-invites')) {
-            await loadOwnerEventInvites();
-        }
-        setStatus('player-status', 'Invitation updated successfully', 'success');
-    } catch (e) {
-        console.error('DEBUG updateInvite - error:', e);
-        setStatus('player-status', e.message || 'Failed to update invitation', 'danger');
-    }
-}
-
 async function initOwnerDashboard() {
-    const teamIdInput = document.getElementById('owner-team-id');
-    const storedTeamId = localStorage.getItem('rbac_team_id');
-    if (teamIdInput && storedTeamId) teamIdInput.value = storedTeamId;
-
+    const profileLink = document.getElementById('owner-profile-link');
+    if (profileLink) {
+        const userId = getUserIdFromToken();
+        profileLink.href = userId ? `/owner/profile/${userId}` : '#';
+    }
     const createForm = document.getElementById('owner-create-team');
     if (createForm) {
         createForm.addEventListener('submit', async (e) => {
@@ -243,15 +251,20 @@ async function loadOwnerTeamInvites() {
         }
         data.forEach(invite => {
             const card = document.createElement('div');
-            card.className = 'card mb-2';
+            card.className = 'request-card';
             const inviteId = getInviteId(invite);
+            const statusValue = (getInviteField(invite, 'Status', 'status') || '').toLowerCase();
+            const statusDisplay = {
+                'invited_via_link': 'waiting for player action',
+                'pending': 'pending',
+                'accepted': 'accepted',
+                'declined': 'declined'
+            }[statusValue] || (getInviteField(invite, 'Status', 'status') || 'pending');
             card.innerHTML = `
-                <div class="card-body">
-                    <div class="fw-semibold">Player Invite</div>
-                    <div class="small text-white">Invite ID: ${formatId(inviteId)}</div>
-                    <div class="small text-white">Player ID: ${formatId(getInviteField(invite, 'ToID', 'to_id'))}</div>
-                    <div class="small text-white">Status: ${getInviteField(invite, 'Status', 'status')}</div>
-                </div>
+                <h6>Player Invite</h6>
+                <p class="mb-1">Invite ID: <span class="text-white">${formatId(inviteId)}</span></p>
+                <p class="mb-1">Player ID: <span class="text-white">${formatId(getInviteField(invite, 'ToID', 'to_id'))}</span></p>
+                <p>Status: <span class="badge-custom">${statusDisplay}</span></p>
             `;
             list.appendChild(card);
         });
@@ -261,14 +274,21 @@ async function loadOwnerTeamInvites() {
 }
 
 async function loadOwnerEventInvites() {
-    const list = document.getElementById('owner-event-invites');
-    if (!list) return;
-    list.innerHTML = '';
+    const pendingList = document.getElementById('owner-event-invites-pending');
+    const acceptedList = document.getElementById('owner-event-invites-accepted');
+    const declinedList = document.getElementById('owner-event-invites-declined');
+    const legacyList = document.getElementById('owner-event-invites');
+    if (!pendingList && !acceptedList && !declinedList && !legacyList) return;
+    if (pendingList) pendingList.innerHTML = '';
+    if (acceptedList) acceptedList.innerHTML = '';
+    if (declinedList) declinedList.innerHTML = '';
+    if (legacyList) legacyList.innerHTML = '';
 
     let ownerTeams = [];
     try {
         const teamsRes = await apiRequest('/api/owner/teams');
-        ownerTeams = await teamsRes.json();
+        const teamsJson = await teamsRes.json();
+        ownerTeams = Array.isArray(teamsJson) ? teamsJson : (teamsJson.data || []);
     } catch (e) {
         ownerTeams = [];
     }
@@ -283,50 +303,35 @@ async function loadOwnerEventInvites() {
             throw new Error(data.error || 'Failed to load event invites');
         }
         if (!Array.isArray(data) || data.length === 0) {
-            list.innerHTML = '<div class="text-white">No event invites.</div>';
+            const emptyMsg = '<div class="text-white">No event invites.</div>';
+            if (pendingList) pendingList.innerHTML = emptyMsg;
+            if (acceptedList) acceptedList.innerHTML = emptyMsg;
+            if (declinedList) declinedList.innerHTML = emptyMsg;
+            if (legacyList) legacyList.innerHTML = emptyMsg;
             return;
         }
         
         // Separate by status
-        const pending = data.filter(inv => inv.status === 'pending');
-        const accepted = data.filter(inv => inv.status === 'accepted');
-        const declined = data.filter(inv => inv.status === 'declined');
+        const getStatus = (inv) => (inv.status || inv.Status || '').toLowerCase();
+        const pending = data.filter(inv => ['pending', 'invited_via_link'].includes(getStatus(inv)));
+        const accepted = data.filter(inv => ['accepted', 'accepted_by_organizer'].includes(getStatus(inv)));
+        const declined = data.filter(inv => ['declined', 'declined_by_organizer'].includes(getStatus(inv)));
         
-        // Render pending first
-        if (pending.length > 0) {
-            const pendingHeader = document.createElement('h6');
-            pendingHeader.className = 'text-warning mt-3 mb-2';
-            pendingHeader.textContent = 'Pending Invitations';
-            list.appendChild(pendingHeader);
-        }
-        pending.forEach(invite => {
-            renderOwnerEventInvite(list, invite, ownerTeams, true);
-        });
-        
-        // Render accepted
-        if (accepted.length > 0) {
-            const acceptedHeader = document.createElement('h6');
-            acceptedHeader.className = 'text-success mt-3 mb-2';
-            acceptedHeader.textContent = 'Accepted';
-            list.appendChild(acceptedHeader);
-        }
-        accepted.forEach(invite => {
-            renderOwnerEventInvite(list, invite, ownerTeams, false);
-        });
-        
-        // Render declined
-        if (declined.length > 0) {
-            const declinedHeader = document.createElement('h6');
-            declinedHeader.className = 'text-danger mt-3 mb-2';
-            declinedHeader.textContent = 'Declined';
-            list.appendChild(declinedHeader);
-        }
-        declined.forEach(invite => {
-            renderOwnerEventInvite(list, invite, ownerTeams, false);
-        });
-        
-        if (pending.length === 0 && accepted.length === 0 && declined.length === 0) {
-            list.innerHTML = '<div class="text-white">No event invites.</div>';
+        // Render into tab containers when present, otherwise fallback to legacy list
+        if (pendingList && acceptedList && declinedList) {
+            if (pending.length === 0) pendingList.innerHTML = '<div class="text-white">No pending invites.</div>';
+            if (accepted.length === 0) acceptedList.innerHTML = '<div class="text-white">No accepted invites.</div>';
+            if (declined.length === 0) declinedList.innerHTML = '<div class="text-white">No declined invites.</div>';
+            pending.forEach(invite => renderOwnerEventInvite(pendingList, invite, ownerTeams, true));
+            accepted.forEach(invite => renderOwnerEventInvite(acceptedList, invite, ownerTeams, false));
+            declined.forEach(invite => renderOwnerEventInvite(declinedList, invite, ownerTeams, false));
+        } else if (legacyList) {
+            pending.forEach(invite => renderOwnerEventInvite(legacyList, invite, ownerTeams, true));
+            accepted.forEach(invite => renderOwnerEventInvite(legacyList, invite, ownerTeams, false));
+            declined.forEach(invite => renderOwnerEventInvite(legacyList, invite, ownerTeams, false));
+            if (pending.length === 0 && accepted.length === 0 && declined.length === 0) {
+                legacyList.innerHTML = '<div class="text-white">No event invites.</div>';
+            }
         }
     } catch (e) {
         setStatus('owner-status', 'Failed to load event invites', 'danger');
@@ -337,31 +342,48 @@ function renderOwnerEventInvite(list, invite, ownerTeams, showActions) {
     const inviteId = getInviteId(invite);
     console.log('DEBUG renderOwnerEventInvite - Processing invite, ID:', inviteId, 'Full invite:', invite);
     const card = document.createElement('div');
-    card.className = 'card mb-2';
+    card.className = 'request-card';
     card.setAttribute('data-invite-id', inviteId); // Add for debugging
-    const statusBadge = invite.status === 'pending' ? 'badge bg-warning' : 
-                       invite.status === 'accepted' ? 'badge bg-success' : 'badge bg-danger';
+    const rawStatus = (invite.status || invite.Status || '').toLowerCase();
+    const statusBadge = ['pending', 'invited_via_link'].includes(rawStatus) ? 'badge bg-warning' : 
+                       ['accepted', 'accepted_by_organizer'].includes(rawStatus) ? 'badge bg-success' : 'badge bg-danger';
+    const statusDisplay = {
+        'invited_via_link': 'waiting for organizer approval',
+        'accepted_by_organizer': 'accepted by organizer',
+        'declined_by_organizer': 'declined by organizer',
+        'pending': 'pending',
+        'accepted': 'accepted',
+        'declined': 'declined'
+    }[rawStatus] || rawStatus;
+    const declineReason = invite.declineReason || invite.decline_reason || invite.DeclineReason || '';
     const eventName = invite.eventName || invite.EventName || 'Unknown Event';
     const eventType = invite.eventType || invite.EventType || 'Unknown Type';
     const ownerName = invite.ownerName || invite.OwnerName || 'Unknown Owner';
     const teamName = invite.teamName || invite.TeamName || 'Unassigned';
+    const teamOptions = Array.isArray(ownerTeams) ? ownerTeams : (ownerTeams.data || []);
     card.innerHTML = `
-                <div class="card-body">
-                    <div class="fw-semibold">Event Invite <span class="${statusBadge}">${invite.status}</span></div>
-                    <div class="small text-white">Team Owner: ${ownerName}</div>
-                    <div class="small text-white">Event: ${eventName}</div>
-                    <div class="small text-white">Event Type: ${eventType}</div>
-                    <div class="small text-white">Team: ${teamName}</div>
-                    ${showActions ? `<div class="mt-2">
-                        <select class="form-select form-select-sm mb-2" style="max-width: 220px;">
-                            <option value="">Select team to accept...</option>
-                            ${ownerTeams.map(t => `<option value="${t.ID}">${t.TeamName}</option>`).join('')}
-                        </select>
-                        <button class="btn btn-sm btn-success me-2" data-action="accept">Accept</button>
-                        <button class="btn btn-sm btn-outline-danger" data-action="decline">Decline</button>
-                    </div>` : ''}
-                </div>
-            `;
+        <h6>Event Invite</h6>
+        <p class="mb-1">Team Owner: ${ownerName}</p>
+        <p class="mb-1">Event: <span class="text-white">${eventName}</span></p>
+        <p class="mb-1">Event Type: <span class="text-white">${eventType}</span></p>
+        <p class="mb-1">Team: <span class="text-white">${teamName}</span></p>
+        <p>Status: <span class="badge-custom">${statusDisplay}</span></p>
+        ${declineReason && rawStatus.startsWith('declined') ? `<p class="mb-1">Reason: <span class="text-white">${declineReason}</span></p>` : ''}
+        ${showActions && rawStatus !== 'invited_via_link' ? `
+        <div class="request-actions">
+            <select class="form-select form-select-sm" style="max-width: 220px;">
+                <option value="">Select team to accept...</option>
+                ${teamOptions.map(t => {
+                    const playersCount = Number(t.Players || 0);
+                    const disabled = playersCount < 7 ? 'disabled' : '';
+                    const label = `${t.TeamName} (${playersCount} players)`;
+                    return `<option value="${t.ID}" ${disabled}>${label}</option>`;
+                }).join('')}
+            </select>
+            <button class="btn btn-sm btn-success" data-action="accept">Accept</button>
+            <button class="btn btn-sm btn-outline-danger" data-action="decline">Decline</button>
+        </div>` : ''}
+    `;
     if (showActions) {
         const selectEl = card.querySelector('select');
         const acceptBtn = card.querySelector('button[data-action="accept"]');
@@ -371,6 +393,12 @@ function renderOwnerEventInvite(list, invite, ownerTeams, showActions) {
             const selectedTeamId = selectEl ? selectEl.value.trim() : '';
             if (!selectedTeamId) {
                 setStatus('owner-status', 'Select a team before accepting.', 'warning');
+                return;
+            }
+            const selectedTeam = teamOptions.find(t => t.ID === selectedTeamId);
+            const playersCount = selectedTeam ? Number(selectedTeam.Players || 0) : 0;
+            if (playersCount < 7) {
+                setStatus('owner-status', 'Selected team must have at least 7 players.', 'warning');
                 return;
             }
             console.log('DEBUG Calling updateInvite with inviteId:', inviteId, 'team_id:', selectedTeamId);
@@ -515,43 +543,7 @@ function renderOrganizerEventList(container, events, allowActions) {
             ${event.maxTeams ? `<p><strong>Max Teams:</strong> ${event.maxTeams}</p>` : ''}
             <p><strong>Status:</strong> <span class="badge-custom">${event.status === 'completed' ? 'completed' : event.status}</span></p>
             <p><strong>Accepted:</strong> ${event.counts?.accepted || 0} | <strong>Pending:</strong> ${event.counts?.pending || 0} | <strong>Declined:</strong> ${event.counts?.declined || 0}</p>
-            ${allowActions ? `
-            <div class="event-card-actions">
-                <button class="btn btn-primary-orange btn-sm" onclick="populateEventEdit('${event.id}')">Edit</button>
-                <button class="btn btn-outline-light btn-sm" onclick="toggleInviteForm('${event.id}')">Invite Team Owner</button>
-                <button class="btn btn-success btn-sm" onclick="markEventDone('${event.id}')">Mark as Completed</button>
-            </div>
-            <div class="mt-3" id="event-edit-${event.id}" style="display:none;">
-                <div class="row g-2">
-                    <div class="col-md-5">
-                        <input class="form-control" value="${event.eventName}" id="edit-name-${event.id}" />
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="edit-type-${event.id}">
-                            <option value="match" ${event.eventType === 'match' ? 'selected' : ''}>Match</option>
-                            <option value="tournament" ${event.eventType === 'tournament' ? 'selected' : ''}>Tournament</option>
-                            <option value="championship" ${event.eventType === 'championship' ? 'selected' : ''}>Championship</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input class="form-control" type="number" min="0" id="edit-max-${event.id}" value="${event.maxTeams || 0}" />
-                    </div>
-                    <div class="col-md-2 d-grid">
-                        <button class="btn btn-sm btn-success" onclick="saveEventEdit('${event.id}')">Save</button>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-3" id="event-invite-${event.id}" style="display:none;">
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <input class="form-control" placeholder="Team owner username or email" id="invite-owner-${event.id}" />
-                    </div>
-                    <div class="col-md-3 d-grid">
-                        <button class="btn btn-primary-orange btn-sm" onclick="sendOrganizerInvite('${event.id}')">Send Invite</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+            ${allowActions ? `` : ''}
         `;
         card.addEventListener('click', (e) => {
             if (e.target.closest('button, input, select, textarea, label, a, .event-card-actions')) {
@@ -687,6 +679,7 @@ function renderOrganizerRequestList(container, requests) {
     requests.forEach(req => {
         const card = document.createElement('div');
         card.className = 'request-card';
+        const declineReason = req.declineReason || req.decline_reason || req.DeclineReason || '';
         const teamName = req.teamName || 'Unassigned';
         const teamId = req.teamId || 'Unassigned';
         card.innerHTML = `
@@ -696,6 +689,7 @@ function renderOrganizerRequestList(container, requests) {
             <p class="mb-1">Team: <span class="text-white">${teamName}</span></p>
             <p class="mb-1">Team ID: <span class="text-white">${teamId}</span></p>
             <p>Status: <span class="badge-custom">${req.status}</span></p>
+            ${declineReason && (req.status || '').startsWith('declined') ? `<p class="mb-1">Reason: <span class="text-white">${declineReason}</span></p>` : ''}
             <p class="text-muted mb-0">Invite ID: ${req.id}</p>
         `;
         container.appendChild(card);

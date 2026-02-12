@@ -52,23 +52,71 @@
       transform: scale(1.05);
     }
 
-    .dashboard-card {
+    .card {
       background: rgba(30, 41, 59, 0.95);
       border-radius: 16px;
-      padding: 24px;
+      border: 1px solid #334155;
+      color: white;
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
     }
 
-    .invite-card {
-      background: #1e293b;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 16px;
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
     }
 
-    .invite-meta {
-      color: #94a3b8;
+    .nav-tabs {
+      border-bottom: 2px solid #334155;
+    }
+
+    .nav-tabs .nav-link {
+      color: #cbd5e1;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+      color: #f97316;
+      border-bottom-color: #f97316;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: #f97316;
+      border-bottom-color: #f97316;
+      background-color: transparent;
+    }
+
+    .request-card {
+      background-color: rgba(30, 41, 59, 0.8);
+      border-left: 4px solid #f97316;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .request-card h6 {
+      color: #fbbf24;
+    }
+
+    .request-card p {
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-custom {
+      background-color: #334155;
+      color: #f97316;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
       font-size: 0.85rem;
+    }
+
+    .request-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -93,32 +141,48 @@
     <div id="role-warning" class="alert alert-warning d-none"></div>
     <div id="player-status" class="alert alert-info d-none"></div>
 
-    <div class="dashboard-card">
-      <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
         <div>
-          <h3 class="mb-1" style="color:#fbbf24;">Team Invitations</h3>
-          <div class="text-white">Review and manage incoming team requests.</div>
+          <h5 class="mb-0" style="color:#fbbf24;">Team Invitations</h5>
+          <div class="text-white small">Review and manage incoming team requests.</div>
         </div>
         <button id="player-refresh" class="btn btn-orange">Refresh</button>
       </div>
-
-      <div class="mb-4">
-        <h5 class="mb-2">Pending</h5>
-        <div id="player-invites-pending" class="mt-2"></div>
-      </div>
-
-      <div class="mb-4">
-        <h5 class="mb-2">Accepted</h5>
-        <div id="player-invites-accepted" class="mt-2"></div>
-      </div>
-
-      <div class="mb-2">
-        <h5 class="mb-2">Declined</h5>
-        <div id="player-invites-declined" class="mt-2"></div>
+      <div class="card-body">
+        <ul class="nav nav-tabs" id="playerRequestsTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="player-pending-tab" data-bs-toggle="tab" data-bs-target="#player-pending" type="button" role="tab">
+              <i class="bi bi-clock"></i> Pending
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="player-accepted-tab" data-bs-toggle="tab" data-bs-target="#player-accepted" type="button" role="tab">
+              <i class="bi bi-check-circle"></i> Accepted
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="player-declined-tab" data-bs-toggle="tab" data-bs-target="#player-declined" type="button" role="tab">
+              <i class="bi bi-x-circle"></i> Declined
+            </button>
+          </li>
+        </ul>
+        <div class="tab-content mt-3">
+          <div class="tab-pane fade show active" id="player-pending" role="tabpanel">
+            <div id="player-invites-pending" class="mt-2"></div>
+          </div>
+          <div class="tab-pane fade" id="player-accepted" role="tabpanel">
+            <div id="player-invites-accepted" class="mt-2"></div>
+          </div>
+          <div class="tab-pane fade" id="player-declined" role="tabpanel">
+            <div id="player-invites-declined" class="mt-2"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/static/auth.js"></script>
   <script src="/static/rbac-dashboard.js"></script>
 </body>

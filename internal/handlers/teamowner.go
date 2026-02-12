@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -139,6 +140,21 @@ func CreateTeamInviteHandler(c *fiber.Ctx) error {
 
 	inviteToken := generateRandomToken()
 	invitesColl := db.MongoClient.Database("raidx").Collection("invitations")
+	// Prevent duplicate invitations for same team and player (allow if previously declined)
+	if toID != primitive.NilObjectID {
+		dupErr := invitesColl.FindOne(ctx, bson.M{
+			"type":    models.InviteTypeTeam,
+			"team_id": teamID,
+			"to_id":   toID,
+			"status":  bson.M{"$ne": models.InviteStatusDeclined},
+		}).Err()
+		if dupErr == nil {
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Invitation already exists for this team and player"})
+		}
+		if dupErr != mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to check existing invitations"})
+		}
+	}
 
 	invitation := models.Invitation{
 		Type:        models.InviteTypeTeam,
@@ -261,6 +277,9 @@ func GetOwnerEventInvitesHandler(c *fiber.Ctx) error {
 			"id":     invite.ID.Hex(),
 			"status": invite.Status,
 		}
+		if invite.DeclineReason != "" {
+			item["declineReason"] = invite.DeclineReason
+		}
 		if ownerName != "" {
 			item["ownerName"] = ownerName
 		}
@@ -350,9 +369,78 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 	if invite.ToID == primitive.NilObjectID {
 		update["$set"].(bson.M)["to_id"] = userID
 	}
+	if status == models.InviteStatusAccepted {
+		update["$set"].(bson.M)["decline_reason"] = ""
+	}
 	if invite.Type == models.InviteTypeEvent && strings.TrimSpace(req.TeamID) != "" {
 		if oid, err := primitive.ObjectIDFromHex(req.TeamID); err == nil {
 			update["$set"].(bson.M)["team_id"] = oid
+		}
+	}
+
+	if invite.Type == models.InviteTypeEvent && status == models.InviteStatusAccepted {
+		if strings.TrimSpace(req.TeamID) == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "team_id is required for event acceptance"})
+		}
+		teamOID, err := primitive.ObjectIDFromHex(req.TeamID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid team_id"})
+		}
+		teamsColl := db.MongoClient.Database("raidx").Collection("rbac_teams")
+		var team struct {
+			OwnerID primitive.ObjectID `bson:"owner_id"`
+			Players []primitive.ObjectID `bson:"players"`
+		}
+		if err := teamsColl.FindOne(ctx, bson.M{"_id": teamOID}).Decode(&team); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Team not found"})
+		}
+		if team.OwnerID != userID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Team not owned by user"})
+		}
+		if len(team.Players) < 7 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Team must have at least 7 players"})
+		}
+
+		if invite.EventID != nil {
+			eventsColl := db.MongoClient.Database("raidx").Collection("events")
+			var event models.Event
+			if err := eventsColl.FindOne(ctx, bson.M{"_id": *invite.EventID}).Decode(&event); err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch event"})
+			}
+			maxAllowed := 0
+			switch event.EventType {
+			case models.EventTypeMatch:
+				maxAllowed = 2
+			case models.EventTypeTournament, models.EventTypeChampionship:
+				maxAllowed = event.MaxTeams
+			}
+			if maxAllowed > 0 {
+				acceptedCount := 0
+				for _, entry := range event.ParticipatingTeams {
+					if entry.Status == models.EventTeamStatusAccepted {
+						acceptedCount++
+					}
+				}
+				if acceptedCount >= maxAllowed {
+					label := event.EventType
+					if label == "" {
+						label = "event"
+					}
+					reason := fmt.Sprintf("Maximum number of teams for the %s reached", label)
+					declineUpdate := bson.M{"$set": bson.M{
+						"status":          models.InviteStatusDeclined,
+						"decline_reason":  reason,
+						"to_id":           userID,
+						"team_id":         teamOID,
+					}}
+					_, _ = invitesColl.UpdateOne(ctx, bson.M{"_id": invID}, declineUpdate)
+					return c.JSON(fiber.Map{
+						"status":  models.InviteStatusDeclined,
+						"reason":  reason,
+						"message": reason,
+					})
+				}
+			}
 		}
 	}
 
@@ -361,6 +449,15 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 	}
 
 	if status == models.InviteStatusAccepted && invite.Type == models.InviteTypeTeam && invite.TeamID != nil {
+		if invite.Source == "invite_link" {
+			if err := createPendingApprovalFromInvite(ctx, invite, userID); err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create pending approval"})
+			}
+			_, _ = invitesColl.UpdateOne(ctx, bson.M{"_id": invite.ID}, bson.M{
+				"$set": bson.M{"status": models.InviteStatusInvitedViaLink},
+			})
+			return c.JSON(fiber.Map{"status": models.InviteStatusInvitedViaLink})
+		}
 		teamsColl := db.MongoClient.Database("raidx").Collection("rbac_teams")
 		_, _ = teamsColl.UpdateOne(ctx, bson.M{"_id": *invite.TeamID}, bson.M{
 			"$addToSet": bson.M{"players": userID},
@@ -369,6 +466,15 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 	}
 
 	if status == models.InviteStatusAccepted && invite.Type == models.InviteTypeEvent && invite.EventID != nil {
+		if invite.Source == "invite_link" {
+			if err := createPendingApprovalFromInvite(ctx, invite, userID); err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create pending approval"})
+			}
+			_, _ = invitesColl.UpdateOne(ctx, bson.M{"_id": invite.ID}, bson.M{
+				"$set": bson.M{"status": models.InviteStatusInvitedViaLink},
+			})
+			return c.JSON(fiber.Map{"status": models.InviteStatusInvitedViaLink})
+		}
 		teamsColl := db.MongoClient.Database("raidx").Collection("rbac_teams")
 		teamID := primitive.NilObjectID
 		if invite.TeamID != nil {
@@ -405,4 +511,72 @@ func UpdateInvitationStatusHandler(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"status": status})
+}
+
+func createPendingApprovalFromInvite(ctx context.Context, invite models.Invitation, userID primitive.ObjectID) error {
+	linksCollection := db.MongoClient.Database("raidx").Collection("invite_links")
+	var link models.InviteLink
+	if err := linksCollection.FindOne(ctx, bson.M{
+		"token":    invite.InviteToken,
+		"isActive": true,
+	}).Decode(&link); err != nil {
+		return err
+	}
+
+	approvalsCollection := db.MongoClient.Database("raidx").Collection("pending_approvals")
+	// Avoid duplicates
+	existingErr := approvalsCollection.FindOne(ctx, bson.M{
+		"inviteLinkId": link.ID,
+		"acceptorId":   userID.Hex(),
+		"status":       bson.M{"$in": []string{"pending", "invited_via_link"}},
+	}).Err()
+	if existingErr == nil {
+		return nil
+	}
+
+	playersCollection := db.MongoClient.Database("raidx").Collection("players")
+	var account models.User
+	playerName := userID.Hex()
+	playerUsername := userID.Hex()
+	if err := playersCollection.FindOne(ctx, bson.M{"_id": userID}).Decode(&account); err == nil {
+		if account.FullName != "" {
+			playerName = account.FullName
+		}
+		if account.UserID != "" {
+			playerUsername = account.UserID
+		}
+	}
+
+	approval := models.PendingApproval{
+		ID:               primitive.NewObjectID(),
+		InviteLinkID:     link.ID,
+		FromID:           link.FromID,
+		AcceptorID:       userID.Hex(),
+		AcceptorUsername: playerUsername,
+		AcceptorName:     playerName,
+		Status:           "invited_via_link",
+		CreatedAt:        time.Now(),
+	}
+
+	if invite.Type == models.InviteTypeTeam {
+		approval.Type = models.InviteLinkTypeTeam
+		approval.TeamID = link.TeamID
+		approval.AcceptorRole = models.RolePlayer
+	}
+
+	if invite.Type == models.InviteTypeEvent {
+		approval.Type = models.InviteLinkTypeEvent
+		approval.EventID = link.EventID
+		approval.AcceptorRole = models.RoleTeamOwner
+	}
+
+	if _, err := approvalsCollection.InsertOne(ctx, approval); err != nil {
+		return err
+	}
+
+	_, _ = linksCollection.UpdateOne(ctx, bson.M{"_id": link.ID}, bson.M{
+		"$inc": bson.M{"usedCount": 1},
+	})
+
+	return nil
 }

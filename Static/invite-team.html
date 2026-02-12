@@ -159,17 +159,8 @@
         <div class="team-name" id="teamName">Loading...</div>
       </div>
 
-      <div id="actionButtons">
-        <button class="btn btn-accept" onclick="acceptInvite()">
-          <i class="bi bi-check-circle"></i> Accept & Wait for Approval
-        </button>
-        <button class="btn btn-decline" onclick="goBack()">
-          <i class="bi bi-x-circle"></i> Decline
-        </button>
-      </div>
-
       <div id="approvalMessage" style="display: none; margin-top: 2rem; padding: 1rem; background-color: #1e293b; border-radius: 0.5rem; border-left: 4px solid #10b981; color: #cbd5e1;">
-        <i class="bi bi-info-circle"></i> Your request has been sent. The team owner will review and approve your membership soon.
+        <i class="bi bi-info-circle"></i> Redirecting to your dashboard...
       </div>
     </div>
   </div>
@@ -240,57 +231,25 @@
           }
         });
 
-        if (response.ok) {
-          window.location.href = '/player/dashboard';
-          return;
-        }
-
         const data = await response.json();
-        showMessage(data.error || 'Failed to claim invite', 'error');
-        document.getElementById('contentSection').style.display = 'block';
+
+        if (response.ok) {
+          document.getElementById('contentSection').style.display = 'block';
+          document.getElementById('approvalMessage').style.display = 'block';
+          showMessage('✅ Invite added to your dashboard. Please accept it there.', 'success');
+          setTimeout(() => {
+            window.location.href = '/player/dashboard';
+          }, 800);
+        } else {
+          showMessage(data.error || 'Failed to claim invite', 'error');
+          document.getElementById('contentSection').style.display = 'block';
+        }
       } catch (error) {
         console.error('Error claiming invite:', error);
         showMessage('An error occurred. Please try again.', 'error');
         document.getElementById('contentSection').style.display = 'block';
       } finally {
         document.getElementById('loadingSection').style.display = 'none';
-      }
-    }
-
-    async function acceptInvite() {
-      const authToken = getValidToken();
-      if (!authToken) {
-        const returnUrl = encodeURIComponent(window.location.href);
-        window.location.href = `/login?returnUrl=${returnUrl}`;
-        return;
-      }
-
-      const currentRole = normalizeRole(getRoleFromToken());
-      if (currentRole && currentRole !== 'player') {
-        showMessage(`Only player accounts can accept this invite. You are logged in as ${currentRole}.`, 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/invite-link/team/${token}/accept`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-          }
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          document.getElementById('actionButtons').style.display = 'none';
-          document.getElementById('approvalMessage').style.display = 'block';
-          showMessage('✅ Request sent! Waiting for team owner approval.', 'success');
-        } else {
-          showMessage(data.error || 'Failed to accept invite', 'error');
-        }
-      } catch (error) {
-        console.error('Error accepting invite:', error);
-        showMessage('An error occurred. Please try again.', 'error');
       }
     }
 

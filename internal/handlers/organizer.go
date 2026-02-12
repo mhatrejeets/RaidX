@@ -44,8 +44,8 @@ func CreateEventHandler(c *fiber.Ctx) error {
 
 	maxTeams := req.MaxTeams
 	if eventType == models.EventTypeTournament || eventType == models.EventTypeChampionship {
-		if maxTeams <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "max_teams is required for tournament or championship"})
+		if maxTeams < 4 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "max_teams must be at least 4 for tournament or championship"})
 		}
 	} else {
 		maxTeams = 0
@@ -145,8 +145,8 @@ func UpdateEventHandler(c *fiber.Ctx) error {
 
 	maxTeams := req.MaxTeams
 	if eventType == models.EventTypeTournament || eventType == models.EventTypeChampionship {
-		if maxTeams <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "max_teams is required for tournament or championship"})
+		if maxTeams < 4 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "max_teams must be at least 4 for tournament or championship"})
 		}
 	} else {
 		maxTeams = 0
@@ -156,6 +156,17 @@ func UpdateEventHandler(c *fiber.Ctx) error {
 	defer cancel()
 
 	eventsColl := db.MongoClient.Database("raidx").Collection("events")
+	var existing models.Event
+	if err := eventsColl.FindOne(ctx, bson.M{"_id": eventID, "organizer_id": organizerID}).Decode(&existing); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Event not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch event"})
+	}
+	if existing.Status == models.EventStatusActive || existing.Status == models.EventStatusCompleted {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot edit an active or completed event"})
+	}
+
 	res, err := eventsColl.UpdateOne(ctx, bson.M{"_id": eventID, "organizer_id": organizerID}, bson.M{
 		"$set": bson.M{
 			"event_name": eventName,
@@ -323,6 +334,11 @@ func GetOrganizerEventDetailHandler(c *fiber.Ctx) error {
 				}
 				item["ownerUserId"] = owner.UserID
 			}
+		}
+
+		// Include decline reason if present
+		if invite.DeclineReason != "" {
+			item["declineReason"] = invite.DeclineReason
 		}
 
 		switch status {
@@ -503,6 +519,7 @@ func GetOrganizerEventInvitesHandler(c *fiber.Ctx) error {
 		item := fiber.Map{
 			"id":          invite.ID.Hex(),
 			"status":      invite.Status,
+			"declineReason": invite.DeclineReason,
 			"eventId":     "",
 			"eventName":   "",
 			"ownerName":   "Unknown",
@@ -640,6 +657,21 @@ func CreateEventInviteHandler(c *fiber.Ctx) error {
 
 	inviteToken := generateRandomToken()
 	invitesColl := db.MongoClient.Database("raidx").Collection("invitations")
+	// Prevent duplicate invitations for same event and owner (allow if previously declined)
+	if teamOwnerID != primitive.NilObjectID {
+		dupErr := invitesColl.FindOne(ctx, bson.M{
+			"type":     models.InviteTypeEvent,
+			"event_id": eventID,
+			"to_id":    teamOwnerID,
+			"status":   bson.M{"$ne": models.InviteStatusDeclined},
+		}).Err()
+		if dupErr == nil {
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Invitation already exists for this event and team owner"})
+		}
+		if dupErr != mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to check existing invitations"})
+		}
+	}
 
 	invitation := models.Invitation{
 		Type:        models.InviteTypeEvent,

@@ -30,16 +30,17 @@ type InviteLink struct {
 
 // PendingApproval represents a user/team that accepted an invite link and is waiting for owner/organizer approval
 type PendingApproval struct {
-	ID           primitive.ObjectID `bson:"_id"`
-	InviteLinkID primitive.ObjectID `bson:"inviteLinkId"`
-	Type         string             `bson:"type"`   // "team" or "event"
-	FromID       string             `bson:"fromId"` // Team owner or organizer
-	TeamID       string             `bson:"teamId,omitempty"`
-	EventID      string             `bson:"eventId,omitempty"`
-	AcceptorID   string             `bson:"acceptorId"` // Player or team owner who accepted
-	AcceptorName string             `bson:"acceptorName"`
-	AcceptorRole string             `bson:"acceptorRole"` // "player" or "team_owner"
-	Status       string             `bson:"status"`       // "pending", "approved", "rejected"
-	CreatedAt    time.Time          `bson:"createdAt"`
-	ApprovedAt   time.Time          `bson:"approvedAt,omitempty"`
+	ID               primitive.ObjectID `bson:"_id"`
+	InviteLinkID     primitive.ObjectID `bson:"inviteLinkId"`
+	Type             string             `bson:"type"`   // "team" or "event"
+	FromID           string             `bson:"fromId"` // Team owner or organizer
+	TeamID           string             `bson:"teamId,omitempty"`
+	EventID          string             `bson:"eventId,omitempty"`
+	AcceptorID       string             `bson:"acceptorId"`       // Player or team owner who accepted
+	AcceptorUsername string             `bson:"acceptorUsername"` // Username
+	AcceptorName     string             `bson:"acceptorName"`     // Full name
+	AcceptorRole     string             `bson:"acceptorRole"`     // "player" or "team_owner"
+	Status           string             `bson:"status"`           // "pending", "approved", "rejected"
+	CreatedAt        time.Time          `bson:"createdAt"`
+	ApprovedAt       time.Time          `bson:"approvedAt,omitempty"`
 }
