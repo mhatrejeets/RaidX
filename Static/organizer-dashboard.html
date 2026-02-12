@@ -233,10 +233,34 @@
             </button>
           </div>
           <div class="card-body">
-            <div id="organizer-events"></div>
-            <hr>
-            <h6 style="color: #fbbf24;">Completed Events</h6>
-            <div id="organizer-events-completed"></div>
+            <ul class="nav nav-tabs" id="eventsStatusTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="events-ongoing-tab" data-bs-toggle="tab" data-bs-target="#events-ongoing" type="button">
+                  <i class="bi bi-play-circle"></i> Ongoing
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="events-pending-tab" data-bs-toggle="tab" data-bs-target="#events-pending" type="button">
+                  <i class="bi bi-clock"></i> Pending
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="events-completed-tab" data-bs-toggle="tab" data-bs-target="#events-completed" type="button">
+                  <i class="bi bi-check-circle"></i> Completed
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content mt-3">
+              <div class="tab-pane fade show active" id="events-ongoing" role="tabpanel">
+                <div id="organizer-events-ongoing"></div>
+              </div>
+              <div class="tab-pane fade" id="events-pending" role="tabpanel">
+                <div id="organizer-events-pending"></div>
+              </div>
+              <div class="tab-pane fade" id="events-completed" role="tabpanel">
+                <div id="organizer-events-completed"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

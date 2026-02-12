@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func CreateEventHandler(c *fiber.Ctx) error {
@@ -183,7 +184,8 @@ func GetOrganizerEventsHandler(c *fiber.Ctx) error {
 	defer cancel()
 
 	eventsColl := db.MongoClient.Database("raidx").Collection("events")
-	cursor, err := eventsColl.Find(ctx, bson.M{"organizer_id": organizerID})
+	findOpts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+	cursor, err := eventsColl.Find(ctx, bson.M{"organizer_id": organizerID}, findOpts)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch events"})
 	}

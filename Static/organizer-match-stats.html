@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Match Stats</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+    }
+    .navbar-brand {
+      font-weight: bold;
+      color: #f97316 !important;
+      font-size: 1.5rem;
+    }
+    .container {
+      max-width: 1200px;
+    }
+    .page-header h1 {
+      color: #fbbf24;
+      font-weight: bold;
+    }
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+    .score {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fbbf24;
+    }
+    .table {
+      color: white;
+    }
+    .table thead {
+      background-color: #0f172a;
+    }
+    .table tbody tr {
+      background-color: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+    .table tbody tr:hover {
+      background-color: #334155;
+    }
+    .btn-primary-orange {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      border: none;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .btn-primary-orange:hover {
+      background: linear-gradient(45deg, #ea580c, #f97316);
+      color: white;
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body data-role="organizer">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <i class="bi bi-lightning-fill"></i> RaidX
+      </a>
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a class="btn btn-outline-light btn-sm" id="back-to-tournament" href="#">
+          <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <a class="btn btn-outline-light btn-sm" href="/organizer/dashboard">
+          <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header mb-4">
+      <h1><i class="bi bi-bar-chart"></i> Match Stats</h1>
+      <p class="text-muted" id="match-subtitle"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0" id="match-title">Match</h5>
+      </div>
+      <div class="card-body text-center">
+        <div class="score" id="match-score">-</div>
+        <div id="match-winner" style="color:#fbbf24; font-weight:600;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Player Stats</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <h6 class="text-warning" id="teamA-stats-title">Team A Players</h6>
+            <div class="table-responsive">
+              <table class="table table-dark table-striped align-middle">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>Raid Points</th>
+                    <th>Defense Points</th>
+                    <th>Total Points</th>
+                  </tr>
+                </thead>
+                <tbody id="player-stats-body-teamA"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <h6 class="text-warning" id="teamB-stats-title">Team B Players</h6>
+            <div class="table-responsive">
+              <table class="table table-dark table-striped align-middle">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>Raid Points</th>
+                    <th>Defense Points</th>
+                    <th>Total Points</th>
+                  </tr>
+                </thead>
+                <tbody id="player-stats-body-teamB"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function normalizeParam(value) {
+      if (!value) return null;
+      if (value === 'null' || value === 'undefined') return null;
+      return value;
+    }
+
+    async function loadMatchStats() {
+      if (!requireAuth()) return;
+      const pathParts = window.location.pathname.split('/');
+      const matchId = pathParts[pathParts.indexOf('match') + 1];
+      const params = new URLSearchParams(window.location.search);
+      const tournamentId = normalizeParam(params.get('tournament_id')) || normalizeParam(params.get('tournamentId'));
+
+      const backBtn = document.getElementById('back-to-tournament');
+      if (backBtn) {
+        if (tournamentId) {
+          backBtn.href = `/organizer/tournament?id=${encodeURIComponent(tournamentId)}`;
+        } else {
+          backBtn.style.display = 'none';
+        }
+      }
+
+      if (!matchId) {
+        document.getElementById('match-title').textContent = 'Match not found';
+        return;
+      }
+
+      try {
+        const res = await apiRequest(`/api/match/${matchId}`);
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load match stats');
+        }
+
+        const teamA = data?.data?.teamA || {};
+        const teamB = data?.data?.teamB || {};
+        const teamAName = normalizeParam(teamA.name) || 'Team A';
+        const teamBName = normalizeParam(teamB.name) || 'Team B';
+        const teamAScore = teamA.score || 0;
+        const teamBScore = teamB.score || 0;
+
+        document.getElementById('match-title').textContent = `${teamAName} vs ${teamBName}`;
+        document.getElementById('match-score').textContent = `${teamAScore} - ${teamBScore}`;
+
+        let winnerText = 'Draw';
+        if (teamAScore > teamBScore) winnerText = `Winner: ${teamAName}`;
+        if (teamBScore > teamAScore) winnerText = `Winner: ${teamBName}`;
+        document.getElementById('match-winner').textContent = winnerText;
+
+        const playerStats = data?.data?.playerStats || {};
+        const teamAPlayers = new Set(data?.data?.teamAPlayerIds || data?.data?.TeamAPlayerIDs || []);
+        const teamBPlayers = new Set(data?.data?.teamBPlayerIds || data?.data?.TeamBPlayerIDs || []);
+        const teamAResolvedName = teamAName || 'Team A';
+        const teamBResolvedName = teamBName || 'Team B';
+        const playerEntries = Object.entries(playerStats);
+        const splitIndex = Math.ceil(playerEntries.length / 2);
+
+        const teamAList = [];
+        const teamBList = [];
+
+        playerEntries.forEach(([id, p], index) => {
+          const name = p.fullName || p.name || p.email || 'Player';
+          const row = `
+            <tr>
+              <td>${name}</td>
+              <td>${p.raidPoints || 0}</td>
+              <td>${p.defencePoints || 0}</td>
+              <td>${p.totalPoints || 0}</td>
+            </tr>
+          `;
+
+          if (teamAPlayers.has(id)) {
+            teamAList.push(row);
+            return;
+          }
+          if (teamBPlayers.has(id)) {
+            teamBList.push(row);
+            return;
+          }
+
+          if (index < splitIndex) teamAList.push(row);
+          else teamBList.push(row);
+        });
+
+        document.getElementById('teamA-stats-title').textContent = `${teamAResolvedName} Players`;
+        document.getElementById('teamB-stats-title').textContent = `${teamBResolvedName} Players`;
+        document.getElementById('player-stats-body-teamA').innerHTML = teamAList.join('') || '<tr><td colspan="4">No player stats found.</td></tr>';
+        document.getElementById('player-stats-body-teamB').innerHTML = teamBList.join('') || '<tr><td colspan="4">No player stats found.</td></tr>';
+      } catch (err) {
+        document.getElementById('match-title').textContent = 'Failed to load match stats';
+        document.getElementById('match-subtitle').textContent = err.message;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMatchStats);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

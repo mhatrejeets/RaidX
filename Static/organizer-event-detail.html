@@ -149,7 +149,7 @@
         <h2 class="event-title" id="event-name">Event Details</h2>
         <div class="muted" id="event-subtitle">Loading event information...</div>
       </div>
-      <div>
+      <div id="action-button-container">
         <button class="btn btn-primary-orange" id="start-event-btn" disabled>Start Event</button>
       </div>
     </div>
@@ -187,16 +187,16 @@
         <div class="muted" id="event-counts"></div>
       </div>
       <div class="card-body">
-        <div class="row g-4">
-          <div class="col-lg-4">
+        <div class="row g-4" id="teams-columns-container">
+          <div class="col-lg-4" id="pending-column">
             <h6>Pending</h6>
             <div id="event-teams-pending"></div>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-4" id="accepted-column">
             <h6>Accepted</h6>
             <div id="event-teams-accepted"></div>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-4" id="declined-column">
             <h6>Declined</h6>
             <div id="event-teams-declined"></div>
           </div>
@@ -204,7 +204,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="start-validation-card">
       <div class="card-header">
         <h5 class="mb-0">Start Validation</h5>
       </div>
@@ -232,6 +232,7 @@
             </div>
           </div>
         </div>
+        <div class="text-center mb-3" style="color:#fbbf24; font-weight:600;" id="match-winner"></div>
         <div class="row g-3">
           <div class="col-lg-6">
             <h6 id="match-teamA-header">Team A Players</h6>
@@ -311,17 +312,49 @@
         document.getElementById('event-accepted-count').textContent = accepted;
         document.getElementById('event-counts').textContent = `Invited: ${invited} • Pending: ${pending} • Accepted: ${accepted} • Declined: ${declined}`;
 
-        renderTeamList('event-teams-pending', data.teams?.pending);
-        renderTeamList('event-teams-accepted', data.teams?.accepted);
-        renderTeamList('event-teams-declined', data.teams?.declined);
+        const eventType = (data.eventType || '').toLowerCase();
+        const eventStatus = (data.status || '').toLowerCase();
+        const isOngoingOrCompleted = eventStatus === 'ongoing' || eventStatus === 'completed';
+        const isTournamentOrChampionship = eventType === 'tournament' || eventType === 'championship';
 
+        // If status is ongoing or completed, only show accepted teams
+        if (isOngoingOrCompleted) {
+          document.getElementById('pending-column').style.display = 'none';
+          document.getElementById('declined-column').style.display = 'none';
+          document.getElementById('accepted-column').classList.remove('col-lg-4');
+          document.getElementById('accepted-column').classList.add('col-lg-12');
+          renderTeamList('event-teams-accepted', data.teams?.accepted);
+        } else {
+          renderTeamList('event-teams-pending', data.teams?.pending);
+          renderTeamList('event-teams-accepted', data.teams?.accepted);
+          renderTeamList('event-teams-declined', data.teams?.declined);
+        }
+
+        const actionButtonContainer = document.getElementById('action-button-container');
         const startBtn = document.getElementById('start-event-btn');
+        const validationCard = document.getElementById('start-validation-card');
         const validationText = document.getElementById('start-validation-text');
         const canStart = requiredTeams > 0 && accepted === requiredTeams;
 
-        // Hide start button if event is already completed
-        if ((data.status || '').toLowerCase() === 'completed') {
-          startBtn.style.display = 'none';
+        // Hide start validation card if status is ongoing or completed
+        if (isOngoingOrCompleted) {
+          validationCard.style.display = 'none';
+        }
+
+        // Handle button display based on event type and status
+        if (isTournamentOrChampionship && (eventStatus === 'ongoing' || eventStatus === 'completed')) {
+          // Show "Go to Fixtures" button for ongoing/completed tournaments/championships
+          const fixturesUrl = eventType === 'tournament' 
+            ? `/organizer/tournament?id=${data.tournamentId || eventId}` 
+            : `/organizer/championship?id=${data.championshipId || eventId}`;
+          
+          actionButtonContainer.style.display = '';
+          actionButtonContainer.innerHTML = `
+            <button class="btn btn-primary-orange" onclick="window.location.href='${fixturesUrl}'">Go to Fixtures</button>
+          `;
+        } else if (eventStatus === 'completed') {
+          // Hide button for completed events
+          actionButtonContainer.style.display = 'none';
         } else if (canStart) {
           startBtn.disabled = false;
           validationText.textContent = 'All required teams have accepted. You can start the event.';
@@ -340,6 +373,20 @@
         startBtn.onclick = async () => {
           if (startBtn.disabled) return;
           try {
+            // Handle tournament initialization
+            if ((data.eventType || '').toLowerCase() === 'tournament') {
+              setStatus('Initializing tournament...', 'info');
+              const initRes = await apiRequest(`/api/tournaments/initialize/${eventId}`, { method: 'POST' });
+              const initData = await initRes.json();
+              if (!initRes.ok) {
+                throw new Error(initData.error || 'Failed to initialize tournament');
+              }
+              setStatus('Tournament initialized successfully!', 'success');
+              // Redirect to tournament dashboard
+              window.location.href = `/organizer/tournament?id=${initData.tournamentId}`;
+              return;
+            }
+
             const startRes = await apiRequest(`/api/organizer/events/${eventId}/start`, { method: 'POST' });
             const startData = await startRes.json();
             if (!startRes.ok) {
@@ -394,12 +441,22 @@
         const teamB = data.teamB || data.TeamB || {};
         const playerStats = data.playerStats || data.PlayerStats || {};
 
-        document.getElementById('match-teamA-label').textContent = teamA.name || 'Team A';
-        document.getElementById('match-teamB-label').textContent = teamB.name || 'Team B';
-        document.getElementById('match-teamA-score').textContent = teamA.score ?? 0;
-        document.getElementById('match-teamB-score').textContent = teamB.score ?? 0;
-        document.getElementById('match-teamA-header').textContent = (teamA.name || 'Team A') + ' Players';
-        document.getElementById('match-teamB-header').textContent = (teamB.name || 'Team B') + ' Players';
+        const teamAName = teamA.name || 'Team A';
+        const teamBName = teamB.name || 'Team B';
+        const teamAScore = teamA.score ?? 0;
+        const teamBScore = teamB.score ?? 0;
+
+        document.getElementById('match-teamA-label').textContent = teamAName;
+        document.getElementById('match-teamB-label').textContent = teamBName;
+        document.getElementById('match-teamA-score').textContent = teamAScore;
+        document.getElementById('match-teamB-score').textContent = teamBScore;
+        document.getElementById('match-teamA-header').textContent = teamAName + ' Players';
+        document.getElementById('match-teamB-header').textContent = teamBName + ' Players';
+
+        let winnerText = 'Winner: Draw';
+        if (teamAScore > teamBScore) winnerText = `Winner: ${teamAName}`;
+        if (teamBScore > teamAScore) winnerText = `Winner: ${teamBName}`;
+        document.getElementById('match-winner').textContent = winnerText;
 
         const teamAPlayers = (data.teamAPlayerIds || data.TeamAPlayerIDs || []).map(id => playerStats[id]).filter(Boolean);
         const teamBPlayers = (data.teamBPlayerIds || data.TeamBPlayerIDs || []).map(id => playerStats[id]).filter(Boolean);

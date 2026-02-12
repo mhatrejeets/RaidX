@@ -13,6 +13,16 @@ import (
 
 var MongoClient *mongo.Client
 
+// Tournament collections
+var TournamentsCollection *mongo.Collection
+var FixturesCollection *mongo.Collection
+var PointsTableCollection *mongo.Collection
+
+// Other collections
+var TeamsCollection *mongo.Collection
+var EventsCollection *mongo.Collection
+var InvitationsCollection *mongo.Collection
+
 func InitDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -37,6 +47,15 @@ func InitDB() {
 	}
 
 	logrus.Info("Info:", "InitDB: ", " ✅ Connected to MongoDB")
+
+	// Initialize collection references
+	raidxDB := MongoClient.Database("raidx")
+	TournamentsCollection = raidxDB.Collection("tournaments")
+	FixturesCollection = raidxDB.Collection("fixtures")
+	PointsTableCollection = raidxDB.Collection("points_table")
+	TeamsCollection = raidxDB.Collection("rbac_teams")
+	EventsCollection = raidxDB.Collection("events")
+	InvitationsCollection = raidxDB.Collection("invitations")
 
 	// TODO: Enable this when reaching production scale for automatic session cleanup
 	// This creates a TTL index on the sessions collection to auto-delete expired refresh tokens

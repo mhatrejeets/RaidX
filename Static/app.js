@@ -245,16 +245,23 @@ function endGame() {
 
     // Send API request to end game with authentication
     const eventId = new URLSearchParams(window.location.search).get('event_id');
+    const tournamentId = new URLSearchParams(window.location.search).get('tournament_id');
+    const fixtureId = new URLSearchParams(window.location.search).get('fixture_id');
     const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
-    fetch(`/api/endgame?match_id=${encodeURIComponent(matchId)}${eventParam}`, {
+    const tournamentParam = tournamentId ? `&tournament_id=${encodeURIComponent(tournamentId)}` : '';
+    const fixtureParam = fixtureId ? `&fixture_id=${encodeURIComponent(fixtureId)}` : '';
+    fetch(`/api/endgame?match_id=${encodeURIComponent(matchId)}${eventParam}${tournamentParam}${fixtureParam}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
         }
     }).then(response => {
         if (response.ok) {
-            // Successfully ended game, redirect to matches page
-            if (eventId) {
+            // Successfully ended game, redirect appropriately
+            if (tournamentId) {
+                // Redirect to tournament dashboard
+                window.location.href = `/organizer/tournament?id=${tournamentId}&token=${encodeURIComponent(token)}`;
+            } else if (eventId) {
                 window.location.href = `/organizer/event/${eventId}?token=${encodeURIComponent(token)}`;
             } else {
                 window.location.href = `/organizer/events?token=${encodeURIComponent(token)}`;
@@ -535,12 +542,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
     const params = new URLSearchParams(window.location.search);
-    const team1Id = params.get("team1_id");
-    const team2Id = params.get("team2_id");
+    const normalizeParam = (value) => {
+        if (!value) return null;
+        if (value === 'null' || value === 'undefined') return null;
+        return value;
+    };
+    const team1Id = normalizeParam(params.get("team1_id"));
+    const team2Id = normalizeParam(params.get("team2_id"));
     // Allow prefilled match id via URL (scorer could open /scorer?match_id=xxx)
     const prefillMatchId = params.get("match_id");
     // Optional resume flag to auto-join without showing overlay
     const resumeFlag = params.get("resume") === "1";
+    let autoJoinedFromPrefill = false;
 
     console.log("DOM fully loaded. Starting initialization.");
 
@@ -562,8 +575,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const selectedB = JSON.parse(localStorage.getItem("teamB_selected"));
 
             // 2. Initialize Teams and Players
-            const team1Name = params.get("team1_name");
-            const team2Name = params.get("team2_name");
+            const team1Name = normalizeParam(params.get("team1_name"));
+            const team2Name = normalizeParam(params.get("team2_name"));
 
             const normalizePlayer = (p) => {
                 const id = p._id || p.id || p.userId || p.user_id;
@@ -657,9 +670,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
             }
 
+            // If match_id is provided in URL, auto-join using that id (tournament flow)
+            if (prefillMatchId) {
+                matchId = prefillMatchId.trim();
+                if (matchInput) matchInput.value = matchId;
+                try { localStorage.setItem(MATCH_STORAGE_KEY, matchId); } catch (e) { console.warn('Failed to persist match id', e); }
+                setMatchIdDisplay(matchId);
+                const overlay = document.getElementById('match-setup');
+                if (overlay) overlay.style.display = 'none';
+                setupWebSocket();
+                if (socket) {
+                    socket.onopen = () => {
+                        socket.send(JSON.stringify({ type: 'join', matchId }));
+                        setConnectionStatus('Connected');
+                        console.log('Auto-joined match:', matchId);
+                    };
+                }
+                autoJoinedFromPrefill = true;
+            }
+
             // If a match id was previously stored, auto-join that match (persistence across refreshes)
             const stored = (() => { try { return localStorage.getItem(MATCH_STORAGE_KEY); } catch (e) { return null; } })();
-            if (stored && stored.trim() !== '') {
+            if (!autoJoinedFromPrefill && stored && stored.trim() !== '') {
                 matchId = stored.trim();
                 if (matchInput) matchInput.value = matchId;
                 // Only auto-join (and hide overlay) if explicitly allowed via URL (prefill/resume)
@@ -689,6 +721,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Alert user if data loading fails
             alert("Error: Failed to load team data. Check console for details.");
         }
+    } else {
+        console.error('Missing team IDs in scorer URL. team1_id/team2_id are required.');
     }
 
     // 6. Setup Static UI Elements and Listeners

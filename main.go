@@ -81,6 +81,12 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/organizer/event-invites", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventInvitesHandler)
 	app.Post("/api/organizer/events/:id/start", middleware.RoleRequired(models.RoleOrganizer), handlers.StartOrganizerEventHandler)
 
+	// RBAC: Tournament APIs
+	app.Post("/api/tournaments/initialize/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.InitializeTournamentHandler)
+	app.Get("/api/tournaments/:id/fixtures", middleware.RoleRequired(models.RoleOrganizer), handlers.GetTournamentFixturesHandler)
+	app.Get("/api/tournaments/:id/standings", middleware.RoleRequired(models.RoleOrganizer), handlers.GetTournamentStandingsHandler)
+	app.Post("/api/tournaments/:id/start-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.StartTournamentMatchHandler)
+
 	// RBAC: Invitations (players and team owners)
 	app.Put("/api/invitations/:id", middleware.RoleRequired(models.RolePlayer, models.RoleTeamOwner), handlers.UpdateInvitationStatusHandler)
 	app.Get("/api/invitations", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerInvitationsHandler)
@@ -103,11 +109,17 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/organizer/event/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/organizer-event-detail.html")
 	})
+	app.Get("/organizer/tournament", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-tournament-detail.html")
+	})
 	app.Get("/organizer/event/:id/matches", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/organizer-event-matches.html")
 	})
 	app.Get("/organizer/match/:id/teams", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/organizer-match-teams.html")
+	})
+	app.Get("/organizer/match/:id/stats", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/organizer-match-stats.html")
 	})
 
 	app.Get("/organizer/profile/:id", handlers.OrganizerProfileHandler)

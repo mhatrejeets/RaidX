@@ -451,13 +451,15 @@ async function initOrganizerDashboard() {
 }
 
 async function loadOrganizerEvents() {
-    const list = document.getElementById('organizer-events');
+    const ongoingList = document.getElementById('organizer-events-ongoing');
+    const pendingList = document.getElementById('organizer-events-pending');
     const completedList = document.getElementById('organizer-events-completed');
-    if (!list || !completedList) {
+    if (!ongoingList || !pendingList || !completedList) {
         console.error('DEBUG: Missing organizer event containers');
         return;
     }
-    list.innerHTML = '';
+    ongoingList.innerHTML = '';
+    pendingList.innerHTML = '';
     completedList.innerHTML = '';
 
     try {
@@ -470,17 +472,26 @@ async function loadOrganizerEvents() {
         }
         if (!Array.isArray(data) || data.length === 0) {
             console.log('DEBUG: No events found');
-            list.innerHTML = '<div class="text-white">No events created yet.</div>';
+            ongoingList.innerHTML = '<div class="text-white">No ongoing events.</div>';
+            pendingList.innerHTML = '<div class="text-white">No pending events.</div>';
             completedList.innerHTML = '<div class="text-white">No completed events.</div>';
             return;
         }
 
         console.log('DEBUG: Found', data.length, 'total events');
-        const activeEvents = data.filter(evt => evt.status !== 'completed');
-        const completedEvents = data.filter(evt => evt.status === 'completed');
-        console.log('DEBUG: Active:', activeEvents.length, 'Completed:', completedEvents.length);
+        const completedEvents = data.filter(evt => (evt.status || '').toLowerCase() === 'completed');
+        const ongoingEvents = data.filter(evt => {
+            const status = (evt.status || '').toLowerCase();
+            return status === 'ongoing' || status === 'active';
+        });
+        const pendingEvents = data.filter(evt => {
+            const status = (evt.status || '').toLowerCase();
+            return status !== 'completed' && status !== 'ongoing' && status !== 'active';
+        });
+        console.log('DEBUG: Ongoing:', ongoingEvents.length, 'Pending:', pendingEvents.length, 'Completed:', completedEvents.length);
 
-        renderOrganizerEventList(list, activeEvents, true);
+        renderOrganizerEventList(ongoingList, ongoingEvents, true);
+        renderOrganizerEventList(pendingList, pendingEvents, true);
         renderOrganizerEventList(completedList, completedEvents, false);
     } catch (e) {
         console.error('DEBUG loadOrganizerEvents error:', e);
@@ -502,13 +513,13 @@ function renderOrganizerEventList(container, events, allowActions) {
             <h5>${event.eventName}</h5>
             <p><strong>Type:</strong> ${event.eventType}</p>
             ${event.maxTeams ? `<p><strong>Max Teams:</strong> ${event.maxTeams}</p>` : ''}
-            <p><strong>Status:</strong> <span class="badge-custom">${event.status === 'completed' ? 'done' : event.status}</span></p>
+            <p><strong>Status:</strong> <span class="badge-custom">${event.status === 'completed' ? 'completed' : event.status}</span></p>
             <p><strong>Accepted:</strong> ${event.counts?.accepted || 0} | <strong>Pending:</strong> ${event.counts?.pending || 0} | <strong>Declined:</strong> ${event.counts?.declined || 0}</p>
             ${allowActions ? `
             <div class="event-card-actions">
                 <button class="btn btn-primary-orange btn-sm" onclick="populateEventEdit('${event.id}')">Edit</button>
                 <button class="btn btn-outline-light btn-sm" onclick="toggleInviteForm('${event.id}')">Invite Team Owner</button>
-                <button class="btn btn-success btn-sm" onclick="markEventDone('${event.id}')">Mark as Done</button>
+                <button class="btn btn-success btn-sm" onclick="markEventDone('${event.id}')">Mark as Completed</button>
             </div>
             <div class="mt-3" id="event-edit-${event.id}" style="display:none;">
                 <div class="row g-2">

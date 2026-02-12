@@ -160,11 +160,23 @@
     // Wait for DOM to be ready and ensure token is loaded
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
-      const teamId = params.get("team_id");
-      const teamKey = params.get("team_key");
+      const normalizeParam = (value) => {
+        if (!value) return null;
+        if (value === 'null' || value === 'undefined') return null;
+        return value;
+      };
+
+      const teamId = normalizeParam(params.get("team_id")) || normalizeParam(params.get("team1_id")) || normalizeParam(params.get("team2_id"));
+      let teamKey = params.get("team_key");
+      if (!teamKey) {
+        const hasTeam1Name = normalizeParam(params.get("team1_name"));
+        teamKey = hasTeam1Name ? "teamB_selected" : "teamA_selected";
+      }
+      let resolvedTeam1Id = normalizeParam(params.get("team1_id"));
+      let resolvedTeam2Id = normalizeParam(params.get("team2_id"));
       
       // Get token from localStorage (should be saved by HEAD script)
-      const token = localStorage.getItem('token');
+      const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
       console.log('[PlayerSelection FETCH] Fetching team data with token:', token ? 'Present' : 'Missing');
       
       if (!token) {
@@ -172,13 +184,19 @@
         return;
       }
       
-      fetch(`/api/team/${teamId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      function loadTeamById(selectedTeamId) {
+        if (!selectedTeamId) {
+          console.error('[PlayerSelection FETCH] Missing team id for selection.');
+          document.getElementById("player-list").innerHTML = '<div class="text-muted">Failed to load team players.</div>';
+          return;
         }
-      })
-      .then(res => res.json())
-      .then(team => {
+        fetch(`/api/team/${selectedTeamId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(res => res.json())
+        .then(team => {
         const teamName = team.team_name || team.TeamName || team.teamName || 'Team';
         document.getElementById("team-name").textContent = teamName;
 
@@ -218,7 +236,35 @@
       })
       .catch(err => {
         console.error('Failed to load team:', err);
+        document.getElementById("player-list").innerHTML = '<div class="text-muted">Failed to load team players.</div>';
       });
+      }
+
+      // If teamId is missing, resolve from tournament fixture
+      const tournamentId = normalizeParam(params.get("tournament_id")) || normalizeParam(params.get("tournamentId"));
+      const fixtureId = normalizeParam(params.get("fixture_id")) || normalizeParam(params.get("fixtureId"));
+      if ((!teamId || !resolvedTeam1Id || !resolvedTeam2Id) && tournamentId && fixtureId) {
+        apiRequest(`/api/tournaments/${tournamentId}/fixtures`)
+          .then(res => res.json())
+          .then(data => {
+            const fixtures = data.fixtures || [];
+            const fixture = fixtures.find(f => f.id === fixtureId);
+            if (!fixture) {
+              console.error('[PlayerSelection FETCH] Fixture not found for team resolution.');
+              document.getElementById("player-list").innerHTML = '<div class="text-muted">Failed to load team players.</div>';
+              return;
+            }
+            resolvedTeam1Id = fixture.team1Id;
+            resolvedTeam2Id = fixture.team2Id;
+            loadTeamById(teamKey === 'teamB_selected' ? fixture.team2Id : fixture.team1Id);
+          })
+          .catch(err => {
+            console.error('[PlayerSelection FETCH] Failed to resolve team from fixture:', err);
+            document.getElementById("player-list").innerHTML = '<div class="text-muted">Failed to load team players.</div>';
+          });
+      } else {
+        loadTeamById(teamId);
+      }
 
     document.getElementById("player-form").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -237,22 +283,39 @@
       const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
 
       if (teamKey === "teamA_selected") {
-        const team1Id = params.get("team1_id");
-        const team2Id = params.get("team2_id");
+        const team1Id = resolvedTeam1Id || normalizeParam(params.get("team1_id"));
+        const team2Id = resolvedTeam2Id || normalizeParam(params.get("team2_id"));
+        if (!team1Id || !team2Id) {
+          alert("Missing team IDs. Please restart match selection.");
+          return;
+        }
         const team1Name = document.getElementById("team-name").textContent;
-        const eventId = params.get("event_id");
+        localStorage.setItem('team1_name', team1Name);
+        const eventId = normalizeParam(params.get("event_id"));
+        const tournamentId = normalizeParam(params.get("tournament_id")) || normalizeParam(params.get("tournamentId"));
+        const fixtureId = normalizeParam(params.get("fixture_id")) || normalizeParam(params.get("fixtureId"));
         const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
         const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
-        window.location.href = `/organizer/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}${eventParam}&token=${encodeURIComponent(token)}`;
+        const tournamentParam = tournamentId ? `&tournament_id=${encodeURIComponent(tournamentId)}` : '';
+        const fixtureParam = fixtureId ? `&fixture_id=${encodeURIComponent(fixtureId)}` : '';
+        window.location.href = `/organizer/playerselection/${playerId}?team_id=${team2Id}&team_key=teamB_selected&team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&match_id=${encodeURIComponent(playerId)}${eventParam}${tournamentParam}${fixtureParam}&token=${encodeURIComponent(token)}`;
       } else {
-        const team1Id = params.get("team1_id");
-        const team2Id = params.get("team2_id");
-        const team1Name = params.get("team1_name");
+        const team1Id = resolvedTeam1Id || normalizeParam(params.get("team1_id"));
+        const team2Id = resolvedTeam2Id || normalizeParam(params.get("team2_id"));
+        if (!team1Id || !team2Id) {
+          alert("Missing team IDs. Please restart match selection.");
+          return;
+        }
+        const team1Name = normalizeParam(params.get("team1_name")) || localStorage.getItem('team1_name') || 'Team A';
         const team2Name = document.getElementById("team-name").textContent;
-        const eventId = params.get("event_id");
+        const eventId = normalizeParam(params.get("event_id"));
+        const tournamentId = normalizeParam(params.get("tournament_id")) || normalizeParam(params.get("tournamentId"));
+        const fixtureId = normalizeParam(params.get("fixture_id")) || normalizeParam(params.get("fixtureId"));
         const token = (typeof getValidToken === 'function' ? getValidToken() : null) || localStorage.getItem('jwtToken') || localStorage.getItem('token');
         const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
-        window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&team2_name=${encodeURIComponent(team2Name)}${eventParam}&token=${encodeURIComponent(token)}`;
+        const tournamentParam = tournamentId ? `&tournament_id=${encodeURIComponent(tournamentId)}` : '';
+        const fixtureParam = fixtureId ? `&fixture_id=${encodeURIComponent(fixtureId)}` : '';
+        window.location.href = `/scorer?team1_id=${team1Id}&team2_id=${team2Id}&team1_name=${encodeURIComponent(team1Name)}&team2_name=${encodeURIComponent(team2Name)}&match_id=${encodeURIComponent(playerId)}${eventParam}${tournamentParam}${fixtureParam}&token=${encodeURIComponent(token)}`;
       }
     });
     
