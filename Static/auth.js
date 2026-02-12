@@ -24,7 +24,7 @@ function requireAuth() {
     return true;
 }
 
-// Helper function to make authenticated API requests
+// Helper function to make authenticated API requests with automatic refresh
 async function apiRequest(url, options = {}) {
     const token = getValidToken();
     if (!token) {
@@ -46,10 +46,27 @@ async function apiRequest(url, options = {}) {
         });
 
         if (response.status === 401) {
-            localStorage.removeItem(JWT_STORAGE_KEY);
-            const currentUrl = encodeURIComponent(window.location.href);
-            window.location.href = `/login?returnUrl=${currentUrl}`;
-            throw new Error('Unauthorized');
+            // Try to refresh the token
+            const refreshed = await refreshAccessToken();
+            if (refreshed) {
+                // Retry the original request with new token
+                const newToken = getValidToken();
+                const newHeaders = {
+                    'Authorization': `Bearer ${newToken}`,
+                    ...options.headers,
+                };
+                const retryResponse = await fetch(url, {
+                    ...options,
+                    headers: newHeaders
+                });
+                return retryResponse;
+            } else {
+                // Refresh failed, redirect to login
+                localStorage.removeItem(JWT_STORAGE_KEY);
+                const currentUrl = encodeURIComponent(window.location.href);
+                window.location.href = `/login?returnUrl=${currentUrl}`;
+                throw new Error('Unauthorized');
+            }
         }
 
         return response;
@@ -168,17 +185,23 @@ async function refreshAccessToken() {
     try {
         const response = await fetch('/refresh', { 
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include' // Include cookies for refresh token
         });
         
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem(JWT_STORAGE_KEY, data.token);
+            localStorage.setItem('jwtToken', data.token);
+            console.log('Token refreshed successfully');
+            // Restart the auto-refresh timer
+            setupAutoRefresh();
             return true;
         } else if (response.status === 401) {
             // Refresh token expired or invalid
+            console.log('Refresh token expired, redirecting to login');
             localStorage.removeItem(JWT_STORAGE_KEY);
-            window.location.href = '/login';
+            localStorage.removeItem('jwtToken');
             return false;
         }
         return false;
@@ -186,4 +209,51 @@ async function refreshAccessToken() {
         console.error('Token refresh failed:', error);
         return false;
     }
+}
+
+// Setup automatic token refresh before expiry
+let refreshTimer = null;
+function setupAutoRefresh() {
+    // Clear any existing timer
+    if (refreshTimer) {
+        clearTimeout(refreshTimer);
+    }
+
+    const token = getValidToken();
+    if (!token) return;
+
+    try {
+        // Decode token to get expiry
+        const parts = token.split('.');
+        if (parts.length < 2) return;
+        
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const exp = payload.exp;
+        
+        if (!exp) return;
+
+        const now = Math.floor(Date.now() / 1000);
+        const timeUntilExpiry = exp - now;
+
+        // Refresh 5 minutes before expiry (or immediately if less than 5 minutes left)
+        const refreshIn = Math.max(0, (timeUntilExpiry - 300) * 1000);
+
+        console.log(`Token expires in ${timeUntilExpiry} seconds, will refresh in ${refreshIn / 1000} seconds`);
+
+        refreshTimer = setTimeout(async () => {
+            console.log('Auto-refreshing token...');
+            await refreshAccessToken();
+        }, refreshIn);
+    } catch (e) {
+        console.error('Failed to setup auto-refresh:', e);
+    }
+}
+
+// Initialize auto-refresh on page load
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        if (isAuthenticated()) {
+            setupAutoRefresh();
+        }
+    });
 }

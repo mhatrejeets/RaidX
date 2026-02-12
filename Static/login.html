@@ -162,6 +162,68 @@
     
     <script src="/static/auth.js"></script>
     <script>
+    // Check if already logged in on page load
+    window.addEventListener('DOMContentLoaded', async function() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // Try to get current user role to verify token validity
+          const response = await fetch('/api/player-profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            // Token is valid, determine role and redirect
+            const role = (getRoleFromToken() || 'player').toLowerCase();
+            let target = '/player/dashboard';
+            
+            if (role === 'organizer') {
+              target = '/organizer/dashboard';
+            } else if (role === 'team_owner') {
+              target = '/owner/dashboard';
+            }
+            
+            console.log('Valid token found, redirecting to:', target);
+            window.location.replace(target);
+            return;
+          } else if (response.status === 401) {
+            // Token expired, try to refresh
+            console.log('Token expired, attempting refresh...');
+            const refreshed = await refreshAccessToken();
+            if (refreshed) {
+              // Refresh successful, redirect to dashboard
+              const role = (getRoleFromToken() || 'player').toLowerCase();
+              let target = '/player/dashboard';
+              
+              if (role === 'organizer') {
+                target = '/organizer/dashboard';
+              } else if (role === 'team_owner') {
+                target = '/owner/dashboard';
+              }
+              
+              console.log('Token refreshed, redirecting to:', target);
+              window.location.replace(target);
+              return;
+            } else {
+              // Refresh failed, clear tokens and show login
+              console.log('Token refresh failed, showing login form');
+              localStorage.removeItem('token');
+              localStorage.removeItem('jwtToken');
+            }
+          } else {
+            // Other error, clear tokens
+            localStorage.removeItem('token');
+            localStorage.removeItem('jwtToken');
+          }
+        } catch (e) {
+          // Token verification failed, clear it
+          console.error('Token verification error:', e);
+          localStorage.removeItem('token');
+          localStorage.removeItem('jwtToken');
+        }
+      }
+    });
+
     async function handleLogin(event) {
       event.preventDefault();
       console.log('Login form submitted');
