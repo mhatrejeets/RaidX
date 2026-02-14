@@ -294,6 +294,7 @@
           </div>
         </div>
         <div class="text-center mb-3" style="color:#fbbf24; font-weight:600;" id="match-winner"></div>
+        <div class="text-center mb-3" style="color:#e2e8f0; font-weight:600;" id="match-toss-info"></div>
         <div class="row g-3">
           <div class="col-lg-6">
             <h6 id="match-teamA-header">Team A Players</h6>
@@ -312,6 +313,7 @@
   <script>
     const eventId = window.location.pathname.split('/').pop();
     const pendingApprovalsLink = document.getElementById('pending-approvals-link');
+    let currentEventType = '';
     if (pendingApprovalsLink && eventId) {
       pendingApprovalsLink.href = `/organizer/event/${eventId}/pending-approvals`;
     }
@@ -380,6 +382,7 @@
         document.getElementById('event-counts').textContent = `Invited: ${invited} • Pending: ${pending} • Accepted: ${accepted} • Declined: ${declined}`;
 
         const eventType = (data.eventType || '').toLowerCase();
+        currentEventType = eventType;
         const eventStatus = (data.status || '').toLowerCase();
         const isOngoingOrCompleted = eventStatus === 'ongoing' || eventStatus === 'completed';
         const isTournamentOrChampionship = eventType === 'tournament' || eventType === 'championship';
@@ -553,7 +556,10 @@
 
     async function loadMatchStats() {
       try {
-        const res = await apiRequest(`/api/organizer/events/${eventId}/match`);
+        const matchEndpoint = currentEventType === 'match'
+          ? `/api/match/${eventId}`
+          : `/api/organizer/events/${eventId}/match`;
+        const res = await apiRequest(matchEndpoint);
         const match = await res.json();
         if (!res.ok) {
           throw new Error(match.error || 'Failed to load match stats');
@@ -581,8 +587,30 @@
         if (teamBScore > teamAScore) winnerText = `Winner: ${teamBName}`;
         document.getElementById('match-winner').textContent = winnerText;
 
-        const teamAPlayers = (data.teamAPlayerIds || data.TeamAPlayerIDs || []).map(id => playerStats[id]).filter(Boolean);
-        const teamBPlayers = (data.teamBPlayerIds || data.TeamBPlayerIDs || []).map(id => playerStats[id]).filter(Boolean);
+        const tossWinner = data.tossWinner || data.TossWinner;
+        const tossDecision = data.tossDecision || data.TossDecision;
+        const tossWinnerName = tossWinner === 'teamB' ? teamBName : (tossWinner === 'teamA' ? teamAName : null);
+        const tossDecisionText = tossDecision === 'defend' ? 'Defend First' : (tossDecision ? 'Raid First' : null);
+        const tossEl = document.getElementById('match-toss-info');
+        if (tossEl) {
+          if (tossWinnerName) {
+            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || '—'}`;
+          } else {
+            tossEl.textContent = '';
+          }
+        }
+
+        const teamAIdList = data.teamAPlayerIds || data.TeamAPlayerIDs || [];
+        const teamBIdList = data.teamBPlayerIds || data.TeamBPlayerIDs || [];
+        let teamAPlayers = teamAIdList.map(id => playerStats[id]).filter(Boolean);
+        let teamBPlayers = teamBIdList.map(id => playerStats[id]).filter(Boolean);
+
+        if (teamAPlayers.length === 0 && teamBPlayers.length === 0) {
+          const entries = Object.values(playerStats || {});
+          const splitIndex = Math.ceil(entries.length / 2);
+          teamAPlayers = entries.slice(0, splitIndex);
+          teamBPlayers = entries.slice(splitIndex);
+        }
 
         const renderPlayers = (containerId, players) => {
           const container = document.getElementById(containerId);

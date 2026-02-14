@@ -35,6 +35,9 @@ let emptyRaidCountA = 0;
 let emptyRaidCountB = 0;
 let isDoOrDieRaid = false;
 let currentRaidNumber = 1;
+let tossWinner = null; // 'teamA' | 'teamB'
+let tossDecision = 'raid'; // 'raid' | 'defend'
+let firstRaidingTeam = 'teamA';
 
 /**
  * WebSocket Connection Management
@@ -83,7 +86,10 @@ function setupWebSocket() {
                         teamAPlayerIds: teamA.players.map(p => p.id),
                         teamBPlayerIds: teamB.players.map(p => p.id),
                         raidNumber: currentRaidNumber,
-                        emptyRaidCounts: { teamA: emptyRaidCountA, teamB: emptyRaidCountB }
+                        emptyRaidCounts: { teamA: emptyRaidCountA, teamB: emptyRaidCountB },
+                        tossWinner: tossWinner,
+                        tossDecision: tossDecision,
+                        firstRaidingTeam: firstRaidingTeam
                     }
                 };
                 socket.send(JSON.stringify(initialState));
@@ -110,8 +116,13 @@ function setupWebSocket() {
                     emptyRaidCountB = msg.data.emptyRaidCounts.teamB;
                 }
 
+                if (msg.data.tossWinner) tossWinner = msg.data.tossWinner;
+                if (msg.data.tossDecision) tossDecision = msg.data.tossDecision;
+                if (msg.data.firstRaidingTeam) firstRaidingTeam = msg.data.firstRaidingTeam;
+
                 updateDisplay();
                 updateRaidInfoUI();
+                updateTossInfoUI();
                 nextRaid(); // Reset UI selections for the next raid
             }
         } catch (e) {
@@ -164,11 +175,13 @@ function initializePlayerStats(team) {
 }
 
 function getDefendingTeam() {
-    return currentRaidNumber % 2 !== 0 ? teamB : teamA;
+    return getRaidingTeam() === teamA ? teamB : teamA;
 }
 
 function getRaidingTeam() {
-    return currentRaidNumber % 2 !== 0 ? teamA : teamB;
+    const firstTeam = firstRaidingTeam === 'teamB' ? teamB : teamA;
+    const secondTeam = firstTeam === teamA ? teamB : teamA;
+    return currentRaidNumber % 2 !== 0 ? firstTeam : secondTeam;
 }
 
 
@@ -326,6 +339,7 @@ function handlePlayerClick(playerId) {
 
     updateCurrentRaidDisplay();
     updateBonusToggleVisibility();
+    renderPlayers(); // Re-render to show selection highlighting
 }
 
 function toggleDefenderSelection(player) {
@@ -334,6 +348,7 @@ function toggleDefenderSelection(player) {
     } else {
         selectedDefenders.push(player);
     }
+    renderPlayers(); // Re-render to update selection highlighting
 }
 
 /**
@@ -408,10 +423,10 @@ function updateCurrentRaidDisplay() {
     const defendingTeam = getDefendingTeam();
     
     if (!selectedRaider) {
-        display.innerHTML = `**${raidingTeam.name}** to raid. Select a raider.`;
+        display.innerHTML = `<strong>${raidingTeam.name}</strong> to raid. Select a raider.`;
     } else {
         const defendersList = selectedDefenders.map(p => p.name).join(", ");
-        display.innerHTML = `Raider (**${selectedRaider.name}** from ${raidingTeam.name}), Defended By: ${defendersList || 'No defenders selected'}`;
+        display.innerHTML = `Raider (<strong>${selectedRaider.name}</strong> from ${raidingTeam.name}), Defended By: ${defendersList || 'No defenders selected'}`;
     }
 }
 
@@ -439,12 +454,18 @@ function renderPlayers() {
                 btn.style.opacity = "0.6";
             }
 
-            // Highlight selected raider/defenders
-            if (selectedRaider && selectedRaider.id === player.id) {
-                 btn.classList.add("btn-success");
-            } else if (selectedDefenders.some(p => p.id === player.id)) {
-                 btn.classList.add("btn-warning");
-            }
+              // Highlight selected raider/defenders
+              if (selectedRaider && selectedRaider.id === player.id) {
+                  btn.classList.add("selected-raider");
+                  btn.classList.remove("btn-outline-primary");
+                  btn.setAttribute("aria-pressed", "true");
+              } else if (selectedDefenders.some(p => p.id === player.id)) {
+                  btn.classList.add("selected-defender");
+                  btn.classList.remove("btn-outline-primary");
+                  btn.setAttribute("aria-pressed", "true");
+              } else {
+                  btn.setAttribute("aria-pressed", "false");
+              }
 
 
             btn.textContent = player.name;
@@ -503,7 +524,20 @@ function updateRaidInfoUI() {
     const emptyCount = raidingTeam.name === teamA.name ? emptyRaidCountA : emptyRaidCountB;
     const raidType = emptyCount === 2 ? "🔴 Do or Die Raid" : "Normal Raid";
 
-    raidElement.innerHTML = `Raid: **${currentRaidNumber}** | Turn: **${raidingTeam.name}** | Status: **${raidType}**`;
+    raidElement.innerHTML = `Raid: <strong>${currentRaidNumber}</strong> | Turn: <strong>${raidingTeam.name}</strong> | Status: <strong>${raidType}</strong>`;
+}
+
+function updateTossInfoUI() {
+    const el = document.getElementById('toss-info');
+    if (!el) return;
+    if (!tossWinner) {
+        el.style.display = 'none';
+        return;
+    }
+    const winnerName = tossWinner === 'teamB' ? teamB.name : teamA.name;
+    const decisionText = tossDecision === 'defend' ? 'Defend First' : 'Raid First';
+    el.textContent = `Toss: ${winnerName} | Decided To: ${decisionText}`;
+    el.style.display = 'block';
 }
 
 /**
@@ -602,6 +636,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("teamB-name").textContent = teamB.name;
             document.getElementById("teamA-header").textContent = teamA.name;
             document.getElementById("teamB-header").textContent = teamB.name;
+
+            // Update toss selection labels with actual team names
+            const tossWinnerSelect = document.getElementById('toss-winner');
+            if (tossWinnerSelect) {
+                const optA = tossWinnerSelect.querySelector('option[value="teamA"]');
+                const optB = tossWinnerSelect.querySelector('option[value="teamB"]');
+                if (optA) optA.textContent = teamA.name || 'Team A';
+                if (optB) optB.textContent = teamB.name || 'Team B';
+            }
             
             // Log team initialization for debugging
             console.log('Teams initialized:', { 
@@ -657,6 +700,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (startBtn) {
                 startBtn.addEventListener('click', () => {
                     if (!matchInput || !matchInput.value) return alert('Please enter a match ID');
+
+                    const tossWinnerSelect = document.getElementById('toss-winner');
+                    const tossDecisionSelect = document.getElementById('toss-decision');
+                    if (!tossWinnerSelect || !tossWinnerSelect.value) {
+                        return alert('Please select which team won the toss');
+                    }
+
+                    tossWinner = tossWinnerSelect.value;
+                    tossDecision = tossDecisionSelect ? tossDecisionSelect.value : 'raid';
+                    firstRaidingTeam = tossDecision === 'raid'
+                        ? tossWinner
+                        : (tossWinner === 'teamA' ? 'teamB' : 'teamA');
+
+                    currentRaidNumber = 1;
+                    updateCurrentRaidDisplay();
+                    updateRaidInfoUI();
+                    updateTossInfoUI();
+
                     matchId = matchInput.value.trim();
                     // persist match id so refreshes keep the same match
                     try { localStorage.setItem(MATCH_STORAGE_KEY, matchId); } catch (e) { console.warn('Failed to persist match id', e); }

@@ -121,6 +121,12 @@
       font-style: italic;
     }
 
+    #toss-info {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
     .teams-container {
       display: flex;
       width: 95%;
@@ -310,6 +316,25 @@
     .btn-dark:hover {
       background-color: #2d3748 !important;
     }
+
+    /* Selected player states */
+    .player-card.selected-raider {
+      background: linear-gradient(135deg, #10b981, #059669) !important;
+      color: #fff !important;
+      border: 2px solid #34d399 !important;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
+      font-weight: bold;
+      transform: scale(1.05);
+    }
+
+    .player-card.selected-defender {
+      background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+      color: #fff !important;
+      border: 2px solid #fbbf24 !important;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.6) !important;
+      font-weight: bold;
+      transform: scale(1.05);
+    }
     
   </style>
 </head>
@@ -348,6 +373,21 @@
         </div>
       </div>
       <div class="mb-3">
+        <label for="toss-winner" class="form-label">Toss Won By</label>
+        <select id="toss-winner" class="form-select">
+          <option value="">-- Select Team --</option>
+          <option value="teamA">Team A</option>
+          <option value="teamB">Team B</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="toss-decision" class="form-label">Decided To</label>
+        <select id="toss-decision" class="form-select">
+          <option value="raid">Raid First</option>
+          <option value="defend">Defend First</option>
+        </select>
+      </div>
+      <div class="mb-3">
         <small id="viewer-link" style="color:#facc15"></small>
       </div>
       <div class="d-flex justify-content-end gap-2">
@@ -359,6 +399,7 @@
   <div class="raid-info-container">
     <div id="raid-number">Raid: 1</div>
     <div id="current-raid">Select a raider.</div>
+    <div id="toss-info" style="display:none;">Toss: —</div>
   </div>
 
   <div class="teams-container">

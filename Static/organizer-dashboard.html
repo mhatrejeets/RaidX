@@ -200,7 +200,7 @@
   <div class="container">
     <div class="dashboard-header">
       <h1><i class="bi bi-trophy"></i> Organizer Dashboard</h1>
-      <p>Manage your events, invitations, and requests.</p>
+      <p>Manage your events and create new ones.</p>
     </div>
 
     <div id="role-warning" class="alert alert-warning d-none"></div>
@@ -211,11 +211,6 @@
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button">
             <i class="bi bi-calendar-event"></i> My Events
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="requests-tab" data-bs-toggle="tab" data-bs-target="#requests" type="button">
-            <i class="bi bi-envelope"></i> Requests
           </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -262,47 +257,6 @@
               </div>
               <div class="tab-pane fade" id="events-completed" role="tabpanel">
                 <div id="organizer-events-completed"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tab-pane fade" id="requests" role="tabpanel">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Requests</h5>
-            <button id="organizer-refresh-requests" class="btn btn-primary-orange btn-sm">
-              <i class="bi bi-arrow-repeat"></i> Refresh
-            </button>
-          </div>
-          <div class="card-body">
-            <ul class="nav nav-tabs" id="requestsTabs" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-requests" type="button">
-                  <i class="bi bi-clock"></i> Pending
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted-requests" type="button">
-                  <i class="bi bi-check-circle"></i> Accepted
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="declined-tab" data-bs-toggle="tab" data-bs-target="#declined-requests" type="button">
-                  <i class="bi bi-x-circle"></i> Declined
-                </button>
-              </li>
-            </ul>
-            <div class="tab-content mt-3">
-              <div class="tab-pane fade show active" id="pending-requests" role="tabpanel">
-                <div id="organizer-requests-pending"></div>
-              </div>
-              <div class="tab-pane fade" id="accepted-requests" role="tabpanel">
-                <div id="organizer-requests-accepted"></div>
-              </div>
-              <div class="tab-pane fade" id="declined-requests" role="tabpanel">
-                <div id="organizer-requests-declined"></div>
               </div>
             </div>
           </div>

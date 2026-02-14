@@ -54,6 +54,10 @@ func GetMatchByID(c *fiber.Ctx) error {
 	// Try lookup by Mongo ObjectID first (if valid), else fallback to matchId field
 	if objID, e := primitive.ObjectIDFromHex(idParam); e == nil {
 		err = matchesCol.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&match)
+		if err != nil {
+			// Fallback: match stored with event_id (match event)
+			err = matchesCol.FindOne(context.TODO(), bson.M{"event_id": objID}).Decode(&match)
+		}
 	} else {
 		err = mongo.ErrNoDocuments
 	}
@@ -92,6 +96,10 @@ func GetMatchByIDJSON(c *fiber.Ctx) error {
 	// Try lookup by Mongo ObjectID first (if valid), else fallback to matchId field
 	if objID, e := primitive.ObjectIDFromHex(idParam); e == nil {
 		err = matchesCol.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&match)
+		if err != nil {
+			// Fallback: match stored with event_id (match event)
+			err = matchesCol.FindOne(context.TODO(), bson.M{"event_id": objID}).Decode(&match)
+		}
 	} else {
 		err = mongo.ErrNoDocuments
 	}
@@ -239,11 +247,29 @@ func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) e
 		return fmt.Errorf("raider does not belong to any team: %s", raid.RaiderID)
 	}
 
-	// Verify alternating raid rule - backend determines expected team
+	// Verify alternating raid rule - backend determines expected team based on toss
+	firstRaidingTeam := match.Data.FirstRaidingTeam
+	if firstRaidingTeam == "" {
+		firstRaidingTeam = "teamA" // Default fallback for legacy matches
+	}
+
 	expectedRaidingTeam := "A"
 	if match.Data.RaidNumber%2 == 0 {
-		expectedRaidingTeam = "B"
+		// Even raid - opposite team raids
+		if firstRaidingTeam == "teamA" {
+			expectedRaidingTeam = "B"
+		} else {
+			expectedRaidingTeam = "A"
+		}
+	} else {
+		// Odd raid - first team raids
+		if firstRaidingTeam == "teamA" {
+			expectedRaidingTeam = "A"
+		} else {
+			expectedRaidingTeam = "B"
+		}
 	}
+
 	if raiderTeam != expectedRaidingTeam {
 		return fmt.Errorf("incorrect raiding team. Expected team %s to raid, but raider belongs to team %s", expectedRaidingTeam, raiderTeam)
 	}

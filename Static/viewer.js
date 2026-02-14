@@ -6,6 +6,20 @@ let eventId = null;
 // Optional token (viewer is allowed without auth)
 let jwtToken = null;
 let matchEnded = false;
+let tossWinner = null;
+let tossDecision = null;
+
+function updateTossInfoUI(teamAName = 'Team A', teamBName = 'Team B') {
+    const el = document.getElementById('toss-info');
+    if (!el) return;
+    if (!tossWinner) {
+        el.textContent = 'Toss: —';
+        return;
+    }
+    const winnerName = tossWinner === 'teamB' ? teamBName : teamAName;
+    const decisionText = tossDecision === 'defend' ? 'Defend First' : 'Raid First';
+    el.textContent = `Toss: ${winnerName} | Decided To: ${decisionText}`;
+}
 
 function normalizeEventType(value) {
     if (!value) return null;
@@ -171,6 +185,10 @@ function joinMatch(id) {
                 if (payload.teamB) document.getElementById("teamB-name").textContent = payload.teamB.name;
                 if (payload.teamB) document.getElementById("teamB-score").textContent = payload.teamB.score;
 
+                if (payload.tossWinner || payload.data?.tossWinner) tossWinner = payload.tossWinner || payload.data?.tossWinner;
+                if (payload.tossDecision || payload.data?.tossDecision) tossDecision = payload.tossDecision || payload.data?.tossDecision;
+                updateTossInfoUI(payload.teamA?.name || 'Team A', payload.teamB?.name || 'Team B');
+
                 if (payload.playerStats) {
                     renderScorecard(
                         payload.playerStats,
@@ -261,6 +279,13 @@ function fetchMatchMetadata() {
                 if (!eventType && inferredType) {
                     eventType = inferredType;
                 }
+                if (data.tossWinner || match.tossWinner) {
+                    tossWinner = data.tossWinner || match.tossWinner;
+                }
+                if (data.tossDecision || match.tossDecision) {
+                    tossDecision = data.tossDecision || match.tossDecision;
+                }
+                updateTossInfoUI(data.teamA?.name || 'Team A', data.teamB?.name || 'Team B');
                 updateEventNavButton();
             }
         })
@@ -299,6 +324,14 @@ function tryFetchFinalScore() {
                         data.teamB?.name || 'Team B'
                     );
                 }
+
+                if (data.tossWinner || match.tossWinner) {
+                    tossWinner = data.tossWinner || match.tossWinner;
+                }
+                if (data.tossDecision || match.tossDecision) {
+                    tossDecision = data.tossDecision || match.tossDecision;
+                }
+                updateTossInfoUI(data.teamA?.name || 'Team A', data.teamB?.name || 'Team B');
 
                 applyEventInfo(match);
                 applyEventInfo(data);

@@ -108,6 +108,7 @@
       <div class="card-body text-center">
         <div class="score" id="match-score">-</div>
         <div id="match-winner" style="color:#fbbf24; font-weight:600;"></div>
+        <div id="match-toss-info" style="color:#e2e8f0; font-weight:600; margin-top:0.5rem;"></div>
       </div>
     </div>
 
@@ -207,6 +208,19 @@
         if (teamAScore > teamBScore) winnerText = `Winner: ${teamAName}`;
         if (teamBScore > teamAScore) winnerText = `Winner: ${teamBName}`;
         document.getElementById('match-winner').textContent = winnerText;
+
+        const tossWinner = data?.data?.tossWinner || data?.tossWinner;
+        const tossDecision = data?.data?.tossDecision || data?.tossDecision;
+        const tossWinnerName = tossWinner === 'teamB' ? teamBName : (tossWinner === 'teamA' ? teamAName : null);
+        const tossDecisionText = tossDecision === 'defend' ? 'Defend First' : (tossDecision ? 'Raid First' : null);
+        const tossEl = document.getElementById('match-toss-info');
+        if (tossEl) {
+          if (tossWinnerName) {
+            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || '—'}`;
+          } else {
+            tossEl.textContent = '';
+          }
+        }
 
         const playerStats = data?.data?.playerStats || {};
         const teamAPlayers = new Set(data?.data?.teamAPlayerIds || data?.data?.TeamAPlayerIDs || []);

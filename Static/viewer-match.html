@@ -97,6 +97,18 @@
               <div class="summary-value" id="match-winner">-</div>
             </div>
           </div>
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-label">Toss Won By</div>
+              <div class="summary-value" id="match-toss-winner">-</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-label">Decided To</div>
+              <div class="summary-value" id="match-toss-decision">-</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -221,6 +233,13 @@
         if (teamAScore > teamBScore) winner = teamAName;
         if (teamBScore > teamAScore) winner = teamBName;
         document.getElementById('match-winner').textContent = winner;
+
+        const tossWinner = match.tossWinner || match.data?.tossWinner || data.data?.tossWinner || data.tossWinner;
+        const tossDecision = match.tossDecision || match.data?.tossDecision || data.data?.tossDecision || data.tossDecision;
+        const tossWinnerName = tossWinner === 'teamB' ? teamBName : (tossWinner === 'teamA' ? teamAName : '-');
+        const tossDecisionText = tossDecision === 'defend' ? 'Defend First' : (tossDecision ? 'Raid First' : '-');
+        document.getElementById('match-toss-winner').textContent = tossWinnerName || '-';
+        document.getElementById('match-toss-decision').textContent = tossDecisionText || '-';
 
         // Show "Go to Event" button if match is part of tournament or championship
         const rawEventType = (data.eventType || data.event_type || '').toLowerCase();

@@ -473,9 +473,6 @@ async function initOrganizerDashboard() {
     if (refreshEventsBtn) refreshEventsBtn.addEventListener('click', loadOrganizerEvents);
     await loadOrganizerEvents();
 
-    const refreshRequestsBtn = document.getElementById('organizer-refresh-requests');
-    if (refreshRequestsBtn) refreshRequestsBtn.addEventListener('click', loadOrganizerRequests);
-    await loadOrganizerRequests();
 }
 
 async function loadOrganizerEvents() {
@@ -609,7 +606,6 @@ async function sendOrganizerInvite(eventId) {
         if (!res.ok) throw new Error(data.error || 'Failed to invite team owner');
         setStatus('organizer-status', 'Invitation created.', 'success');
         if (ownerInput) ownerInput.value = '';
-        await loadOrganizerRequests();
     } catch (e) {
         setStatus('organizer-status', e.message, 'danger');
     }

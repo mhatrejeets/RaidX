@@ -10,10 +10,13 @@ type Match struct {
 	EventType string              `json:"eventType" bson:"event_type"`                 // "match" | "tournament" | "championship"
 	EventID   *primitive.ObjectID `json:"eventId,omitempty" bson:"event_id,omitempty"` // Reference to event, tournament, or championship
 	Data      struct {
-		TeamA       TeamStat              `json:"teamA" bson:"teamA"`
-		TeamB       TeamStat              `json:"teamB" bson:"teamB"`
-		PlayerStats map[string]PlayerStat `json:"playerStats" bson:"playerStats"`
-		RaidDetails RaidDetails           `json:"raidDetails" bson:"raidDetails"`
+		TeamA            TeamStat              `json:"teamA" bson:"teamA"`
+		TeamB            TeamStat              `json:"teamB" bson:"teamB"`
+		PlayerStats      map[string]PlayerStat `json:"playerStats" bson:"playerStats"`
+		RaidDetails      RaidDetails           `json:"raidDetails" bson:"raidDetails"`
+		TossWinner       string                `json:"tossWinner,omitempty" bson:"tossWinner,omitempty"`
+		TossDecision     string                `json:"tossDecision,omitempty" bson:"tossDecision,omitempty"`
+		FirstRaidingTeam string                `json:"firstRaidingTeam,omitempty" bson:"firstRaidingTeam,omitempty"`
 	} `json:"data" bson:"data"`
 }
 
@@ -33,14 +36,17 @@ type RaidDetails struct {
 type EnhancedStatsMessage struct {
 	Type string `json:"type"`
 	Data struct {
-		TeamA           TeamStat              `json:"teamA"`
-		TeamB           TeamStat              `json:"teamB"`
-		PlayerStats     map[string]PlayerStat `json:"playerStats"`
-		RaidDetails     RaidDetails           `json:"raidDetails"`
-		RaidNumber      int                   `json:"raidNumber"`
-		TeamAPlayerIDs  []string              `json:"teamAPlayerIds" bson:"teamAPlayerIds"`
-		TeamBPlayerIDs  []string              `json:"teamBPlayerIds" bson:"teamBPlayerIds"`
-		EmptyRaidCounts struct {
+		TeamA            TeamStat              `json:"teamA"`
+		TeamB            TeamStat              `json:"teamB"`
+		PlayerStats      map[string]PlayerStat `json:"playerStats"`
+		RaidDetails      RaidDetails           `json:"raidDetails"`
+		RaidNumber       int                   `json:"raidNumber"`
+		TeamAPlayerIDs   []string              `json:"teamAPlayerIds" bson:"teamAPlayerIds"`
+		TeamBPlayerIDs   []string              `json:"teamBPlayerIds" bson:"teamBPlayerIds"`
+		TossWinner       string                `json:"tossWinner,omitempty" bson:"tossWinner,omitempty"`
+		TossDecision     string                `json:"tossDecision,omitempty" bson:"tossDecision,omitempty"`
+		FirstRaidingTeam string                `json:"firstRaidingTeam,omitempty" bson:"firstRaidingTeam,omitempty"`
+		EmptyRaidCounts  struct {
 			TeamA int `json:"teamA"`
 			TeamB int `json:"teamB"`
 		} `json:"emptyRaidCounts"`
