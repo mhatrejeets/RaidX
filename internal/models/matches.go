@@ -4,10 +4,12 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 // Match struct matching your MongoDB document
 type Match struct {
-	ID      primitive.ObjectID `json:"id" bson:"_id"`
-	MatchID string             `json:"matchId" bson:"matchId"`
-	Type    string             `json:"type" bson:"type"`
-	Data    struct {
+	ID        primitive.ObjectID  `json:"id" bson:"_id"`
+	MatchID   string              `json:"matchId" bson:"matchId"`
+	Type      string              `json:"type" bson:"type"`
+	EventType string              `json:"eventType" bson:"event_type"`                 // "match" | "tournament" | "championship"
+	EventID   *primitive.ObjectID `json:"eventId,omitempty" bson:"event_id,omitempty"` // Reference to event, tournament, or championship
+	Data      struct {
 		TeamA       TeamStat              `json:"teamA" bson:"teamA"`
 		TeamB       TeamStat              `json:"teamB" bson:"teamB"`
 		PlayerStats map[string]PlayerStat `json:"playerStats" bson:"playerStats"`

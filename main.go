@@ -33,12 +33,27 @@ func setupPublicRoutes(app *fiber.App) {
 	app.Get("/viewer", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/viewer.html")
 	})
+	app.Get("/viewer/match/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/viewer-match.html")
+	})
+	app.Get("/viewer/tournament/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/viewer-tournament.html")
+	})
+	app.Get("/viewer/championship/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/viewer-championship.html")
+	})
 
 	// Public player profile page (client-side auth gate)
 	app.Get("/playerprofile/:id", handlers.PlayerProfileHandler)
 
 	// Public API endpoint to fetch match details by ID (JSON) - no auth required for viewers
 	app.Get("/api/match/:id", handlers.GetMatchByIDJSON)
+	// Public tournament/championship read-only endpoints for viewers
+	app.Get("/api/public/tournaments/:id/fixtures", handlers.GetTournamentFixturesHandler)
+	app.Get("/api/public/tournaments/:id/standings", handlers.GetTournamentStandingsHandler)
+	app.Get("/api/public/championships/:id", handlers.GetChampionshipByIDHandler)
+	app.Get("/api/public/championships/:id/fixtures", handlers.GetChampionshipFixturesHandler)
+	app.Get("/api/public/championships/:id/stats", handlers.GetChampionshipStatsHandler)
 
 	// Public invite link pages (anyone can visit)
 	app.Get("/invite/team/:token", func(c *fiber.Ctx) error {

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Championship Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    .container {
+      max-width: 1400px;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      color: #fbbf24;
+      font-weight: bold;
+    }
+
+    .page-header .subtitle {
+      color: #cbd5e1;
+    }
+
+    .badge-round {
+      background: linear-gradient(45deg, #f97316, #ea580c);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-tabs {
+      border-bottom: 2px solid #334155;
+      margin-bottom: 2rem;
+    }
+
+    .nav-tabs .nav-link {
+      color: #cbd5e1;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 1rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+      color: #f97316;
+      border-bottom-color: #f97316;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: #f97316;
+      border-bottom-color: #f97316;
+      background-color: transparent;
+    }
+
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+
+    .fixture-card {
+      background-color: rgba(30, 41, 59, 0.8);
+      border: 2px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .fixture-card:hover {
+      border-color: #f97316;
+      box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+    }
+
+    .fixture-card h5 {
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+    }
+
+    .fixture-card .score {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fbbf24;
+    }
+
+    .fixture-card.bye-card {
+      background-color: rgba(100, 116, 139, 0.3);
+      border-color: #64748b;
+    }
+
+    .badge-status {
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+    }
+
+    .badge-pending {
+      background-color: #64748b;
+    }
+
+    .badge-ongoing {
+      background-color: #3b82f6;
+    }
+
+    .badge-completed {
+      background-color: #22c55e;
+    }
+
+    .table {
+      color: white;
+    }
+
+    .table thead {
+      background-color: #0f172a;
+    }
+
+    .table tbody tr {
+      background-color: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+
+    .table tbody tr:hover {
+      background-color: #334155;
+    }
+
+    /* Bracket Tree View */
+    .bracket-tree {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 3rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+      padding: 2rem;
+    }
+
+    .bracket-round-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .bracket-arrow {
+      color: #94a3b8;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+    }
+
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      min-width: 250px;
+    }
+
+    .bracket-round-title {
+      color: #fbbf24;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .bracket-match {
+      background-color: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .bracket-match:hover {
+      border-color: #f97316;
+    }
+
+    .bracket-match.bye-match {
+      background-color: rgba(100, 116, 139, 0.2);
+      border-color: #64748b;
+    }
+
+    .bracket-match h6 {
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .bracket-team {
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      background-color: rgba(15, 23, 42, 0.5);
+      border-radius: 0.25rem;
+    }
+
+    .bracket-team.winner {
+      background-color: rgba(34, 197, 94, 0.2);
+      border: 1px solid #22c55e;
+    }
+
+    .winner-badge {
+      background: linear-gradient(45deg, #fbbf24, #f59e0b);
+      color: #0f172a;
+      padding: 1.5rem 2.5rem;
+      border-radius: 0.75rem;
+      font-size: 1.8rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 2rem;
+    }
+
+    .muted { color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 id="championship-name"><i class="bi bi-trophy"></i> Championship</h1>
+          <p class="subtitle" id="championship-subtitle">Loading...</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="badge-round" id="championship-round">Round -</span>
+          <a id="dashboard-link" class="btn btn-outline-light" href="#" style="display:none;">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+          <a class="btn btn-outline-light" href="/viewer">Back to Viewer</a>
+        </div>
+      </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="championshipTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="fixtures-tab" data-bs-toggle="tab" data-bs-target="#fixtures" type="button">
+          <i class="bi bi-calendar-event"></i> Fixtures
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button">
+          <i class="bi bi-bar-chart"></i> Team Stats
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="bracket-tab" data-bs-toggle="tab" data-bs-target="#bracket" type="button">
+          <i class="bi bi-diagram-3"></i> Knockout Tree
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Fixtures Tab -->
+      <div class="tab-pane fade show active" id="fixtures" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Championship Fixtures</h5>
+          </div>
+          <div class="card-body">
+            <div id="fixtures-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Tab -->
+      <div class="tab-pane fade" id="stats" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Team NRR Statistics</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Team</th>
+                    <th>Matches Played</th>
+                    <th>Points Scored</th>
+                    <th>Points Conceded</th>
+                    <th>NRR</th>
+                  </tr>
+                </thead>
+                <tbody id="stats-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bracket Tab -->
+      <div class="tab-pane fade" id="bracket" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Knockout Tree</h5>
+          </div>
+          <div class="card-body">
+            <div id="bracket-view"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const championshipId = window.location.pathname.split('/').pop();
+    let currentChampionship = null;
+
+    function getRoundName(roundNum, totalRounds) {
+      if (!totalRounds) return `Round ${roundNum}`;
+      const remainingRounds = totalRounds - roundNum;
+      if (remainingRounds === 0) return 'Final';
+      if (remainingRounds === 1) return 'Semifinal';
+      if (remainingRounds === 2) return 'Quarterfinal';
+      return `Round ${roundNum}`;
+    }
+
+    function renderFixture(fixture) {
+      const statusBadge = {
+        pending: 'badge-pending',
+        ongoing: 'badge-ongoing',
+        completed: 'badge-completed',
+      }[fixture.status] || 'badge-pending';
+
+      if (fixture.isBye) {
+        return `
+          <div class="fixture-card bye-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="flex-grow-1">
+                <h5>${fixture.team1?.name || fixture.team1?.Name || fixture.team1?.team_name || 'Team'} - BYE</h5>
+                <p style="color: #cbd5e1; margin: 0;">Advances to next round automatically</p>
+                <span class="badge badge-status badge-completed">BYE</span>
+              </div>
+              <div>
+                <i class="bi bi-check-circle" style="font-size: 2rem; color: #22c55e;"></i>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      let scoreDisplay = '';
+      let actionBtn = '';
+      if (fixture.status === 'completed') {
+        const winner = fixture.winnerId === fixture.team1Id ? (fixture.team1?.name || fixture.team1?.Name || fixture.team1?.team_name) : (fixture.team2?.name || fixture.team2?.Name || fixture.team2?.team_name);
+        scoreDisplay = `
+          <div class="score">${fixture.team1Score || 0} - ${fixture.team2Score || 0}</div>
+          <div style="color:#fbbf24; font-weight:600;">Winner: ${winner || 'TBD'}</div>
+        `;
+        
+        if (fixture.matchId) {
+          actionBtn = `
+            <button class="btn btn-outline-light btn-sm" onclick="window.location.href='/viewer/match/${fixture.matchId}'">
+              <i class="bi bi-bar-chart"></i> View Stats
+            </button>
+          `;
+        }
+      }
+
+      const team1Name = fixture.team1?.name || fixture.team1?.Name || fixture.team1?.team_name || 'Team 1';
+      const team2Name = fixture.team2?.name || fixture.team2?.Name || fixture.team2?.team_name || 'Team 2';
+
+      return `
+        <div class="fixture-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+              <h5>${team1Name} vs ${team2Name}</h5>
+              ${scoreDisplay}
+              <span class="badge badge-status ${statusBadge}">${fixture.status.toUpperCase()}</span>
+            </div>
+            <div>
+              ${actionBtn}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadChampionshipInfo() {
+      try {
+        const res = await fetch(`/api/public/championships/${championshipId}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load championship');
+        }
+
+        currentChampionship = data;
+        
+        // Update header
+        document.getElementById('championship-subtitle').textContent = `Status: ${data.status || 'unknown'}`;
+        document.getElementById('championship-round').textContent = `Round ${data.currentRound || data.CurrentRound || 1} of ${data.totalRounds || data.TotalRounds || '-'}`;
+      } catch (error) {
+        console.error('Failed to load championship info:', error);
+        document.getElementById('championship-subtitle').innerHTML = `<span style=\"color: #ef4444;\">${error.message}</span>`;
+      }
+    }
+
+    async function loadFixtures() {
+      try {
+        const res = await fetch(`/api/public/championships/${championshipId}/fixtures`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load fixtures');
+        }
+
+        const fixtures = data || [];
+
+        if (fixtures.length === 0) {
+          document.getElementById('fixtures-list').innerHTML = '<p style="color: #fbbf24;">No fixtures available.</p>';
+          return;
+        }
+
+        // Group fixtures by round
+        const fixturesByRound = {};
+        fixtures.forEach(f => {
+          const roundNum = f.roundNumber ?? f.RoundNumber ?? 1;
+          if (!fixturesByRound[roundNum]) {
+            fixturesByRound[roundNum] = [];
+          }
+          fixturesByRound[roundNum].push(f);
+        });
+
+        // Render rounds in descending order (latest first)
+        const rounds = Object.keys(fixturesByRound).sort((a, b) => b - a);
+        
+        let html = '';
+        rounds.forEach(roundNum => {
+          const roundFixtures = fixturesByRound[roundNum];
+          const roundName = getRoundName(parseInt(roundNum), currentChampionship?.totalRounds || currentChampionship?.TotalRounds);
+          html += `<h6 style="color: #fbbf24; margin-top: ${html ? '2rem' : '0'};">${roundName}</h6>`;
+          roundFixtures.forEach(f => html += renderFixture(f));
+        });
+
+        document.getElementById('fixtures-list').innerHTML = html;
+      } catch (error) {
+        console.error('Failed to load fixtures:', error);
+        document.getElementById('fixtures-list').innerHTML = '<p style="color: #ef4444;">Failed to load fixtures.</p>';
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`/api/public/championships/${championshipId}/stats`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load stats');
+        }
+
+        const stats = data || [];
+        
+        // Sort by NRR descending
+        stats.sort((a, b) => (b.nrr ?? b.NRR ?? 0) - (a.nrr ?? a.NRR ?? 0));
+
+        const tbody = document.getElementById('stats-table');
+        tbody.innerHTML = stats.map(stat => {
+          const teamName = stat.team?.name || stat.team?.Name || stat.team?.team_name || stat.Team?.name || stat.Team?.Name || stat.Team?.team_name || 'Unknown Team';
+          const matchesPlayed = stat.matchesPlayed ?? stat.MatchesPlayed ?? 0;
+          const pointsScored = stat.pointsScored ?? stat.PointsScored ?? 0;
+          const pointsConceded = stat.pointsConceded ?? stat.PointsConceded ?? 0;
+          const nrr = stat.nrr ?? stat.NRR ?? 0;
+          
+          return `
+            <tr>
+              <td><strong>${teamName}</strong></td>
+              <td>${matchesPlayed}</td>
+              <td>${pointsScored}</td>
+              <td>${pointsConceded}</td>
+              <td><strong>${typeof nrr === 'number' ? nrr.toFixed(2) : nrr}</strong></td>
+            </tr>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+        document.getElementById('stats-table').innerHTML = '<tr><td colspan="5" style="color: #ef4444;">Failed to load stats.</td></tr>';
+      }
+    }
+
+    async function loadBracket() {
+      try {
+        const res = await fetch(`/api/public/championships/${championshipId}/fixtures`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load bracket');
+        }
+
+        const fixtures = data || [];
+
+        if (fixtures.length === 0) {
+          document.getElementById('bracket-view').innerHTML = '<p style="color: #fbbf24;">No fixtures generated yet.</p>';
+          return;
+        }
+
+        // Group fixtures by round
+        const fixturesByRound = {};
+        fixtures.forEach(f => {
+          const roundNum = f.roundNumber ?? f.RoundNumber ?? 1;
+          if (!fixturesByRound[roundNum]) {
+            fixturesByRound[roundNum] = [];
+          }
+          fixturesByRound[roundNum].push(f);
+        });
+
+        // Render rounds in ascending order (R1 first)
+        const rounds = Object.keys(fixturesByRound).sort((a, b) => a - b);
+        
+        let html = '<div class="bracket-tree">';
+        rounds.forEach((roundNum, idx) => {
+          const roundFixtures = fixturesByRound[roundNum];
+          const roundName = getRoundName(parseInt(roundNum), currentChampionship?.totalRounds || currentChampionship?.TotalRounds);
+
+          html += '<div class="bracket-round-wrapper">';
+          html += '<div class="bracket-round">';
+          html += `<div class="bracket-round-title">${roundName}</div>`;
+          
+          roundFixtures.forEach(fixture => {
+            const isBye = fixture.isBye;
+            const matchClass = isBye ? 'bracket-match bye-match' : 'bracket-match';
+            
+            const team1Name = fixture.team1?.name || fixture.team1?.Name || fixture.team1?.team_name || 'Team 1';
+            const team2Name = fixture.team2?.name || fixture.team2?.Name || fixture.team2?.team_name || 'Team 2';
+            const status = fixture.status || fixture.Status || 'pending';
+            
+            html += `<div class="${matchClass}">`;
+            
+            if (isBye) {
+              html += `<div class="bracket-team winner">${team1Name} (BYE)</div>`;
+            } else {
+              const team1Class = fixture.winnerId === fixture.team1Id ? 'bracket-team winner' : 'bracket-team';
+              const team2Class = fixture.winnerId === fixture.team2Id ? 'bracket-team winner' : 'bracket-team';
+              const team1Score = fixture.team1Score ?? fixture.Team1Score ?? 0;
+              const team2Score = fixture.team2Score ?? fixture.Team2Score ?? 0;
+              
+              html += `<div class="${team1Class}">${team1Name}${status === 'completed' ? ` (${team1Score})` : ''}</div>`;
+              html += `<div class="${team2Class}">${team2Name}${status === 'completed' ? ` (${team2Score})` : ''}</div>`;
+            }
+            
+            html += '</div>';
+          });
+
+          html += '</div>';
+          if (idx < rounds.length - 1) {
+            html += '<div class="bracket-arrow"><i class="bi bi-arrow-right"></i></div>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+
+        if (currentChampionship?.status === 'completed' && currentChampionship?.winnerId) {
+          const winnerFixture = fixtures.find(f => f.winnerId === currentChampionship.winnerId);
+          const winnerTeam = winnerFixture
+            ? (winnerFixture.team1Id === currentChampionship.winnerId ? (winnerFixture.team1?.name || winnerFixture.team1?.Name || winnerFixture.team1?.team_name) : (winnerFixture.team2?.name || winnerFixture.team2?.Name || winnerFixture.team2?.team_name))
+            : null;
+          const winnerText = winnerTeam ? `Championship Winner: ${winnerTeam}` : 'Championship Winner!';
+          html += `<div class="text-center"><div class="winner-badge"><i class="bi bi-trophy-fill"></i> ${winnerText}</div></div>`;
+        }
+
+        document.getElementById('bracket-view').innerHTML = html;
+      } catch (error) {
+        console.error('Failed to load bracket:', error);
+        document.getElementById('bracket-view').innerHTML = '<p style="color: #ef4444;">Failed to load bracket.</p>';
+      }
+    }
+
+    // Load initial data
+    loadChampionshipInfo();
+    loadFixtures();
+
+    // Load data on tab change
+    document.getElementById('stats-tab').addEventListener('click', () => {
+      if (!document.getElementById('stats-table').innerHTML) loadStats();
+    });
+    document.getElementById('bracket-tab').addEventListener('click', () => {
+      if (!document.getElementById('bracket-view').innerHTML) loadBracket();
+    });
+
+    // Setup dashboard link
+    const dashboardLink = document.getElementById('dashboard-link');
+    if (dashboardLink && typeof getRoleFromToken === 'function') {
+      const role = getRoleFromToken();
+      if (role) {
+        const dashboardPaths = {
+          'player': '/player/dashboard',
+          'owner': '/owner/dashboard',
+          'organizer': '/organizer/dashboard'
+        };
+        const path = dashboardPaths[role.toLowerCase()];
+        if (path) {
+          dashboardLink.href = path;
+          dashboardLink.style.display = 'inline-block';
+        }
+      }
+    }
+  </script>
+  <script src="/static/auth.js"></script>
+</body>
+</html>

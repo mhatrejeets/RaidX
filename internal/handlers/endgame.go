@@ -49,16 +49,46 @@ func EndGameHandler(c *fiber.Ctx) error {
 		return c.Status(500).SendString("Failed to parse Redis JSON: " + err.Error())
 	}
 
-	// Attach eventId if provided
+	// Ensure matchId is stored in Mongo for shareable lookups
+	gameStats["matchId"] = matchId
+	if objID, err := primitive.ObjectIDFromHex(matchId); err == nil {
+		gameStats["_id"] = objID
+	}
+
+	// Set event_type and event_id based on query params
+	tournamentIDParam := c.Query("tournament_id")
+	championshipIDParam := c.Query("championship_id")
 	eventIDParam := c.Query("event_id")
-	if eventIDParam != "" {
-		gameStats["eventId"] = eventIDParam
-		// Best-effort update event status to completed for non-tournament events
+
+	if tournamentIDParam != "" {
+		gameStats["event_type"] = "tournament"
+		if tournamentOID, err := primitive.ObjectIDFromHex(tournamentIDParam); err == nil {
+			// Get tournament to find the event ID
+			var tournament models.Tournament
+			if err := db.TournamentsCollection.FindOne(ctx, bson.M{"_id": tournamentOID}).Decode(&tournament); err == nil {
+				gameStats["event_id"] = tournament.EventID
+			}
+		}
+	} else if championshipIDParam != "" {
+		gameStats["event_type"] = "championship"
+		if championshipOID, err := primitive.ObjectIDFromHex(championshipIDParam); err == nil {
+			// Get championship to find the event ID
+			var championship models.Championship
+			if err := db.ChampionshipsCollection.FindOne(ctx, bson.M{"_id": championshipOID}).Decode(&championship); err == nil {
+				gameStats["event_id"] = championship.EventID
+			}
+		}
+	} else if eventIDParam != "" {
+		// Standalone match event
+		gameStats["event_type"] = "match"
 		if eventOID, err := primitive.ObjectIDFromHex(eventIDParam); err == nil {
+			gameStats["event_id"] = eventOID
+
+			// Update event status to completed for standalone match events
 			eventsColl := db.MongoClient.Database("raidx").Collection("events")
 			var evt models.Event
 			if err := eventsColl.FindOne(ctx, bson.M{"_id": eventOID}).Decode(&evt); err == nil {
-				if evt.EventType != models.EventTypeTournament {
+				if evt.EventType != models.EventTypeTournament && evt.EventType != models.EventTypeChampionship {
 					_, _ = eventsColl.UpdateOne(ctx, bson.M{"_id": eventOID}, bson.M{
 						"$set": bson.M{
 							"status":     models.EventStatusCompleted,
@@ -68,15 +98,32 @@ func EndGameHandler(c *fiber.Ctx) error {
 				}
 			}
 		}
+	} else {
+		// No event association (legacy/standalone)
+		gameStats["event_type"] = "match"
 	}
 
-	// Ensure matchId is stored in Mongo for shareable lookups
-	gameStats["matchId"] = matchId
-	if objID, err := primitive.ObjectIDFromHex(matchId); err == nil {
-		gameStats["_id"] = objID
+	// 3. Handle tournament match completion BEFORE saving match (to set fixture's matchId)
+	fixtureIDParam := c.Query("fixture_id")
+
+	if tournamentIDParam != "" && fixtureIDParam != "" {
+		if err := updateTournamentAfterMatch(ctx, tournamentIDParam, fixtureIDParam, gameStats); err != nil {
+			logrus.Error("Error:", "EndGameHandler:", " Failed to update tournament: %v", err)
+			// Don't fail the whole endgame, just log the error
+		}
 	}
 
-	// 3. Insert full gameStats into matches collection
+	// 4. Handle championship match completion
+	championshipFixtureIDParam := c.Query("championship_fixture_id")
+
+	if championshipIDParam != "" && championshipFixtureIDParam != "" {
+		if err := updateChampionshipAfterMatch(ctx, championshipIDParam, championshipFixtureIDParam, gameStats); err != nil {
+			logrus.Error("Error:", "EndGameHandler:", " Failed to update championship: %v", err)
+			// Don't fail the whole endgame, just log the error
+		}
+	}
+
+	// 5. Insert full gameStats into matches collection (after event_type and event_id are set)
 	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
 	logrus.Debug("EndGame Handler will insert ", gameStats)
 	_, err = matchesColl.InsertOne(ctx, gameStats)
@@ -85,7 +132,7 @@ func EndGameHandler(c *fiber.Ctx) error {
 		return c.Status(500).SendString("Failed to insert into matches: " + err.Error())
 	}
 
-	// 4. Update each player in players collection
+	// 6. Update each player in players collection
 	data := gameStats["data"].(map[string]interface{})
 	playerStats := data["playerStats"].(map[string]interface{})
 	playersColl := db.MongoClient.Database("raidx").Collection("players")
@@ -114,31 +161,9 @@ func EndGameHandler(c *fiber.Ctx) error {
 
 	}
 
-	// 5. Clean up Redis key for this match
+	// 7. Clean up Redis key for this match
 	if err := redisImpl.RedisClient.Del(ctx, redisKey).Err(); err != nil {
 		logrus.Error("Error:", "EndGameHandler:", " Failed to delete Redis key for match %s: %v", matchId, err)
-	}
-
-	// 6. Handle tournament match completion
-	tournamentIDParam := c.Query("tournament_id")
-	fixtureIDParam := c.Query("fixture_id")
-
-	if tournamentIDParam != "" && fixtureIDParam != "" {
-		if err := updateTournamentAfterMatch(ctx, tournamentIDParam, fixtureIDParam, gameStats); err != nil {
-			logrus.Error("Error:", "EndGameHandler:", " Failed to update tournament: %v", err)
-			// Don't fail the whole endgame, just log the error
-		}
-	}
-
-	// 7. Handle championship match completion
-	championshipIDParam := c.Query("championship_id")
-	championshipFixtureIDParam := c.Query("championship_fixture_id")
-
-	if championshipIDParam != "" && championshipFixtureIDParam != "" {
-		if err := updateChampionshipAfterMatch(ctx, championshipIDParam, championshipFixtureIDParam, gameStats); err != nil {
-			logrus.Error("Error:", "EndGameHandler:", " Failed to update championship: %v", err)
-			// Don't fail the whole endgame, just log the error
-		}
 	}
 
 	return c.JSON(fiber.Map{"success": true, "matchId": matchId})

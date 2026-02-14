@@ -190,6 +190,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a id="dashboard-link" class="btn btn-sm btn-outline-light" href="#" style="display:none;"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
                     <li class="nav-item ms-2"><button class="btn btn-sm btn-danger" onclick="logout()">Logout</button></li>
                 </ul>
             </div>
@@ -276,6 +277,24 @@
         AOS.init();
         document.addEventListener('DOMContentLoaded', () => {
             requireAuth();
+
+            // Setup dashboard link based on user role
+            const dashboardLink = document.getElementById('dashboard-link');
+            if (dashboardLink && typeof getRoleFromToken === 'function') {
+                const role = getRoleFromToken();
+                if (role) {
+                    const dashboardPaths = {
+                        'player': '/player/dashboard',
+                        'owner': '/owner/dashboard',
+                        'organizer': '/organizer/dashboard'
+                    };
+                    const path = dashboardPaths[role.toLowerCase()];
+                    if (path) {
+                        dashboardLink.href = path;
+                        dashboardLink.style.display = 'inline-block';
+                    }
+                }
+            }
         });
     </script>
 </body>
