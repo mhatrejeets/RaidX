@@ -1,0 +1,23 @@
+{
+  "name": "@raidx/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@raidx/shared": "file:../../packages/shared",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "fdir": "^6.5.0",
+    "rollup": "^4.57.1",
+    "vite": "^6.4.1"
+  }
+}

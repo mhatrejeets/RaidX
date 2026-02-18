@@ -75,6 +75,9 @@ func setupPublicRoutes(app *fiber.App) {
 }
 
 func setupProtectedRoutes(app *fiber.App) {
+	// Authenticated profile API
+	app.Get("/api/me/profile", handlers.GetMyProfileHandler)
+
 	// Role-based dashboards (RBAC only)
 	app.Get("/player/dashboard", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/player-dashboard.html")
