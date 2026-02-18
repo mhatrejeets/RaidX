@@ -3,14 +3,13 @@ services:
     image: mongo:6
     container_name: raidx-mongo
     restart: always
-    command: ["mongod", "--bind_ip_all", "--logpath", "/var/log/mongodb/mongod.log", "--logappend"]
+    command: ["mongod", "--bind_ip_all"]
     environment:
       MONGO_INITDB_DATABASE: raidx
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-      - ../logs/mongo:/var/log/mongodb
     healthcheck:
       test: ["CMD-SHELL", "ps -o comm= 1 | grep -q '^mongod$'"]
       interval: 180s
