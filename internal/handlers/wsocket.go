@@ -3,8 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"sync"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
@@ -16,117 +14,85 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var viewerClients = struct {
-	clients map[*websocket.Conn]bool
-	mu      sync.Mutex
-}{
-	clients: make(map[*websocket.Conn]bool),
-}
-
-var broadcastChan = make(chan []byte)
-
-func StartBroadcastWorker() {
-	go func() {
-		for msg := range broadcastChan {
-			viewerClients.mu.Lock()
-			for conn := range viewerClients.clients {
-				err := conn.WriteMessage(websocket.TextMessage, msg)
-				if err != nil {
-					logrus.Error("Error:", "StartBroadcastWorker:", " Error sending message to viewer: %v", err)
-					conn.Close()
-					delete(viewerClients.clients, conn)
-				}
-			}
-			viewerClients.mu.Unlock()
-		}
-	}()
-}
-
-func BroadcastToViewers(message models.EnhancedStatsMessage) {
-	data, err := json.Marshal(message)
+func SetupWebSocket(app *fiber.App) {
+// Handle scorer WebSocket
+app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
+	token := c.Query("token")
+	_, err := middleware.AuthWebSocket(token)
 	if err != nil {
-		logrus.Error("Error:", "BroadcastToViewers:", " Error marshalling data for viewers: %v", err)
+		resp := map[string]string{"error": "Unauthorized: Invalid JWT"}
+		data, _ := json.Marshal(resp)
+		c.WriteMessage(websocket.TextMessage, data)
+		c.Close()
 		return
 	}
-	broadcastChan <- data
-}
-
-func SetupWebSocket(app *fiber.App) {
-	// Start the broadcast worker
-	StartBroadcastWorker()
-
-	// Handle scorer WebSocket
-	app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
-		// JWT token must be present in query param
-		token := c.Query("token")
-		_, err := middleware.AuthWebSocket(token)
+	_, joinMsg, err := c.ReadMessage()
+	if err != nil {
+		return
+	}
+	var join struct {
+		Type    string `json:"type"`
+		MatchID string `json:"matchId"`
+	}
+	if err := json.Unmarshal(joinMsg, &join); err != nil || join.Type != "join" || join.MatchID == "" {
+		req := map[string]string{"type": "requestJoin"}
+		data, _ := json.Marshal(req)
+		c.WriteMessage(websocket.TextMessage, data)
+		return
+	}
+	matchID := join.MatchID
+	room := GetRoom(matchID)
+	client := &Client{conn: c, send: make(chan []byte, 256), room: room}
+	room.AddClient(client)
+	client.StartWritePump()
+	defer func() {
+		room.RemoveClient(client)
+		c.Close()
+	}()
+	// Send current match state
+	var currentMatch models.EnhancedStatsMessage
+	redisKey := "gameStats:" + matchID
+	if err := redisImpl.GetRedisKey(redisKey, &currentMatch); err != nil {
+		if err == redisImpl.RedisNull {
+			req := map[string]string{"type": "requestInit"}
+			data, _ := json.Marshal(req)
+			client.send <- data
+		}
+	} else {
+		if data, err := json.Marshal(currentMatch); err == nil {
+			client.send <- data
+		}
+	}
+	for {
+		_, msg, err := c.ReadMessage()
 		if err != nil {
-			logrus.Warn("WebSocket scorer: JWT invalid or missing")
-			c.WriteMessage(websocket.TextMessage, []byte(`{"error":"Unauthorized: Invalid JWT"}`))
-			c.Close()
-			return
+			break
 		}
-		// Expect first message from client to be a join with matchId
-		_, joinMsg, err := c.ReadMessage()
-		if err != nil {
-			logrus.Error("Error:", "SetupWebSocket:", " Failed to read join message: %v", err)
-			return
+		// First probe if this is a raid payload (from scorer UI) or a full state update
+		var probe struct {
+			RaidType string `json:"raidType"`
+			Type     string `json:"type"`
 		}
-		var join struct {
-			Type    string `json:"type"`
-			MatchID string `json:"matchId"`
-		}
-		if err := json.Unmarshal(joinMsg, &join); err != nil || join.Type != "join" || join.MatchID == "" {
-			// ask client to send proper join
-			req := map[string]string{"type": "requestJoin"}
-			if data, e := json.Marshal(req); e == nil {
-				_ = c.WriteMessage(websocket.TextMessage, data)
-			}
-			return
-		}
-
-		matchID := join.MatchID
-		room := GetRoom(matchID)
-		room.AddScorer(c)
-		defer func() {
-			logrus.Info("Info:", "SetupWebSocket:", " Scorer connection closed")
-			c.Close()
-		}()
-
-		// ...existing code...
-
-		// send current match state from Redis (per-match key)
-		var currentMatch models.EnhancedStatsMessage
-		redisKey := "gameStats:" + matchID
-		if err := redisImpl.GetRedisKey(redisKey, &currentMatch); err != nil {
-			if err == redisImpl.RedisNull {
-				// Ask client to send initial state
-				req := map[string]string{"type": "requestInit"}
-				if data, e := json.Marshal(req); e == nil {
-					_ = c.WriteMessage(websocket.TextMessage, data)
+		_ = json.Unmarshal(msg, &probe)
+		if probe.Type == "initialState" {
+			var received models.EnhancedStatsMessage
+			if err := json.Unmarshal(msg, &received); err == nil {
+				if err := redisImpl.SetRedisKey(redisKey, received); err == nil {
+					if data, e := json.Marshal(received); e == nil {
+						room.Broadcast(data)
+					}
 				}
-			} else {
-				logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats for match %s: %v", matchID, err)
 			}
-		} else {
-			if data, err := json.Marshal(currentMatch); err == nil {
-				// send to connecting scorer only
-				_ = c.WriteMessage(websocket.TextMessage, data)
-			}
+			continue
 		}
-
-		// main read loop for this scorer
-		for {
-			_, msg, err := c.ReadMessage()
-			if err != nil {
-				logrus.Error("Error:", "SetupWebSocket:", " Error reading message from scorer: %v", err)
-				break
+		if probe.RaidType != "" {
+			var payload RaidPayload
+			if err := json.Unmarshal(msg, &payload); err != nil {
+				continue
 			}
-
-			// First probe if this is a raid payload (from scorer UI) or a full state update
-			var probe struct {
-				RaidType string `json:"raidType"`
-				Type     string `json:"type"`
+			var currentMatch models.EnhancedStatsMessage
+			if err := redisImpl.GetRedisKey(redisKey, &currentMatch); err != nil {
+				continue
 			}
 			_ = json.Unmarshal(msg, &probe)
 			if probe.Type == "initialState" {
@@ -193,10 +159,24 @@ func SetupWebSocket(app *fiber.App) {
 				}
 				continue
 			}
-
-			// Probe for custom non-raid message types (e.g., lobbyTouch)
-			var typeProbe struct {
+			if data, err := json.Marshal(currentMatch); err == nil {
+				room.Broadcast(data)
+				client.send <- data
+			}
+			continue
+		}
+		var typeProbe struct {
+			Type string `json:"type"`
+		}
+		_ = json.Unmarshal(msg, &typeProbe)
+		if typeProbe.Type == "lobbyTouch" {
+			var lobbyPayload struct {
 				Type string `json:"type"`
+				Data struct {
+					TouchedPlayerId string `json:"touchedPlayerId"`
+					IsRaider        bool   `json:"isRaider"`
+					ScoringTeam     string `json:"scoringTeam"`
+				} `json:"data"`
 			}
 			_ = json.Unmarshal(msg, &typeProbe)
 
@@ -295,11 +275,36 @@ func SetupWebSocket(app *fiber.App) {
 			if data, err := json.Marshal(receivedMessage); err == nil {
 				room.BroadcastBytes(data)
 			}
+			currentMatch.Data.RaidDetails = models.RaidDetails{
+				Type:         "lobbyTouch",
+				Raider:       raiderName,
+				PointsGained: 1,
+			}
+			currentMatch.Data.RaidNumber++
+			checkAndHandleAllOut(&currentMatch)
+			if err := redisImpl.SetRedisKey(redisKey, currentMatch); err != nil {
+				continue
+			}
+			if data, err := json.Marshal(currentMatch); err == nil {
+				room.Broadcast(data)
+				client.send <- data
+			}
+			continue
 		}
-
-		// cleanup
-		room.RemoveScorer(c)
-	}))
+		var receivedMessage models.EnhancedStatsMessage
+		err = json.Unmarshal(msg, &receivedMessage)
+		if err != nil {
+			continue
+		}
+		err = redisImpl.SetRedisKey(redisKey, receivedMessage)
+		if err != nil {
+			continue
+		}
+		if data, err := json.Marshal(receivedMessage); err == nil {
+			room.Broadcast(data)
+		}
+	}
+}))
 
 	// Handle viewer WebSocket
 	app.Get("/ws/viewer", websocket.New(func(c *websocket.Conn) {
@@ -319,11 +324,8 @@ func SetupWebSocket(app *fiber.App) {
 				return
 			}
 		}
-
-		// Expect a join message with matchId
 		_, joinMsg, err := c.ReadMessage()
 		if err != nil {
-			logrus.Error("Error:", "SetupWebSocket:", " Failed to read join message from viewer: %v", err)
 			return
 		}
 		var join struct {
@@ -332,17 +334,19 @@ func SetupWebSocket(app *fiber.App) {
 		}
 		if err := json.Unmarshal(joinMsg, &join); err != nil || join.Type != "join" || join.MatchID == "" {
 			req := map[string]string{"type": "requestJoin"}
-			if data, e := json.Marshal(req); e == nil {
-				_ = c.WriteMessage(websocket.TextMessage, data)
-			}
+			data, _ := json.Marshal(req)
+			c.WriteMessage(websocket.TextMessage, data)
 			return
 		}
-
 		matchID := join.MatchID
 		room := GetRoom(matchID)
-		room.AddViewer(c)
-
-		// send latest game stats from Redis for this match
+		client := &Client{conn: c, send: make(chan []byte, 256), room: room}
+		room.AddClient(client)
+		client.StartWritePump()
+		defer func() {
+			room.RemoveClient(client)
+			c.Close()
+		}()
 		var latestStats models.EnhancedStatsMessage
 		redisKey := "gameStats:" + matchID
 		err = redisImpl.GetRedisKey(redisKey, &latestStats)
@@ -379,14 +383,10 @@ func SetupWebSocket(app *fiber.App) {
 				_ = c.WriteMessage(websocket.TextMessage, data)
 			}
 		}
-
-		// Keep connection open
 		for {
 			if _, _, err := c.NextReader(); err != nil {
 				break
 			}
 		}
-
-		room.RemoveViewer(c)
 	}))
 }
