@@ -795,7 +795,7 @@ func ApprovePendingApproval(c *fiber.Ctx) error {
 	// Update invitation status with appropriate status message
 	statusMsg := "accepted_by_owner"
 	if approval.Type == models.InviteLinkTypeEvent {
-		statusMsg = "accepted_by_organizer"
+		statusMsg = models.InviteStatusAccepted
 	}
 	_ = updateInvitationStatusByLink(ctx, approval, statusMsg)
 

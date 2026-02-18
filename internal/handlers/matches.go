@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -108,9 +109,26 @@ func GetMatchByIDJSON(c *fiber.Ctx) error {
 		err = matchesCol.FindOne(context.TODO(), bson.M{"matchId": idParam}).Decode(&match)
 	}
 	if err != nil {
+		// Redis-first fallback for live (in-progress) matches that are not yet persisted to MongoDB.
+		redisKey := fmt.Sprintf("gameStats:%s", idParam)
+		redisVal, redisErr := redisImpl.RedisClient.Get(context.TODO(), redisKey).Result()
+		if redisErr == nil {
+			var live models.EnhancedStatsMessage
+			if unmarshalErr := json.Unmarshal([]byte(redisVal), &live); unmarshalErr == nil {
+				live.Data.Awards = computeAwardsFromPlayerStats(live.Data.PlayerStats)
+				return c.JSON(fiber.Map{
+					"matchId": idParam,
+					"type":    live.Type,
+					"data":    live.Data,
+				})
+			}
+		}
+
 		logrus.Warn("Warning:", "GetMatchByIDJSON:", " Match not found: %v", err)
 		return c.Status(404).JSON(fiber.Map{"error": "Match not found"})
 	}
+
+	match.Data.Awards = computeAwardsFromPlayerStats(match.Data.PlayerStats)
 
 	// Return match as JSON
 	return c.JSON(match)
@@ -152,8 +170,7 @@ func ProcessRaidResult(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "unknown raid type"})
 	}
 
-	// Increment raid number after processing
-	currentMatch.Data.RaidNumber++
+	currentMatch.Data.Awards = computeAwardsFromPlayerStats(currentMatch.Data.PlayerStats)
 
 	// Save back to Redis
 	if err := redisImpl.SetRedisKey("gameStats", currentMatch); err != nil {
@@ -207,12 +224,18 @@ func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) e
 		if foundInTeam {
 			// initialize minimal PlayerStat
 			ps := models.PlayerStat{
-				Name:          raid.RaiderID,
-				ID:            raid.RaiderID,
-				RaidPoints:    0,
-				DefencePoints: 0,
-				TotalPoints:   0,
-				Status:        "in",
+				Name:              raid.RaiderID,
+				ID:                raid.RaiderID,
+				RaidPoints:        0,
+				DefencePoints:     0,
+				TotalPoints:       0,
+				SuperRaids:        0,
+				SuperTackles:      0,
+				TotalRaids:        0,
+				SuccessfulRaids:   0,
+				TotalTackles:      0,
+				SuccessfulTackles: 0,
+				Status:            "in",
 			}
 			match.Data.PlayerStats[raid.RaiderID] = ps
 			raider = ps
@@ -303,12 +326,18 @@ func validateRaidPayload(raid RaidPayload, match *models.EnhancedStatsMessage) e
 				}
 				if foundInTeam {
 					ps := models.PlayerStat{
-						Name:          defID,
-						ID:            defID,
-						RaidPoints:    0,
-						DefencePoints: 0,
-						TotalPoints:   0,
-						Status:        "in",
+						Name:              defID,
+						ID:                defID,
+						RaidPoints:        0,
+						DefencePoints:     0,
+						TotalPoints:       0,
+						SuperRaids:        0,
+						SuperTackles:      0,
+						TotalRaids:        0,
+						SuccessfulRaids:   0,
+						TotalTackles:      0,
+						SuccessfulTackles: 0,
+						Status:            "in",
 					}
 					match.Data.PlayerStats[defID] = ps
 					d = ps
@@ -346,6 +375,17 @@ func getRaidingTeam(match *models.EnhancedStatsMessage, raiderID string) string 
 func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	// Backend determines raiding team from raider's team membership
 	raidingTeam := getRaidingTeam(match, raid.RaiderID)
+	raidNumber := match.Data.RaidNumber
+	lobbyEvents := consumeLobbyEvents(match)
+	lobbyRaiderEntered, lobbyDefenders := splitLobbyEvents(match, lobbyEvents)
+
+	// Check if this raid is a do-or-die (third consecutive empty for raiding team)
+	doOrDie := false
+	if raidingTeam == "A" {
+		doOrDie = match.Data.EmptyRaidCounts.TeamA >= 2
+	} else {
+		doOrDie = match.Data.EmptyRaidCounts.TeamB >= 2
+	}
 
 	raidPoints := len(raid.DefenderIDs)
 
@@ -364,11 +404,16 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 
 	// update raider stats
 	raiderStat := match.Data.PlayerStats[raid.RaiderID]
+	raiderStat.TotalRaids++
+	raiderStat.SuccessfulRaids++
 	raiderStat.RaidPoints += raidPoints
 	raiderStat.TotalPoints += raidPoints
 	if raid.BonusTaken {
 		raiderStat.RaidPoints++
 		raiderStat.TotalPoints++
+	}
+	if raidPoints >= 3 {
+		raiderStat.SuperRaids++
 	}
 	match.Data.PlayerStats[raid.RaiderID] = raiderStat
 
@@ -382,6 +427,7 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 	// mark defenders out and keep their stats
 	for _, defID := range raid.DefenderIDs {
 		d := match.Data.PlayerStats[defID]
+		d.TotalTackles++
 		d.Status = "out"
 		match.Data.PlayerStats[defID] = d
 	}
@@ -398,14 +444,33 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 
 	// record last raid and check for all out
 	match.Data.RaidDetails = models.RaidDetails{
-		Type:         "raidSuccess",
-		Raider:       raiderStat.Name,
-		PointsGained: pointsGained,
-		BonusTaken:   raid.BonusTaken,
+		Type:           "raidSuccess",
+		Raider:         raiderStat.Name,
+		Defenders:      getDefenderNames(match, raid.DefenderIDs),
+		PointsGained:   pointsGained,
+		BonusTaken:     raid.BonusTaken,
+		SuperRaid:      raidPoints >= 3,
+		DoOrDie:        doOrDie,
+		LobbyRaider:    lobbyRaiderEntered,
+		LobbyDefenders: lobbyDefenders,
 	}
+
+	match.Data.RaidLog = append(match.Data.RaidLog, models.RaidLogEntry{
+		RaidNumber:  raidNumber,
+		RaidingTeam: raidingTeam,
+		RaiderId:    raid.RaiderID,
+		DefenderIds: raid.DefenderIDs,
+		Result:      "raidSuccess",
+		Points:      pointsGained,
+		BonusTaken:  raid.BonusTaken,
+		SuperRaid:   raidPoints >= 3,
+		DoOrDie:     doOrDie,
+		LobbyEvents: lobbyEvents,
+	})
 
 	// Check for all out before incrementing raid number
 	checkAndHandleAllOut(match)
+	match.Data.Awards = computeAwardsFromPlayerStats(match.Data.PlayerStats)
 
 	match.Data.RaidNumber++
 }
@@ -413,6 +478,17 @@ func processSuccessfulRaid(match *models.EnhancedStatsMessage, raid RaidPayload)
 func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	// Backend determines raiding team from raider's team membership
 	raidingTeam := getRaidingTeam(match, raid.RaiderID)
+	raidNumber := match.Data.RaidNumber
+	lobbyEvents := consumeLobbyEvents(match)
+	lobbyRaiderEntered, lobbyDefenders := splitLobbyEvents(match, lobbyEvents)
+
+	// Check if this raid is a do-or-die (third consecutive empty for raiding team)
+	doOrDie := false
+	if raidingTeam == "A" {
+		doOrDie = match.Data.EmptyRaidCounts.TeamA >= 2
+	} else {
+		doOrDie = match.Data.EmptyRaidCounts.TeamB >= 2
+	}
 
 	// Determine defending team by id (A/B)
 	defendingTeam := "A"
@@ -440,6 +516,7 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 	}
 
 	isSuperTackle := activeDefenders <= 3
+	superTackleApplied := isSuperTackle
 	if isSuperTackle {
 		points = 2
 	}
@@ -461,6 +538,7 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 		// If it looked like a super tackle, reduce it to a normal tackle when bonus was taken
 		if isSuperTackle {
 			points = 1
+			superTackleApplied = false
 		}
 	}
 
@@ -473,26 +551,48 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 
 	// Mark raider out
 	r := match.Data.PlayerStats[raid.RaiderID]
+	r.TotalRaids++
 	r.Status = "out"
 	match.Data.PlayerStats[raid.RaiderID] = r
 
 	// update defender stats
 	for _, defID := range raid.DefenderIDs {
 		d := match.Data.PlayerStats[defID]
+		d.TotalTackles++
+		d.SuccessfulTackles++
 		d.DefencePoints++
 		d.TotalPoints++
+		if superTackleApplied {
+			d.SuperTackles++
+		}
 		match.Data.PlayerStats[defID] = d
 	}
 
 	// PointsGained should reflect total points awarded this raid: defender points + bonus (if any)
 	match.Data.RaidDetails = models.RaidDetails{
-		Type:         "defenseSuccess",
-		Raider:       r.Name,
-		Defenders:    getDefenderNames(match, raid.DefenderIDs),
-		PointsGained: points + boolToInt(raid.BonusTaken),
-		SuperTackle:  points > 1,
-		BonusTaken:   raid.BonusTaken,
+		Type:           "defenseSuccess",
+		Raider:         r.Name,
+		Defenders:      getDefenderNames(match, raid.DefenderIDs),
+		PointsGained:   points + boolToInt(raid.BonusTaken),
+		SuperTackle:    superTackleApplied,
+		BonusTaken:     raid.BonusTaken,
+		DoOrDie:        doOrDie,
+		LobbyRaider:    lobbyRaiderEntered,
+		LobbyDefenders: lobbyDefenders,
 	}
+
+	match.Data.RaidLog = append(match.Data.RaidLog, models.RaidLogEntry{
+		RaidNumber:  raidNumber,
+		RaidingTeam: raidingTeam,
+		RaiderId:    raid.RaiderID,
+		DefenderIds: raid.DefenderIDs,
+		Result:      "defenseSuccess",
+		Points:      points + boolToInt(raid.BonusTaken),
+		BonusTaken:  raid.BonusTaken,
+		SuperTackle: superTackleApplied,
+		DoOrDie:     doOrDie,
+		LobbyEvents: lobbyEvents,
+	})
 
 	// Check for all out before revival (will add all-out points to RaidDetails if any)
 	checkAndHandleAllOut(match)
@@ -511,6 +611,7 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 	} else {
 		revivePlayersByIDs(match, match.Data.TeamBPlayerIDs, 1)
 	}
+	match.Data.Awards = computeAwardsFromPlayerStats(match.Data.PlayerStats)
 
 	match.Data.RaidNumber++
 }
@@ -518,8 +619,12 @@ func processDefenseSuccess(match *models.EnhancedStatsMessage, raid RaidPayload)
 func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	// Backend determines raiding team from raider's team membership
 	raidingTeam := getRaidingTeam(match, raid.RaiderID)
+	raidNumber := match.Data.RaidNumber
+	lobbyEvents := consumeLobbyEvents(match)
+	lobbyRaiderEntered, lobbyDefenders := splitLobbyEvents(match, lobbyEvents)
 
 	r := match.Data.PlayerStats[raid.RaiderID]
+	r.TotalRaids++
 
 	// Award bonus point to raiding team if taken (no revival for bonus points)
 	if raid.BonusTaken {
@@ -567,10 +672,24 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 	}
 	match.Data.PlayerStats[raid.RaiderID] = r
 	match.Data.RaidDetails = models.RaidDetails{
-		Type:       ternaryString(emptyCount >= 3, "doOrDieRaid", "emptyRaid"),
-		Raider:     r.Name,
-		BonusTaken: raid.BonusTaken,
+		Type:           ternaryString(emptyCount >= 3, "doOrDieRaid", "emptyRaid"),
+		Raider:         r.Name,
+		BonusTaken:     raid.BonusTaken,
+		DoOrDie:        emptyCount >= 3,
+		LobbyRaider:    lobbyRaiderEntered,
+		LobbyDefenders: lobbyDefenders,
 	}
+
+	match.Data.RaidLog = append(match.Data.RaidLog, models.RaidLogEntry{
+		RaidNumber:  raidNumber,
+		RaidingTeam: raidingTeam,
+		RaiderId:    raid.RaiderID,
+		Result:      ternaryString(emptyCount >= 3, "doOrDieRaid", "emptyRaid"),
+		Points:      boolToInt(raid.BonusTaken),
+		BonusTaken:  raid.BonusTaken,
+		DoOrDie:     emptyCount >= 3,
+		LobbyEvents: lobbyEvents,
+	})
 	// If do-or-die resulted in raider out (i.e., no bonus taken), defending team gets 1 point and revival
 	if emptyCount >= 3 && !raid.BonusTaken {
 		defending := "A"
@@ -589,7 +708,90 @@ func processEmptyRaid(match *models.EnhancedStatsMessage, raid RaidPayload) {
 			match.Data.EmptyRaidCounts.TeamB = 0
 		}
 	}
+	match.Data.Awards = computeAwardsFromPlayerStats(match.Data.PlayerStats)
 	match.Data.RaidNumber++
+}
+
+func computeAwardsFromPlayerStats(playerStats map[string]models.PlayerStat) models.MatchAwards {
+	awards := models.MatchAwards{}
+	if len(playerStats) == 0 {
+		return awards
+	}
+
+	mvp := models.AwardInfo{Points: -1}
+	bestRaider := models.AwardInfo{Points: -1}
+	bestDefender := models.AwardInfo{Points: -1}
+
+	for id, stat := range playerStats {
+		name := stat.Name
+		if stat.TotalPoints > mvp.Points {
+			mvp = models.AwardInfo{PlayerId: id, Name: name, Points: stat.TotalPoints}
+		}
+		if stat.RaidPoints > bestRaider.Points {
+			bestRaider = models.AwardInfo{PlayerId: id, Name: name, Points: stat.RaidPoints}
+		}
+		if stat.DefencePoints > bestDefender.Points {
+			bestDefender = models.AwardInfo{PlayerId: id, Name: name, Points: stat.DefencePoints}
+		}
+	}
+
+	if mvp.Points < 0 {
+		mvp.Points = 0
+	}
+	if bestRaider.Points < 0 {
+		bestRaider.Points = 0
+	}
+	if bestDefender.Points < 0 {
+		bestDefender.Points = 0
+	}
+
+	awards.MVP = mvp
+	awards.BestRaider = bestRaider
+	awards.BestDefender = bestDefender
+	return awards
+}
+
+func consumeLobbyEvents(match *models.EnhancedStatsMessage) []models.LobbyEvent {
+	if len(match.Data.PendingLobby.Events) == 0 {
+		return nil
+	}
+	currentRaid := match.Data.RaidNumber
+	current := make([]models.LobbyEvent, 0)
+	remaining := make([]models.LobbyEvent, 0)
+	for _, ev := range match.Data.PendingLobby.Events {
+		if ev.RaidNumber == 0 || ev.RaidNumber == currentRaid {
+			current = append(current, ev)
+			continue
+		}
+		if ev.RaidNumber > currentRaid {
+			remaining = append(remaining, ev)
+		}
+	}
+	match.Data.PendingLobby.Events = remaining
+	if len(current) == 0 {
+		return nil
+	}
+	return current
+}
+
+func splitLobbyEvents(match *models.EnhancedStatsMessage, events []models.LobbyEvent) (bool, []string) {
+	if len(events) == 0 {
+		return false, nil
+	}
+	lobbyRaider := false
+	lobbyDefenders := []string{}
+	for _, ev := range events {
+		if ev.IsRaider {
+			lobbyRaider = true
+			continue
+		}
+		if p, ok := match.Data.PlayerStats[ev.TouchedPlayerId]; ok {
+			lobbyDefenders = append(lobbyDefenders, p.Name)
+		} else {
+			lobbyDefenders = append(lobbyDefenders, ev.TouchedPlayerId)
+		}
+	}
+	return lobbyRaider, lobbyDefenders
 }
 
 // revivePlayersByIDs revives up to count players from the given playerID list by

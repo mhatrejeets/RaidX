@@ -346,7 +346,7 @@ func StartTournamentMatchHandler(c *fiber.Ctx) error {
 		"team1Id":      fixture.Team1ID.Hex(),
 		"team2Id":      fixture.Team2ID.Hex(),
 		"redirectUrl": fmt.Sprintf(
-			"/organizer/playerselection/%s?team_id=%s&team_key=teamA_selected&team1_id=%s&team2_id=%s&event_id=%s&tournament_id=%s&fixture_id=%s",
+			"/organizer/playerselection/%s?team_id=%s&team_key=teamA_selected&team1_id=%s&team2_id=%s&event_id=%s&tournament_id=%s&fixture_id=%s&match_id=%s",
 			matchID.Hex(),
 			fixture.Team1ID.Hex(),
 			fixture.Team1ID.Hex(),
@@ -354,6 +354,7 @@ func StartTournamentMatchHandler(c *fiber.Ctx) error {
 			tournament.EventID.Hex(),
 			tournament.ID.Hex(),
 			fixtureID,
+			matchID.Hex(),
 		),
 	})
 }

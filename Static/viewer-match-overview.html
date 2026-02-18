@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Match Overview</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="/static/auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+    .container {
+      max-width: 1200px;
+    }
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+    .badge-custom {
+      background-color: #334155;
+      color: #f97316;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+    }
+    .summary-line {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+    .table {
+      color: white;
+    }
+    .table thead {
+      background-color: #0f172a;
+    }
+    .table tbody tr {
+      background-color: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+    .table tbody tr:hover {
+      background-color: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-1" style="color:#fbbf24;">Match Overview</h2>
+        <div id="match-subtitle" class="text-muted"></div>
+      </div>
+      <div class="d-flex gap-2">
+        <a id="back-to-score" class="btn btn-outline-light" href="#">Back to Score</a>
+        <a class="btn btn-outline-light" href="/viewer">Back to Viewer</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Summary</h5>
+        <span class="badge-custom" id="match-id">Match: -</span>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="summary-line" id="summary-score">-</div>
+            <div id="summary-winner"></div>
+          </div>
+          <div class="col-md-4">
+            <div id="summary-toss">Toss: -</div>
+          </div>
+          <div class="col-md-4">
+            <div id="summary-awards">Awards: -</div>
+          </div>
+        </div>
+        <div class="mt-3" id="summary-narrative"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Raid-by-Raid Overview</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-dark table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Raid #</th>
+                <th>Team</th>
+                <th>Raider</th>
+                <th>Result</th>
+                <th>Points</th>
+                <th>Commentary</th>
+              </tr>
+            </thead>
+            <tbody id="raid-log-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const matchId = window.location.pathname.split('/')[3];
+    const matchIdEl = document.getElementById('match-id');
+    if (matchIdEl) matchIdEl.textContent = `Match: ${matchId}`;
+    const backToScore = document.getElementById('back-to-score');
+    if (backToScore) backToScore.href = `/viewer?match_id=${encodeURIComponent(matchId)}`;
+
+    function getNameById(map, id) {
+      if (!map || !id) return id || '';
+      const item = map[id];
+      return item?.name || item?.Name || id;
+    }
+
+    function formatResult(result) {
+      if (!result) return '-';
+      if (result === 'raidSuccess') return 'Raid Success';
+      if (result === 'defenseSuccess') return 'Defense Success';
+      if (result === 'emptyRaid') return 'Empty Raid';
+      if (result === 'doOrDieRaid') return 'Do-or-Die';
+      return result;
+    }
+
+    function buildRaidLine(log, teamName, raiderName, defenderNames) {
+      let line = `Raid by ${raiderName}`;
+      if (teamName) line += ` of ${teamName}`;
+
+      if (log.result === 'defenseSuccess') {
+        line += ' was tackled';
+        if (defenderNames.length) line += ` by ${defenderNames.join(', ')}`;
+        line += '.';
+      } else if (log.result === 'emptyRaid') {
+        line += ' was empty.';
+      } else if (log.result === 'doOrDieRaid') {
+        line += ' faced a do-or-die raid.';
+      } else {
+        line += ` scored ${log.points || 0} point${(log.points || 0) === 1 ? '' : 's'}.`;
+        if (defenderNames.length) line += ` Got out ${defenderNames.join(', ')}.`;
+      }
+
+      const tags = [];
+      if (log.bonusTaken) tags.push('Bonus taken');
+      if (log.superRaid) tags.push('Super Raid');
+      if (log.superTackle) tags.push('Super Tackle');
+      if (log.doOrDie) tags.push('Do-or-Die');
+      if (Array.isArray(log.lobbyEvents) && log.lobbyEvents.length) {
+        const lobbyDef = log.lobbyEvents.filter(e => !e.isRaider).map(e => getNameById(window.__playerStats, e.touchedPlayerId));
+        const lobbyRaid = log.lobbyEvents.some(e => e.isRaider);
+        if (lobbyDef.length) tags.push(`Defender lobby: ${lobbyDef.join(', ')}`);
+        if (lobbyRaid) tags.push('Raider entered lobby');
+      }
+      if (tags.length) line += ` (${tags.join(' • ')})`;
+      return line;
+    }
+
+    async function loadOverview() {
+      const res = await fetch(`/api/match/${matchId}`);
+      const match = await res.json();
+      if (!res.ok) {
+        document.getElementById('match-subtitle').textContent = match.error || 'Failed to load match.';
+        return;
+      }
+
+      const data = match.data || match.Data || {};
+      const teamA = data.teamA || data.TeamA || {};
+      const teamB = data.teamB || data.TeamB || {};
+      const teamAName = teamA.name || 'Team A';
+      const teamBName = teamB.name || 'Team B';
+      const teamAScore = teamA.score ?? 0;
+      const teamBScore = teamB.score ?? 0;
+      const winner = teamAScore === teamBScore ? 'Draw' : teamAScore > teamBScore ? teamAName : teamBName;
+
+      document.getElementById('match-subtitle').textContent = `${teamAName} vs ${teamBName}`;
+      document.getElementById('summary-score').textContent = `${teamAName} ${teamAScore} - ${teamBScore} ${teamBName}`;
+      document.getElementById('summary-winner').textContent = `Winner: ${winner}`;
+
+      const tossWinner = data.tossWinner || match.tossWinner;
+      const tossDecision = data.tossDecision || match.tossDecision;
+      const tossWinnerName = tossWinner === 'teamB' ? teamBName : tossWinner === 'teamA' ? teamAName : '-';
+      const tossDecisionText = tossDecision === 'defend' ? 'Defend First' : tossDecision ? 'Raid First' : '-';
+      document.getElementById('summary-toss').textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText}`;
+
+      const awards = data.awards || match.awards || {};
+      const awardsParts = [];
+      if (awards.mvp) awardsParts.push(`MVP: ${awards.mvp.name} (${awards.mvp.points})`);
+      if (awards.bestRaider) awardsParts.push(`Best Raider: ${awards.bestRaider.name} (${awards.bestRaider.points})`);
+      if (awards.bestDefender) awardsParts.push(`Best Defender: ${awards.bestDefender.name} (${awards.bestDefender.points})`);
+      document.getElementById('summary-awards').textContent = awardsParts.length ? awardsParts.join(' • ') : 'Awards: -';
+
+      document.getElementById('summary-narrative').textContent = `${winner} won the match and decided to ${tossDecisionText.toLowerCase()}.`;
+
+      const raidLog = data.raidLog || [];
+      const playerStats = data.playerStats || {};
+      window.__playerStats = playerStats;
+      const tbody = document.getElementById('raid-log-body');
+      if (!raidLog.length) {
+        tbody.innerHTML = '<tr><td colspan="6">No raid details available.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = raidLog.map(log => {
+        const teamName = log.raidingTeam === 'A' ? teamAName : teamBName;
+        const raiderName = getNameById(playerStats, log.raiderId);
+        const defenderNames = Array.isArray(log.defenderIds)
+          ? log.defenderIds.map(id => getNameById(playerStats, id))
+          : [];
+        const commentary = buildRaidLine(log, teamName, raiderName, defenderNames);
+        return `
+          <tr>
+            <td>${log.raidNumber || '-'}</td>
+            <td>${teamName}</td>
+            <td>${raiderName}</td>
+            <td>${formatResult(log.result)}</td>
+            <td>${log.points ?? 0}</td>
+            <td>${commentary}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    loadOverview();
+  </script>
+</body>
+</html>

@@ -82,6 +82,8 @@
             justify-content: space-around;
             margin-top: 30px;
             padding-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
         .detail-card {
@@ -232,6 +234,58 @@
             <div class="detail-card">
                 <h6>Defence Points</h6>
                 <p>{{ .DefencePoints }}</p>
+            </div>
+        </div>
+
+        <h5>Player Analytics</h5>
+        <div class="player-details">
+            <div class="detail-card">
+                <h6>Matches Played</h6>
+                <p>{{ .MatchesPlayed }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>MVP Awards</h6>
+                <p>{{ .MVPCount }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Best Raider</h6>
+                <p>{{ .BestRaiderCount }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Best Defender</h6>
+                <p>{{ .BestDefenderCount }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Super Raids</h6>
+                <p>{{ .SuperRaids }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Super Tackles</h6>
+                <p>{{ .SuperTackles }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Total Raids</h6>
+                <p>{{ .TotalRaids }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Successful Raids</h6>
+                <p>{{ .SuccessfulRaids }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Total Tackles</h6>
+                <p>{{ .TotalTackles }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Successful Tackles</h6>
+                <p>{{ .SuccessfulTackles }}</p>
+            </div>
+            <div class="detail-card">
+                <h6>Strike Rate</h6>
+                <p>{{ printf "%.1f" .StrikeRate }}%</p>
+            </div>
+            <div class="detail-card">
+                <h6>Tackle Success</h6>
+                <p>{{ printf "%.1f" .TackleSuccessRate }}%</p>
             </div>
         </div>
     </div>

@@ -42,10 +42,11 @@ func InitializeChampionshipHandler(c *fiber.Ctx) error {
 	// Extract team IDs from event's participating teams with accepted status
 	var teamIDs []primitive.ObjectID
 	for _, teamEntry := range event.ParticipatingTeams {
-		if teamEntry.Status == models.EventTeamStatusAccepted {
+		if teamEntry.Status == models.EventTeamStatusAccepted && teamEntry.TeamID != primitive.NilObjectID {
 			teamIDs = append(teamIDs, teamEntry.TeamID)
 		}
 	}
+	teamIDs = uniqueObjectIDs(teamIDs)
 
 	// Validate that we have at least 2 teams
 	if len(teamIDs) < 2 {
@@ -124,13 +125,15 @@ func calculateTotalRounds(numTeams int) int {
 
 // generateRound creates fixtures for a specific round with bye handling
 func generateRound(championshipID primitive.ObjectID, roundNumber int, qualifiedTeams []primitive.ObjectID, isFirstRound bool) error {
+	qualifiedTeams = uniqueObjectIDs(qualifiedTeams)
 	numTeams := len(qualifiedTeams)
 	if numTeams == 0 {
 		return nil
 	}
 
-	var byeTeamID *primitive.ObjectID
-	var matchTeams []primitive.ObjectID
+	var byeTeamID primitive.ObjectID
+	hasBye := false
+	matchTeams := make([]primitive.ObjectID, 0, numTeams)
 
 	// Handle odd number of teams
 	if numTeams%2 != 0 {
@@ -138,9 +141,11 @@ func generateRound(championshipID primitive.ObjectID, roundNumber int, qualified
 			// Random bye for first round
 			rand.Seed(time.Now().UnixNano())
 			byeIndex := rand.Intn(numTeams)
-			byeTeamID = &qualifiedTeams[byeIndex]
+			byeTeamID = qualifiedTeams[byeIndex]
+			hasBye = true
 			// Remove bye team from match list
-			matchTeams = append(qualifiedTeams[:byeIndex], qualifiedTeams[byeIndex+1:]...)
+			matchTeams = append(matchTeams, qualifiedTeams[:byeIndex]...)
+			matchTeams = append(matchTeams, qualifiedTeams[byeIndex+1:]...)
 		} else {
 			// Highest NRR gets bye in subsequent rounds
 			highestNRRTeam, err := getHighestNRRTeam(championshipID, qualifiedTeams)
@@ -148,26 +153,30 @@ func generateRound(championshipID primitive.ObjectID, roundNumber int, qualified
 				logrus.Errorf("Error getting highest NRR team: %v", err)
 				return err
 			}
-			byeTeamID = &highestNRRTeam
+			byeTeamID = highestNRRTeam
+			hasBye = true
 			// Remove bye team from match list
-			for i, teamID := range qualifiedTeams {
+			for _, teamID := range qualifiedTeams {
 				if teamID == highestNRRTeam {
-					matchTeams = append(qualifiedTeams[:i], qualifiedTeams[i+1:]...)
-					break
+					continue
 				}
+				matchTeams = append(matchTeams, teamID)
 			}
 		}
 
 		// Create bye fixture
+		if !hasBye {
+			return fmt.Errorf("failed to determine bye team for round %d", roundNumber)
+		}
 		byeFixture := models.ChampionshipFixture{
 			ID:             primitive.NewObjectID(),
 			ChampionshipID: championshipID,
 			RoundNumber:    roundNumber,
-			Team1ID:        *byeTeamID,
+			Team1ID:        byeTeamID,
 			Team2ID:        nil, // nil indicates bye
 			IsBye:          true,
 			Status:         models.ChampionshipFixtureStatusCompleted,
-			WinnerID:       byeTeamID,
+			WinnerID:       &byeTeamID,
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 		}
@@ -177,7 +186,11 @@ func generateRound(championshipID primitive.ObjectID, roundNumber int, qualified
 			return err
 		}
 	} else {
-		matchTeams = qualifiedTeams
+		matchTeams = append(matchTeams, qualifiedTeams...)
+	}
+
+	if len(matchTeams)%2 != 0 {
+		return fmt.Errorf("invalid team count for pairing in round %d: %d", roundNumber, len(matchTeams))
 	}
 
 	// Shuffle teams for random pairing

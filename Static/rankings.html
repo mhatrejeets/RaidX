@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Rankings</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+    }
+    .navbar-brand {
+      font-weight: bold;
+      color: #f97316 !important;
+      font-size: 1.5rem;
+    }
+    .container { max-width: 1200px; }
+    .page-header h1 { color: #fbbf24; font-weight: bold; }
+    .nav-tabs { border-bottom: 2px solid #334155; }
+    .nav-tabs .nav-link { color: #cbd5e1; border: none; border-bottom: 3px solid transparent; padding: 1rem 1.5rem; }
+    .nav-tabs .nav-link.active { color: #f97316; border-bottom-color: #f97316; background-color: transparent; }
+    .card { background-color: #1e293b; border: 1px solid #334155; color: white; }
+    .card-header { background-color: #0f172a; border-bottom: 1px solid #334155; }
+    .table { color: white; }
+    .table thead { background-color: #0f172a; }
+    .table tbody tr { background-color: #1e293b; border-bottom: 1px solid #334155; }
+    .table tbody tr:hover { background-color: #334155; }
+    a.player-link { color: #fbbf24; text-decoration: none; font-weight: 600; }
+    a.player-link:hover { color: #fde68a; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <i class="bi bi-lightning-fill"></i> RaidX
+      </a>
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a class="btn btn-outline-light btn-sm" id="rankings-back" href="#">
+          <i class="bi bi-arrow-left"></i> Back
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header mb-4">
+      <h1><i class="bi bi-bar-chart"></i> Rankings</h1>
+      <p class="text-muted" id="rankings-subtitle">Loading...</p>
+    </div>
+
+    <ul class="nav nav-tabs" id="rankingsTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="mvp-tab" data-bs-toggle="tab" data-bs-target="#mvp" type="button">
+          <i class="bi bi-trophy"></i> MVP
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="raider-tab" data-bs-toggle="tab" data-bs-target="#raider" type="button">
+          <i class="bi bi-lightning"></i> Top Raiders
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="defender-tab" data-bs-toggle="tab" data-bs-target="#defender" type="button">
+          <i class="bi bi-shield"></i> Top Defenders
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content mt-3">
+      <div class="tab-pane fade show active" id="mvp" role="tabpanel">
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0">Top 10 MVP</h5></div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-dark table-striped align-middle">
+                <thead><tr><th>#</th><th>Player</th><th>Points</th></tr></thead>
+                <tbody id="mvp-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="raider" role="tabpanel">
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0">Top 10 Raiders</h5></div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-dark table-striped align-middle">
+                <thead><tr><th>#</th><th>Player</th><th>Raid Points</th></tr></thead>
+                <tbody id="raider-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="defender" role="tabpanel">
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0">Top 10 Defenders</h5></div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-dark table-striped align-middle">
+                <thead><tr><th>#</th><th>Player</th><th>Defence Points</th></tr></thead>
+                <tbody id="defender-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pathParts = window.location.pathname.split('/');
+    const eventType = pathParts[2];
+    const eventId = pathParts[3];
+    const params = new URLSearchParams(window.location.search);
+    const back = params.get('back');
+    const backBtn = document.getElementById('rankings-back');
+    if (backBtn) {
+      backBtn.href = back || document.referrer || '/viewer';
+    }
+
+    document.getElementById('rankings-subtitle').textContent = `Type: ${eventType} • Event ID: ${eventId}`;
+
+    function renderRows(targetId, rows, label) {
+      const tbody = document.getElementById(targetId);
+      if (!tbody) return;
+      if (!rows || rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3">No ${label} data available.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map((row, idx) => {
+        const name = row.name || 'Player';
+        const playerId = row.playerId || row.id;
+        const points = row.points ?? 0;
+        const link = playerId ? `/playerprofile/${encodeURIComponent(playerId)}` : '#';
+        return `<tr>
+          <td>${idx + 1}</td>
+          <td><a class="player-link" href="${link}">${name}</a></td>
+          <td>${points}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function loadRankings() {
+      const res = await fetch(`/api/public/rankings/${eventType}/${eventId}`);
+      const data = await res.json();
+      if (!res.ok) {
+        document.getElementById('mvp-body').innerHTML = `<tr><td colspan="3">${data.error || 'Failed to load rankings.'}</td></tr>`;
+        document.getElementById('raider-body').innerHTML = '';
+        document.getElementById('defender-body').innerHTML = '';
+        return;
+      }
+      renderRows('mvp-body', data.topMvp, 'MVP');
+      renderRows('raider-body', data.topRaiders, 'Raiders');
+      renderRows('defender-body', data.topDefenders, 'Defenders');
+    }
+
+    loadRankings();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

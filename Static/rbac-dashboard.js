@@ -90,7 +90,16 @@ async function initPlayerDashboard() {
     if (refreshBtn) {
         refreshBtn.addEventListener('click', loadPlayerInvites);
     }
+    const teamRefreshBtn = document.getElementById('player-teams-refresh');
+    if (teamRefreshBtn) {
+        teamRefreshBtn.addEventListener('click', async () => {
+            await loadPlayerTeams();
+            await loadPlayerEvents();
+        });
+    }
     await loadPlayerInvites();
+    await loadPlayerTeams();
+    await loadPlayerEvents();
 }
 
 async function loadPlayerInvites() {
@@ -170,6 +179,66 @@ function renderPlayerInviteList(container, invites, showActions) {
     });
 }
 
+async function loadPlayerTeams() {
+    hideStatus('player-status');
+    const list = document.getElementById('player-teams-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    try {
+        const res = await apiRequest('/api/player/teams');
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+            list.innerHTML = '<div class="text-white">No teams found.</div>';
+            return;
+        }
+        data.forEach(team => {
+            const card = document.createElement('div');
+            card.className = 'request-card';
+            card.innerHTML = `
+                <h6>${team.teamName || 'Team'}</h6>
+                <p class="mb-1">Team ID: <span class="text-white">${formatId(team.teamId)}</span></p>
+                ${team.description ? `<p class="mb-1">Description: ${team.description}</p>` : ''}
+                <p>Status: <span class="badge-custom">${team.status || 'active'}</span></p>
+            `;
+            list.appendChild(card);
+        });
+    } catch (e) {
+        setStatus('player-status', 'Failed to load teams', 'danger');
+    }
+}
+
+async function loadPlayerEvents() {
+    hideStatus('player-status');
+    const list = document.getElementById('player-events-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    try {
+        const res = await apiRequest('/api/player/events');
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+            list.innerHTML = '<div class="text-white">No events found.</div>';
+            return;
+        }
+        data.forEach(evt => {
+            const card = document.createElement('div');
+            card.className = 'request-card';
+            const typeLabel = evt.eventType ? evt.eventType.replace('_', ' ') : 'event';
+            card.innerHTML = `
+                <h6>${evt.eventName || 'Event'}</h6>
+                <p class="mb-1">Type: <span class="badge-custom">${typeLabel}</span></p>
+                ${evt.status ? `<p class="mb-1">Status: <span class="badge-custom">${evt.status}</span></p>` : ''}
+                <p class="mb-1">Matches Played: <span class="text-white">${evt.matchCount || 0}</span></p>
+                ${evt.eventId ? `<p class="mb-1">Event ID: <span class="text-white">${formatId(evt.eventId)}</span></p>` : ''}
+            `;
+            list.appendChild(card);
+        });
+    } catch (e) {
+        setStatus('player-status', 'Failed to load events', 'danger');
+    }
+}
+
 async function initOwnerDashboard() {
     const profileLink = document.getElementById('owner-profile-link');
     if (profileLink) {
@@ -233,6 +302,14 @@ async function initOwnerDashboard() {
 
     const refreshEventInvitesBtn = document.getElementById('owner-event-refresh');
     if (refreshEventInvitesBtn) refreshEventInvitesBtn.addEventListener('click', loadOwnerEventInvites);
+
+    const ownerEventTabBtn = document.getElementById('tournaments-tab');
+    if (ownerEventTabBtn) {
+        ownerEventTabBtn.addEventListener('shown.bs.tab', () => {
+            loadOwnerEventInvites();
+        });
+    }
+
     await loadOwnerEventInvites();
 }
 
@@ -284,6 +361,13 @@ async function loadOwnerEventInvites() {
     if (declinedList) declinedList.innerHTML = '';
     if (legacyList) legacyList.innerHTML = '';
 
+    const setVisibleMessage = (message) => {
+        if (pendingList) pendingList.innerHTML = `<div class="text-white">${message}</div>`;
+        if (acceptedList) acceptedList.innerHTML = `<div class="text-white">${message}</div>`;
+        if (declinedList) declinedList.innerHTML = `<div class="text-white">${message}</div>`;
+        if (legacyList) legacyList.innerHTML = `<div class="text-white">${message}</div>`;
+    };
+
     let ownerTeams = [];
     try {
         const teamsRes = await apiRequest('/api/owner/teams');
@@ -297,24 +381,18 @@ async function loadOwnerEventInvites() {
         // Load ALL event invitations (not just pending)
         const res = await apiRequest('/api/owner/event-invitations');
         const data = await res.json();
-        console.log('Event invitations response:', data); // Debug log
-        console.log('Response status:', res.status, 'Is array?', Array.isArray(data)); // More debug
         if (!res.ok) {
             throw new Error(data.error || 'Failed to load event invites');
         }
         if (!Array.isArray(data) || data.length === 0) {
-            const emptyMsg = '<div class="text-white">No event invites.</div>';
-            if (pendingList) pendingList.innerHTML = emptyMsg;
-            if (acceptedList) acceptedList.innerHTML = emptyMsg;
-            if (declinedList) declinedList.innerHTML = emptyMsg;
-            if (legacyList) legacyList.innerHTML = emptyMsg;
+            setVisibleMessage('No event invites.');
             return;
         }
         
         // Separate by status
         const getStatus = (inv) => (inv.status || inv.Status || '').toLowerCase();
         const pending = data.filter(inv => ['pending', 'invited_via_link'].includes(getStatus(inv)));
-        const accepted = data.filter(inv => ['accepted', 'accepted_by_organizer'].includes(getStatus(inv)));
+        const accepted = data.filter(inv => ['accepted', 'accepted_by_organizer', 'accepted_by_owner'].includes(getStatus(inv)));
         const declined = data.filter(inv => ['declined', 'declined_by_organizer'].includes(getStatus(inv)));
         
         // Render into tab containers when present, otherwise fallback to legacy list
@@ -334,6 +412,7 @@ async function loadOwnerEventInvites() {
             }
         }
     } catch (e) {
+        setVisibleMessage('Failed to load event invites.');
         setStatus('owner-status', 'Failed to load event invites', 'danger');
     }
 }
@@ -361,6 +440,7 @@ function renderOwnerEventInvite(list, invite, ownerTeams, showActions) {
     const ownerName = invite.ownerName || invite.OwnerName || 'Unknown Owner';
     const teamName = invite.teamName || invite.TeamName || 'Unassigned';
     const teamOptions = Array.isArray(ownerTeams) ? ownerTeams : (ownerTeams.data || []);
+    const canAct = showActions && rawStatus !== 'invited_via_link';
     card.innerHTML = `
         <h6>Event Invite</h6>
         <p class="mb-1">Team Owner: ${ownerName}</p>
@@ -369,7 +449,7 @@ function renderOwnerEventInvite(list, invite, ownerTeams, showActions) {
         <p class="mb-1">Team: <span class="text-white">${teamName}</span></p>
         <p>Status: <span class="badge-custom">${statusDisplay}</span></p>
         ${declineReason && rawStatus.startsWith('declined') ? `<p class="mb-1">Reason: <span class="text-white">${declineReason}</span></p>` : ''}
-        ${showActions && rawStatus !== 'invited_via_link' ? `
+        ${canAct ? `
         <div class="request-actions">
             <select class="form-select form-select-sm" style="max-width: 220px;">
                 <option value="">Select team to accept...</option>
@@ -384,10 +464,14 @@ function renderOwnerEventInvite(list, invite, ownerTeams, showActions) {
             <button class="btn btn-sm btn-outline-danger" data-action="decline">Decline</button>
         </div>` : ''}
     `;
-    if (showActions) {
+    if (canAct) {
         const selectEl = card.querySelector('select');
         const acceptBtn = card.querySelector('button[data-action="accept"]');
         const declineBtn = card.querySelector('button[data-action="decline"]');
+        if (!acceptBtn || !declineBtn || !selectEl) {
+            list.appendChild(card);
+            return;
+        }
         acceptBtn.addEventListener('click', () => {
             console.log('DEBUG Accept clicked for inviteId:', inviteId);
             const selectedTeamId = selectEl ? selectEl.value.trim() : '';

@@ -36,6 +36,12 @@ func setupPublicRoutes(app *fiber.App) {
 	app.Get("/viewer/match/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/viewer-match.html")
 	})
+	app.Get("/viewer/match/:id/overview", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/viewer-match-overview.html")
+	})
+	app.Get("/rankings/:type/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/rankings.html")
+	})
 	app.Get("/viewer/tournament/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/viewer-tournament.html")
 	})
@@ -48,6 +54,7 @@ func setupPublicRoutes(app *fiber.App) {
 
 	// Public API endpoint to fetch match details by ID (JSON) - no auth required for viewers
 	app.Get("/api/match/:id", handlers.GetMatchByIDJSON)
+	app.Get("/api/public/rankings/:type/:id", handlers.GetEventRankingsHandler)
 	// Public tournament/championship read-only endpoints for viewers
 	app.Get("/api/public/tournaments/:id/fixtures", handlers.GetTournamentFixturesHandler)
 	app.Get("/api/public/tournaments/:id/standings", handlers.GetTournamentStandingsHandler)
@@ -112,6 +119,8 @@ func setupProtectedRoutes(app *fiber.App) {
 	// RBAC: Invitations (players and team owners)
 	app.Put("/api/invitations/:id", middleware.RoleRequired(models.RolePlayer, models.RoleTeamOwner), handlers.UpdateInvitationStatusHandler)
 	app.Get("/api/invitations", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerInvitationsHandler)
+	app.Get("/api/player/teams", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerTeamsHandler)
+	app.Get("/api/player/events", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerEventsHandler)
 
 	// RBAC: Team Owner - Team Management Pages
 	app.Get("/owner/teams", func(c *fiber.Ctx) error {

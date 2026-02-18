@@ -169,6 +169,12 @@ function initializePlayerStats(team) {
             totalPoints: 0,
             raidPoints: 0,
             defencePoints: 0,
+            superRaids: 0,
+            superTackles: 0,
+            totalRaids: 0,
+            successfulRaids: 0,
+            totalTackles: 0,
+            successfulTackles: 0,
             status: player.status,
         };
     });
@@ -200,7 +206,10 @@ function handleLobbyTouch(player, isRaiderTouchingLobby) {
         data: {
             touchedPlayerId: player.id,
             isRaider: raidingTeam.players.some(p => p.id === player.id),
-            scoringTeam: scoringTeam.name === teamA.name ? "A" : "B"
+            scoringTeam: scoringTeam.name === teamA.name ? "A" : "B",
+            raiderId: selectedRaider ? selectedRaider.id : null,
+            defenderIds: selectedDefenders.map(d => d.id),
+            raidNumber: currentRaidNumber
         }
     };
 

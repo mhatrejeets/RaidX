@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -132,19 +133,59 @@ func EndGameHandler(c *fiber.Ctx) error {
 		return c.Status(500).SendString("Failed to insert into matches: " + err.Error())
 	}
 
+	// Update rankings for tournament/championship events
+	if eventType, ok := gameStats["event_type"].(string); ok {
+		if eventType == "tournament" || eventType == "championship" {
+			if eventOID, ok := getEventIDFromGameStats(gameStats); ok {
+				if err := updateEventRankings(ctx, eventType, eventOID); err != nil {
+					logrus.Error("Error:", "EndGameHandler:", " Failed to update rankings: %v", err)
+				}
+			}
+		}
+	}
+
 	// 6. Update each player in players collection
 	data := gameStats["data"].(map[string]interface{})
 	playerStats := data["playerStats"].(map[string]interface{})
+	data["awards"] = computeMatchAwards(playerStats)
 	playersColl := db.MongoClient.Database("raidx").Collection("players")
+
+	awardsMap, _ := data["awards"].(map[string]interface{})
+	mvpID := getAwardPlayerID(awardsMap, "mvp")
+	bestRaiderID := getAwardPlayerID(awardsMap, "bestRaider")
+	bestDefenderID := getAwardPlayerID(awardsMap, "bestDefender")
 
 	for id, raw := range playerStats {
 		player := raw.(map[string]interface{})
 
+		mvpInc := 0
+		bestRaiderInc := 0
+		bestDefenderInc := 0
+		if id == mvpID {
+			mvpInc = 1
+		}
+		if id == bestRaiderID {
+			bestRaiderInc = 1
+		}
+		if id == bestDefenderID {
+			bestDefenderInc = 1
+		}
+
 		update := bson.M{
 			"$inc": bson.M{
-				"totalPoints":   int(player["totalPoints"].(float64)),
-				"raidPoints":    int(player["raidPoints"].(float64)),
-				"defencePoints": int(player["defencePoints"].(float64)),
+				"totalPoints":       int(player["totalPoints"].(float64)),
+				"raidPoints":        int(player["raidPoints"].(float64)),
+				"defencePoints":     int(player["defencePoints"].(float64)),
+				"superRaids":        int(getFloatOrZero(player, "superRaids")),
+				"superTackles":      int(getFloatOrZero(player, "superTackles")),
+				"totalRaids":        int(getFloatOrZero(player, "totalRaids")),
+				"successfulRaids":   int(getFloatOrZero(player, "successfulRaids")),
+				"totalTackles":      int(getFloatOrZero(player, "totalTackles")),
+				"successfulTackles": int(getFloatOrZero(player, "successfulTackles")),
+				"matchesPlayed":     1,
+				"mvpCount":          mvpInc,
+				"bestRaiderCount":   bestRaiderInc,
+				"bestDefenderCount": bestDefenderInc,
 			},
 		}
 
@@ -455,28 +496,55 @@ func checkAndGeneratePlayoffs(ctx context.Context, tournamentID primitive.Object
 
 // generateFinalFixture is called after semifinal completion
 func generateFinalFixture(ctx context.Context, tournamentID primitive.ObjectID, semifinalWinner primitive.ObjectID) error {
-	// Get 1st place team from points table
-	opts := options.Find().SetSort(bson.D{
-		{Key: "points", Value: -1},
-		{Key: "nrr", Value: -1},
-	}).SetLimit(1)
+	// Fetch semifinal fixture to identify the two teams that played semifinal.
+	// The bye finalist must be the top-ranked team excluding these two.
+	var semifinal models.Fixture
+	if err := db.FixturesCollection.FindOne(ctx, bson.M{
+		"tournamentId": tournamentID,
+		"matchType":    models.FixtureTypeSemifinal,
+	}).Decode(&semifinal); err != nil {
+		return fmt.Errorf("semifinal fixture not found: %w", err)
+	}
 
-	cursor, err := db.PointsTableCollection.Find(ctx, bson.M{"tournamentId": tournamentID}, opts)
+	if semifinal.Team1ID == semifinalWinner {
+		// valid, keep going
+	} else if semifinal.Team2ID == semifinalWinner {
+		// valid, keep going
+	} else {
+		return fmt.Errorf("semifinal winner does not belong to semifinal fixture")
+	}
+
+	// Select top-ranked team from points table excluding semifinal teams.
+	// This locks the league topper (bye finalist) and prevents same-team finals
+	// even if semifinal points re-order the top 3.
+	opts := options.FindOne().SetSort(bson.D{{Key: "points", Value: -1}, {Key: "nrr", Value: -1}})
+	var byeEntry models.PointsTableEntry
+	if err := db.PointsTableCollection.FindOne(ctx, bson.M{
+		"tournamentId": tournamentID,
+		"teamId": bson.M{"$nin": []primitive.ObjectID{
+			semifinal.Team1ID,
+			semifinal.Team2ID,
+		}},
+	}, opts).Decode(&byeEntry); err != nil {
+		return fmt.Errorf("failed to resolve bye finalist: %w", err)
+	}
+
+	firstPlaceTeam := byeEntry.TeamID
+	if firstPlaceTeam == semifinalWinner {
+		return fmt.Errorf("invalid final pairing: bye finalist equals semifinal winner")
+	}
+
+	// Avoid duplicate final fixture creation.
+	existingFinalCount, err := db.FixturesCollection.CountDocuments(ctx, bson.M{
+		"tournamentId": tournamentID,
+		"matchType":    models.FixtureTypeFinal,
+	})
 	if err != nil {
 		return err
 	}
-	defer cursor.Close(ctx)
-
-	var standings []models.PointsTableEntry
-	if err = cursor.All(ctx, &standings); err != nil {
-		return err
+	if existingFinalCount > 0 {
+		return nil
 	}
-
-	if len(standings) == 0 {
-		return fmt.Errorf("no teams found in points table")
-	}
-
-	firstPlaceTeam := standings[0].TeamID
 
 	// Create final fixture
 	final := models.Fixture{
@@ -505,5 +573,255 @@ func generateFinalFixture(ctx context.Context, tournamentID primitive.ObjectID, 
 
 	logrus.Info("Info:", "generateFinalFixture:", " Generated final for tournament:", tournamentID.Hex())
 
+	return err
+}
+
+func getFloatOrZero(m map[string]interface{}, key string) float64 {
+	if m == nil {
+		return 0
+	}
+	v, ok := m[key]
+	if !ok || v == nil {
+		return 0
+	}
+	if f, ok := v.(float64); ok {
+		return f
+	}
+	if i, ok := v.(int); ok {
+		return float64(i)
+	}
+	return 0
+}
+
+func computeMatchAwards(playerStats map[string]interface{}) map[string]interface{} {
+	type stat struct {
+		id    string
+		name  string
+		total int
+		raid  int
+		def   int
+	}
+	list := []stat{}
+	for id, raw := range playerStats {
+		p, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, _ := p["name"].(string)
+		if name == "" {
+			if n, ok := p["Name"].(string); ok {
+				name = n
+			}
+		}
+		list = append(list, stat{
+			id:    id,
+			name:  name,
+			total: int(getFloatOrZero(p, "totalPoints")),
+			raid:  int(getFloatOrZero(p, "raidPoints")),
+			def:   int(getFloatOrZero(p, "defencePoints")),
+		})
+	}
+	if len(list) == 0 {
+		return map[string]interface{}{}
+	}
+	bestMVP := list[0]
+	bestRaider := list[0]
+	bestDefender := list[0]
+	for _, s := range list[1:] {
+		if s.total > bestMVP.total || (s.total == bestMVP.total && s.raid > bestMVP.raid) || (s.total == bestMVP.total && s.raid == bestMVP.raid && s.def > bestMVP.def) {
+			bestMVP = s
+		}
+		if s.raid > bestRaider.raid || (s.raid == bestRaider.raid && s.total > bestRaider.total) {
+			bestRaider = s
+		}
+		if s.def > bestDefender.def || (s.def == bestDefender.def && s.total > bestDefender.total) {
+			bestDefender = s
+		}
+	}
+	return map[string]interface{}{
+		"mvp": map[string]interface{}{
+			"playerId": bestMVP.id,
+			"name":     bestMVP.name,
+			"points":   bestMVP.total,
+		},
+		"bestRaider": map[string]interface{}{
+			"playerId": bestRaider.id,
+			"name":     bestRaider.name,
+			"points":   bestRaider.raid,
+		},
+		"bestDefender": map[string]interface{}{
+			"playerId": bestDefender.id,
+			"name":     bestDefender.name,
+			"points":   bestDefender.def,
+		},
+	}
+}
+
+func getEventIDFromGameStats(gameStats map[string]interface{}) (primitive.ObjectID, bool) {
+	if gameStats == nil {
+		return primitive.NilObjectID, false
+	}
+	if v, ok := gameStats["event_id"]; ok {
+		switch t := v.(type) {
+		case primitive.ObjectID:
+			return t, true
+		case string:
+			if oid, err := primitive.ObjectIDFromHex(t); err == nil {
+				return oid, true
+			}
+		}
+	}
+	return primitive.NilObjectID, false
+}
+
+func getAwardPlayerID(awards map[string]interface{}, key string) string {
+	if awards == nil {
+		return ""
+	}
+	awardRaw, ok := awards[key]
+	if !ok {
+		return ""
+	}
+	award, ok := awardRaw.(map[string]interface{})
+	if !ok {
+		return ""
+	}
+	if playerID, ok := award["playerId"].(string); ok {
+		return playerID
+	}
+	return ""
+}
+
+func updateEventRankings(ctx context.Context, eventType string, eventID primitive.ObjectID) error {
+	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
+	filter := bson.M{"$or": []bson.M{
+		{"event_id": eventID},
+		{"event_id": eventID.Hex()},
+		{"eventId": eventID.Hex()},
+	}}
+	cursor, err := matchesColl.Find(ctx, filter)
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(ctx)
+
+	type agg struct {
+		id    string
+		name  string
+		total int
+		raid  int
+		def   int
+	}
+	acc := map[string]*agg{}
+
+	for cursor.Next(ctx) {
+		var doc bson.M
+		if err := cursor.Decode(&doc); err != nil {
+			continue
+		}
+		dataVal, ok := doc["data"]
+		if !ok {
+			continue
+		}
+		data, ok := dataVal.(bson.M)
+		if !ok {
+			if m, ok2 := dataVal.(map[string]interface{}); ok2 {
+				data = bson.M(m)
+			} else {
+				continue
+			}
+		}
+		psVal, ok := data["playerStats"]
+		if !ok {
+			continue
+		}
+		psMap, ok := psVal.(bson.M)
+		if !ok {
+			if m, ok2 := psVal.(map[string]interface{}); ok2 {
+				psMap = bson.M(m)
+			} else {
+				continue
+			}
+		}
+		for id, raw := range psMap {
+			p, ok := raw.(map[string]interface{})
+			if !ok {
+				if bm, ok2 := raw.(bson.M); ok2 {
+					p = map[string]interface{}(bm)
+				} else {
+					continue
+				}
+			}
+			name, _ := p["name"].(string)
+			if name == "" {
+				if n, ok := p["Name"].(string); ok {
+					name = n
+				}
+			}
+			entry, ok := acc[id]
+			if !ok {
+				entry = &agg{id: id, name: name}
+				acc[id] = entry
+			}
+			entry.total += int(getFloatOrZero(p, "totalPoints"))
+			entry.raid += int(getFloatOrZero(p, "raidPoints"))
+			entry.def += int(getFloatOrZero(p, "defencePoints"))
+		}
+	}
+
+	list := []agg{}
+	for _, v := range acc {
+		list = append(list, *v)
+	}
+
+	sort.Slice(list, func(i, j int) bool {
+		if list[i].total != list[j].total {
+			return list[i].total > list[j].total
+		}
+		if list[i].raid != list[j].raid {
+			return list[i].raid > list[j].raid
+		}
+		return list[i].def > list[j].def
+	})
+	toTop := func(items []agg, limit int, pick func(a agg) int) []bson.M {
+		if len(items) == 0 {
+			return []bson.M{}
+		}
+		cpy := append([]agg(nil), items...)
+		sort.Slice(cpy, func(i, j int) bool {
+			ai := pick(cpy[i])
+			aj := pick(cpy[j])
+			if ai != aj {
+				return ai > aj
+			}
+			return cpy[i].total > cpy[j].total
+		})
+		if len(cpy) > limit {
+			cpy = cpy[:limit]
+		}
+		out := make([]bson.M, 0, len(cpy))
+		for _, s := range cpy {
+			out = append(out, bson.M{"playerId": s.id, "name": s.name, "points": pick(s)})
+		}
+		return out
+	}
+
+	topMvp := toTop(list, 10, func(a agg) int { return a.total })
+	topRaiders := toTop(list, 10, func(a agg) int { return a.raid })
+	topDefenders := toTop(list, 10, func(a agg) int { return a.def })
+
+	rankingsColl := db.MongoClient.Database("raidx").Collection("rankings")
+	_, err = rankingsColl.UpdateOne(ctx,
+		bson.M{"eventId": eventID.Hex(), "eventType": eventType},
+		bson.M{"$set": bson.M{
+			"eventId":      eventID.Hex(),
+			"eventType":    eventType,
+			"updatedAt":    time.Now(),
+			"topMvp":       topMvp,
+			"topRaiders":   topRaiders,
+			"topDefenders": topDefenders,
+		}},
+		options.Update().SetUpsert(true),
+	)
 	return err
 }

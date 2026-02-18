@@ -150,6 +150,9 @@
         <div class="muted" id="event-subtitle">Loading event information...</div>
       </div>
       <div id="action-button-container">
+        <a class="btn btn-outline-light" id="match-overview-link" href="#" style="display:none;">
+          <i class="bi bi-journal-text"></i> Match Overview
+        </a>
         <a class="btn btn-outline-light" id="pending-approvals-link" href="#">
           <i class="bi bi-clipboard-check"></i> Pending Approvals
         </a>
@@ -295,6 +298,7 @@
         </div>
         <div class="text-center mb-3" style="color:#fbbf24; font-weight:600;" id="match-winner"></div>
         <div class="text-center mb-3" style="color:#e2e8f0; font-weight:600;" id="match-toss-info"></div>
+        <div class="text-center mb-3" style="color:#e2e8f0; font-weight:600;" id="match-awards"></div>
         <div class="row g-3">
           <div class="col-lg-6">
             <h6 id="match-teamA-header">Team A Players</h6>
@@ -313,6 +317,7 @@
   <script>
     const eventId = window.location.pathname.split('/').pop();
     const pendingApprovalsLink = document.getElementById('pending-approvals-link');
+    const matchOverviewLink = document.getElementById('match-overview-link');
     let currentEventType = '';
     if (pendingApprovalsLink && eventId) {
       pendingApprovalsLink.href = `/organizer/event/${eventId}/pending-approvals`;
@@ -368,10 +373,30 @@
         }
 
         const requiredTeams = data.requiredTeams || (data.eventType === 'match' ? 2 : data.maxTeams || 0);
-        const accepted = data.counts?.accepted || 0;
-        const pending = data.counts?.pending || 0;
-        const declined = data.counts?.declined || 0;
-        const invited = data.counts?.invited || 0;
+
+        const rawTeams = data.teams || {};
+        const allTeams = [
+          ...(rawTeams.accepted || []),
+          ...(rawTeams.pending || []),
+          ...(rawTeams.declined || [])
+        ];
+        const normalizeStatus = (team) => (team?.status || team?.Status || '').toLowerCase();
+        const teamBuckets = { accepted: [], pending: [], declined: [] };
+        allTeams.forEach(team => {
+          const status = normalizeStatus(team);
+          if (['accepted', 'accepted_by_organizer'].includes(status)) {
+            teamBuckets.accepted.push(team);
+          } else if (['declined', 'declined_by_organizer'].includes(status)) {
+            teamBuckets.declined.push(team);
+          } else {
+            teamBuckets.pending.push(team);
+          }
+        });
+
+        const accepted = teamBuckets.accepted.length || data.counts?.accepted || 0;
+        const pending = teamBuckets.pending.length || data.counts?.pending || 0;
+        const declined = teamBuckets.declined.length || data.counts?.declined || 0;
+        const invited = data.counts?.invited || allTeams.length || 0;
 
         document.getElementById('event-name').textContent = data.eventName || 'Event';
         document.getElementById('event-subtitle').textContent = `Type: ${data.eventType || '-'} • Status: ${data.status || '-'}`;
@@ -383,6 +408,24 @@
 
         const eventType = (data.eventType || '').toLowerCase();
         currentEventType = eventType;
+
+        if (matchOverviewLink) {
+          if (eventType === 'match') {
+            let overviewMatchId = eventId;
+            try {
+              const matchRes = await apiRequest(`/api/organizer/events/${eventId}/match`);
+              if (matchRes.ok) {
+                const matchData = await matchRes.json();
+                overviewMatchId = matchData.matchId || matchData.matchID || matchData.id || eventId;
+              }
+            } catch (_) {}
+            matchOverviewLink.href = `/viewer/match/${encodeURIComponent(overviewMatchId)}/overview`;
+            matchOverviewLink.style.display = '';
+          } else {
+            matchOverviewLink.style.display = 'none';
+          }
+        }
+
         const eventStatus = (data.status || '').toLowerCase();
         const isOngoingOrCompleted = eventStatus === 'ongoing' || eventStatus === 'completed';
         const isTournamentOrChampionship = eventType === 'tournament' || eventType === 'championship';
@@ -435,11 +478,11 @@
           document.getElementById('declined-column').style.display = 'none';
           document.getElementById('accepted-column').classList.remove('col-lg-4');
           document.getElementById('accepted-column').classList.add('col-lg-12');
-          renderTeamList('event-teams-accepted', data.teams?.accepted);
+          renderTeamList('event-teams-accepted', teamBuckets.accepted);
         } else {
-          renderTeamList('event-teams-pending', data.teams?.pending);
-          renderTeamList('event-teams-accepted', data.teams?.accepted);
-          renderTeamList('event-teams-declined', data.teams?.declined);
+          renderTeamList('event-teams-pending', teamBuckets.pending);
+          renderTeamList('event-teams-accepted', teamBuckets.accepted);
+          renderTeamList('event-teams-declined', teamBuckets.declined);
         }
 
         const actionButtonContainer = document.getElementById('action-button-container');
@@ -495,7 +538,8 @@
               }
               setStatus('Tournament initialized successfully!', 'success');
               // Redirect to tournament dashboard
-              window.location.href = `/organizer/tournament?id=${initData.tournament.id}`;
+              const tournamentId = initData.tournamentId || initData.tournament?.id || eventId;
+              window.location.href = `/organizer/tournament?id=${encodeURIComponent(tournamentId)}`;
               return;
             }
 
@@ -509,7 +553,8 @@
               }
               setStatus('Championship initialized successfully!', 'success');
               // Redirect to championship dashboard
-              window.location.href = `/organizer/championship?id=${initData.championship.id}`;
+              const championshipId = initData.championshipId || initData.championship?.id || eventId;
+              window.location.href = `/organizer/championship?id=${encodeURIComponent(championshipId)}`;
               return;
             }
 
@@ -519,7 +564,7 @@
               throw new Error(startData.error || 'Failed to start event');
             }
             if ((data.eventType || '').toLowerCase() === 'match') {
-              const acceptedTeams = (data.teams?.accepted || []).filter(team => team.teamId);
+              const acceptedTeams = (teamBuckets.accepted || []).filter(team => team.teamId);
               if (acceptedTeams.length < 2) {
                 throw new Error('Match requires exactly 2 accepted teams with team IDs.');
               }
@@ -600,6 +645,19 @@
           }
         }
 
+        const awards = data.awards || data.Awards || {};
+        const awardsEl = document.getElementById('match-awards');
+        if (awardsEl) {
+          const mvp = awards.mvp;
+          const bestRaider = awards.bestRaider;
+          const bestDefender = awards.bestDefender;
+          const parts = [];
+          if (mvp) parts.push(`MVP: ${mvp.name} (${mvp.points})`);
+          if (bestRaider) parts.push(`Best Raider: ${bestRaider.name} (${bestRaider.points})`);
+          if (bestDefender) parts.push(`Best Defender: ${bestDefender.name} (${bestDefender.points})`);
+          awardsEl.textContent = parts.join(' • ');
+        }
+
         const teamAIdList = data.teamAPlayerIds || data.TeamAPlayerIDs || [];
         const teamBIdList = data.teamBPlayerIds || data.TeamBPlayerIDs || [];
         let teamAPlayers = teamAIdList.map(id => playerStats[id]).filter(Boolean);
@@ -625,6 +683,8 @@
               <div class="team-meta">Total: ${p.totalPoints ?? p.TotalPoints ?? 0}</div>
               <div class="team-meta">Raid: ${p.raidPoints ?? p.RaidPoints ?? 0}</div>
               <div class="team-meta">Defence: ${p.defencePoints ?? p.DefencePoints ?? 0}</div>
+              <div class="team-meta">Super Raids: ${p.superRaids ?? p.SuperRaids ?? 0}</div>
+              <div class="team-meta">Super Tackles: ${p.superTackles ?? p.SuperTackles ?? 0}</div>
             </div>
           `).join('');
         };

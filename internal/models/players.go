@@ -13,10 +13,16 @@ type Player struct {
 
 // PlayerStat represents a player’s stats (dynamic keys in MongoDB)
 type PlayerStat struct {
-	Name          string `json:"name" bson:"name"`
-	ID            string `json:"id" bson:"id"`
-	RaidPoints    int    `json:"raidPoints" bson:"raidPoints"`
-	DefencePoints int    `json:"defencePoints" bson:"defencePoints"`
-	TotalPoints   int    `json:"totalPoints" bson:"totalPoints"`
-	Status        string `json:"status" bson:"status"`
+	Name              string `json:"name" bson:"name"`
+	ID                string `json:"id" bson:"id"`
+	RaidPoints        int    `json:"raidPoints" bson:"raidPoints"`
+	DefencePoints     int    `json:"defencePoints" bson:"defencePoints"`
+	TotalPoints       int    `json:"totalPoints" bson:"totalPoints"`
+	SuperRaids        int    `json:"superRaids" bson:"superRaids"`
+	SuperTackles      int    `json:"superTackles" bson:"superTackles"`
+	TotalRaids        int    `json:"totalRaids" bson:"totalRaids"`
+	SuccessfulRaids   int    `json:"successfulRaids" bson:"successfulRaids"`
+	TotalTackles      int    `json:"totalTackles" bson:"totalTackles"`
+	SuccessfulTackles int    `json:"successfulTackles" bson:"successfulTackles"`
+	Status            string `json:"status" bson:"status"`
 }

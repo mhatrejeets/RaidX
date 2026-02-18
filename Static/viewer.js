@@ -96,6 +96,8 @@ function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 
             const raid = stat.raidPoints ?? stat.RaidPoints ?? 0;
             const def = stat.defencePoints ?? stat.DefencePoints ?? 0;
             const total = stat.totalPoints ?? stat.TotalPoints ?? 0;
+            const superRaids = stat.superRaids ?? stat.SuperRaids ?? 0;
+            const superTackles = stat.superTackles ?? stat.SuperTackles ?? 0;
             const status = (stat.status || stat.Status || '').toLowerCase();
             const statusBadge = status === 'out'
                 ? '<span style="color:#f87171;font-weight:600;">OUT</span>'
@@ -113,6 +115,8 @@ function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 
                             <div>Raid: <strong>${raid}</strong></div>
                             <div>Defence: <strong>${def}</strong></div>
                             <div>Total: <strong>${total}</strong></div>
+                            <div>Super Raids: <strong>${superRaids}</strong></div>
+                            <div>Super Tackles: <strong>${superTackles}</strong></div>
                         </div>
                     </div>
                 </a>
@@ -124,6 +128,78 @@ function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 
     listB.innerHTML = renderCards(inB);
 }
 
+function buildRaidCommentary(payload) {
+    const raid = payload.raidDetails || payload.raid || {};
+    const lastLog = Array.isArray(payload.raidLog) && payload.raidLog.length
+        ? payload.raidLog[payload.raidLog.length - 1]
+        : null;
+
+    const playerStats = payload.playerStats || {};
+    const getNameById = (id) => {
+        if (!id) return '';
+        const p = playerStats[id];
+        return p?.name || p?.Name || id;
+    };
+
+    const raiderName = raid.raider || getNameById(lastLog?.raiderId);
+    if (!raiderName) return 'Waiting for match updates...';
+
+    const teamName = lastLog?.raidingTeam
+        ? (lastLog.raidingTeam === 'A' ? (payload.teamA?.name || 'Team A') : (payload.teamB?.name || 'Team B'))
+        : null;
+    const points = raid.pointsGained ?? lastLog?.points ?? 0;
+    const defenders = Array.isArray(raid.defenders) && raid.defenders.length
+        ? raid.defenders
+        : (Array.isArray(lastLog?.defenderIds) ? lastLog.defenderIds.map(getNameById) : []);
+
+    const resultType = raid.type || lastLog?.result;
+
+    let line = `Raid by ${raiderName}`;
+    if (teamName) line += ` of ${teamName}`;
+
+    if (resultType === 'defenseSuccess') {
+        line += ` was tackled`;
+        if (defenders.length) {
+            line += ` by ${defenders.join(', ')}`;
+        }
+        line += `.`;
+    } else if (resultType === 'emptyRaid') {
+        line += ` was empty.`;
+    } else if (resultType === 'doOrDieRaid') {
+        line += ` faced a do-or-die raid.`;
+    } else if (resultType === 'lobbyTouch') {
+        line += ` resulted in a lobby touch.`;
+    } else {
+        line += ` scored ${points} point${points === 1 ? '' : 's'}.`;
+        if (defenders.length) {
+            line += ` Got out ${defenders.join(', ')}.`;
+        }
+    }
+
+    const tags = [];
+    if (raid.bonusTaken) tags.push('Bonus taken');
+    if (raid.superRaid) tags.push('Super Raid');
+    if (raid.superTackle) tags.push('Super Tackle');
+    if (raid.doOrDie) tags.push('Do-or-Die');
+    const lobbyDefenders = Array.isArray(raid.lobbyDefenders) && raid.lobbyDefenders.length
+        ? raid.lobbyDefenders
+        : (Array.isArray(lastLog?.lobbyEvents)
+            ? lastLog.lobbyEvents.filter(e => !e.isRaider).map(e => getNameById(e.touchedPlayerId))
+            : []);
+    if (lobbyDefenders.length) {
+        tags.push(`Defender lobby: ${lobbyDefenders.join(', ')}`);
+    }
+    const lobbyRaider = raid.lobbyRaider || (Array.isArray(lastLog?.lobbyEvents) && lastLog.lobbyEvents.some(e => e.isRaider));
+    if (lobbyRaider) {
+        tags.push('Raider entered lobby');
+    }
+    if (tags.length) {
+        line += ` (${tags.join(' • ')})`;
+    }
+
+    return line;
+}
+
 function joinMatch(id) {
     if (!id) return;
     
@@ -132,7 +208,9 @@ function joinMatch(id) {
     const joinDiv = document.getElementById('viewer-join');
     if (joinDiv) joinDiv.style.display = 'none';
     const matchScoreBtn = document.getElementById('match-score-btn');
+    const matchOverviewBtn = document.getElementById('match-overview-btn');
     if (matchScoreBtn) matchScoreBtn.disabled = false;
+    if (matchOverviewBtn) matchOverviewBtn.disabled = false;
 
     // Try to fetch match metadata to get event info
     fetchMatchMetadata();
@@ -200,8 +278,7 @@ function joinMatch(id) {
                 }
 
                 // commentary if present
-                const raid = payload.raidDetails || payload.raid || {};
-                const commentary = raid.raider ? `Raid by ${raid.raider}: ${raid.pointsGained || 0} points ${raid.bonusTaken ? "(Bonus taken)" : ""} ${raid.superTackle ? "(Super Tackle)" : ""}` : 'Waiting for match updates...';
+                const commentary = buildRaidCommentary(payload);
                 const liveEl = document.getElementById("live-commentary");
                 if (liveEl) liveEl.textContent = commentary;
             }
@@ -370,12 +447,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const joinBtn = document.getElementById('viewer-join-btn');
     const info = document.getElementById('viewer-info');
     const matchScoreBtn = document.getElementById('match-score-btn');
+        const matchOverviewBtn = document.getElementById('match-overview-btn');
     const typeSelect = document.getElementById('viewer-type-select');
 
     if (matchScoreBtn) {
         matchScoreBtn.disabled = true;
         matchScoreBtn.addEventListener('click', fetchMatchScore);
     }
+        if (matchOverviewBtn) {
+            matchOverviewBtn.disabled = true;
+            matchOverviewBtn.addEventListener('click', () => {
+                if (!matchId) {
+                    alert('No match ID available');
+                    return;
+                }
+                window.location.href = `/viewer/match/${matchId}/overview`;
+            });
+        }
     updateEventNavButton();
 
     const updatePlaceholder = () => {

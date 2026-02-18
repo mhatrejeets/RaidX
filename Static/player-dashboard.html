@@ -181,6 +181,38 @@
         </div>
       </div>
     </div>
+
+    <div class="card mt-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-0" style="color:#fbbf24;">My Teams &amp; Events</h5>
+          <div class="text-white small">Teams you belong to and recent events you played.</div>
+        </div>
+        <button id="player-teams-refresh" class="btn btn-orange">Refresh</button>
+      </div>
+      <div class="card-body">
+        <ul class="nav nav-tabs" id="playerTeamsTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="player-teams-tab" data-bs-toggle="tab" data-bs-target="#player-teams" type="button" role="tab">
+              <i class="bi bi-people"></i> My Teams
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="player-events-tab" data-bs-toggle="tab" data-bs-target="#player-events" type="button" role="tab">
+              <i class="bi bi-calendar2-week"></i> My Events
+            </button>
+          </li>
+        </ul>
+        <div class="tab-content mt-3">
+          <div class="tab-pane fade show active" id="player-teams" role="tabpanel">
+            <div id="player-teams-list" class="mt-2"></div>
+          </div>
+          <div class="tab-pane fade" id="player-events" role="tabpanel">
+            <div id="player-events-list" class="mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

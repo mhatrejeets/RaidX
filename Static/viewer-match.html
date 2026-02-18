@@ -58,6 +58,7 @@
       <h2 class="mb-0" style="color:#fbbf24;">Match Score</h2>
       <div>
         <button class="btn btn-orange me-2" id="goto-event-btn" style="display: none;">Go to Event</button>
+        <a id="match-overview-link" class="btn btn-outline-light me-2" href="#">Match Overview</a>
         <a id="dashboard-link" class="btn btn-outline-light me-2" href="#" style="display:none;">
           <i class="bi bi-speedometer2"></i> Dashboard
         </a>
@@ -110,6 +111,26 @@
             </div>
           </div>
         </div>
+        <div class="row g-3 mt-2">
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-label">MVP</div>
+              <div class="summary-value" id="match-award-mvp">-</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-label">Best Raider</div>
+              <div class="summary-value" id="match-award-raider">-</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-label">Best Defender</div>
+              <div class="summary-value" id="match-award-defender">-</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -141,6 +162,8 @@
     const matchId = window.location.pathname.split('/').pop();
     const matchIdEl = document.getElementById('match-id');
     if (matchIdEl) matchIdEl.textContent = `Match: ${matchId}`;
+    const matchOverviewLink = document.getElementById('match-overview-link');
+    if (matchOverviewLink) matchOverviewLink.href = `/viewer/match/${matchId}/overview`;
 
     function renderPlayerStats(stats, teamAName = 'Team A', teamBName = 'Team B') {
       const listA = document.getElementById('scorecard-teamA-list');
@@ -174,6 +197,8 @@
           const raid = stat.raidPoints ?? stat.RaidPoints ?? 0;
           const def = stat.defencePoints ?? stat.DefencePoints ?? 0;
           const total = stat.totalPoints ?? stat.TotalPoints ?? 0;
+          const superRaids = stat.superRaids ?? stat.SuperRaids ?? 0;
+          const superTackles = stat.superTackles ?? stat.SuperTackles ?? 0;
           const status = (stat.status || stat.Status || '').toLowerCase();
           const statusBadge = status === 'out'
             ? '<span style="color:#f87171;font-weight:600;">OUT</span>'
@@ -191,6 +216,8 @@
                   <div>Raid: <strong>${raid}</strong></div>
                   <div>Defence: <strong>${def}</strong></div>
                   <div>Total: <strong>${total}</strong></div>
+                  <div>Super Raids: <strong>${superRaids}</strong></div>
+                  <div>Super Tackles: <strong>${superTackles}</strong></div>
                 </div>
               </div>
             </a>
@@ -241,6 +268,15 @@
         document.getElementById('match-toss-winner').textContent = tossWinnerName || '-';
         document.getElementById('match-toss-decision').textContent = tossDecisionText || '-';
 
+        const awards = match.awards || match.data?.awards || data.data?.awards || data.awards || {};
+        const mvp = awards.mvp || {};
+        const bestRaider = awards.bestRaider || {};
+        const bestDefender = awards.bestDefender || {};
+        const formatAward = (a) => (a && a.name ? `${a.name} (${a.points ?? 0})` : '-');
+        document.getElementById('match-award-mvp').textContent = formatAward(mvp);
+        document.getElementById('match-award-raider').textContent = formatAward(bestRaider);
+        document.getElementById('match-award-defender').textContent = formatAward(bestDefender);
+
         // Show "Go to Event" button if match is part of tournament or championship
         const rawEventType = (data.eventType || data.event_type || '').toLowerCase();
         const eventId = data.eventId || data.event_id;
@@ -254,7 +290,7 @@
           };
         }
 
-        renderPlayerStats(match.playerStats || {}, teamAName, teamBName);
+        renderPlayerStats(match.playerStats || data.playerStats || {}, teamAName, teamBName);
       } catch (e) {
         const container = document.getElementById('player-stats');
         if (container) container.innerHTML = `<div class="text-danger">${e.message}</div>`;
