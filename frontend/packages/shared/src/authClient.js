@@ -1,5 +1,10 @@
 const TOKEN_KEY = "raidx.token";
 const SESSION_KEY = "raidx.session";
+const AUTH_ROUTES = {
+  refresh: "/refresh",
+  logout: "/logout",
+  logoutAll: "/logout-all"
+};
 
 export function decodeJwtPayload(token) {
   if (!token) return null;
@@ -76,8 +81,30 @@ export function createAuthClient({ baseUrl = "", storage }) {
     return data;
   }
 
+  async function signup(payload) {
+    const body = new URLSearchParams();
+    Object.entries(payload || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+      body.append(key, String(value));
+    });
+
+    const response = await fetch(`${baseUrl}/signup`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || "Signup failed");
+    }
+
+    return data;
+  }
+
   async function refresh() {
-    const response = await fetch(`${baseUrl}/refresh`, {
+    const response = await fetch(`${baseUrl}${AUTH_ROUTES.refresh}`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" }
@@ -104,7 +131,7 @@ export function createAuthClient({ baseUrl = "", storage }) {
 
   async function logout() {
     const token = await getToken();
-    await fetch(`${baseUrl}/logout`, {
+    await fetch(`${baseUrl}${AUTH_ROUTES.logout}`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -117,7 +144,7 @@ export function createAuthClient({ baseUrl = "", storage }) {
 
   async function logoutAll() {
     const token = await getToken();
-    const response = await fetch(`${baseUrl}/logout-all`, {
+    const response = await fetch(`${baseUrl}${AUTH_ROUTES.logoutAll}`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -180,6 +207,7 @@ export function createAuthClient({ baseUrl = "", storage }) {
     getToken,
     setToken,
     clearToken,
+    signup,
     login,
     refresh,
     logout,

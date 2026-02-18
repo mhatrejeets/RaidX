@@ -8,6 +8,7 @@
   "scripts": {
     "dev:web": "npm run dev -w @raidx/web",
     "dev:mobile": "npm run start -w @raidx/mobile",
-    "build:web": "npm run build -w @raidx/web"
+    "build:web": "npm run build -w @raidx/web",
+    "check:routes": "node ./scripts/check-route-coverage.js"
   }
 }
