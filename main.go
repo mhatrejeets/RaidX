@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/template/html/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/handlers"
+	"github.com/mhatrejeets/RaidX/internal/logger"
 	"github.com/mhatrejeets/RaidX/internal/middleware"
 	"github.com/mhatrejeets/RaidX/internal/models"
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
@@ -240,6 +241,8 @@ func setupProtectedRoutes(app *fiber.App) {
 }
 
 func main() {
+	logger.SetupAppLogging()
+
 	// Initialize services
 	db.InitDB()
 	redisImpl.InitRedis()

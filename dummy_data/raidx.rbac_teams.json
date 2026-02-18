@@ -1,0 +1,564 @@
+[{
+  "_id": {
+    "$oid": "697c7aeaa5e481576f620153"
+  },
+  "team_name": "team owner 1",
+  "owner_id": {
+    "$oid": "697c7aada5e481576f62014f"
+  },
+  "description": "desc 1",
+  "players": [
+    {
+      "$oid": "6823929aa5d8b0b9893f621c"
+    },
+    {
+      "$oid": "6823929aa5d8b0b9893f621d"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593253"
+    },
+    {
+      "$oid": "682388cca5d8b0b9893f61fe"
+    },
+    {
+      "$oid": "68238e67a5d8b0b9893f620b"
+    },
+    {
+      "$oid": "682120097a347f5508a0978e"
+    },
+    {
+      "$oid": "68239496a5d8b0b9893f6226"
+    },
+    {
+      "$oid": "68238e67a5d8b0b9893f6207"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593250"
+    },
+    {
+      "$oid": "6822182c07ccc1d95959324c"
+    },
+    {
+      "$oid": "68211f1dafadf13ee44a5b71"
+    },
+    {
+      "$oid": "68238fcca5d8b0b9893f620d"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-01-30T09:33:30.790Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-11T10:17:55.852Z"
+  },
+  "city": "",
+  "teamName": "team 1"
+},
+{
+  "_id": {
+    "$oid": "697c8777b2e60ba0c1a1e2c7"
+  },
+  "team_name": "team8",
+  "owner_id": {
+    "$oid": "697c83475ad014b2dac225f1"
+  },
+  "players": [
+    {
+      "$oid": "6911a6d9b98572f87682a4e0"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-01-30T10:27:03.409Z"
+  },
+  "updated_at": {
+    "$date": "2026-01-30T11:19:22.153Z"
+  },
+  "city": "",
+  "teamName": "team7"
+},
+{
+  "_id": {
+    "$oid": "697c89f282091db3a07d7125"
+  },
+  "team_name": "team10",
+  "owner_id": {
+    "$oid": "697c83475ad014b2dac225f1"
+  },
+  "players": [
+    "chandu"
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-01-30T10:37:38.004Z"
+  },
+  "updated_at": {
+    "$date": "2026-01-30T10:37:38.004Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "697c8d0767bf4996bb1ef6f8"
+  },
+  "team_name": "team11",
+  "owner_id": {
+    "$oid": "697c83475ad014b2dac225f1"
+  },
+  "players": [],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-01-30T10:50:47.713Z"
+  },
+  "updated_at": {
+    "$date": "2026-01-30T10:50:47.713Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69805a1866ef67f8fdc400bc"
+  },
+  "team_name": "paddys team",
+  "owner_id": {
+    "$oid": "697c83475ad014b2dac225f1"
+  },
+  "players": [
+    {
+      "$oid": "682388cca5d8b0b9893f61fc"
+    },
+    {
+      "$oid": "68238fcca5d8b0b9893f6212"
+    },
+    {
+      "$oid": "6823966ea5d8b0b9893f623d"
+    },
+    {
+      "$oid": "682388cca5d8b0b9893f61fd"
+    },
+    {
+      "$oid": "68210f2cbb8d4c0998be7295"
+    },
+    {
+      "$oid": "68239496a5d8b0b9893f6224"
+    },
+    {
+      "$oid": "6823966ea5d8b0b9893f6235"
+    },
+    {
+      "$oid": "6826c411079a8d24097434ca"
+    },
+    {
+      "$oid": "6822182c07ccc1d95959324b"
+    },
+    {
+      "$oid": "691de0c16e64a1f5215aa553"
+    },
+    {
+      "$oid": "6822182c07ccc1d95959324d"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593258"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-02T08:02:32.759Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-02T08:02:32.759Z"
+  },
+  "city": "",
+  "teamName": "team 2"
+},
+{
+  "_id": {
+    "$oid": "69805af301d49442b351e9db"
+  },
+  "team_name": "t2",
+  "owner_id": {
+    "$oid": "697c83475ad014b2dac225f1"
+  },
+  "players": [],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-02T08:06:11.781Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-02T08:06:11.781Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6982ee7a3faa8a39d14e888a"
+  },
+  "team_name": "team2",
+  "owner_id": {
+    "$oid": "697c7aada5e481576f62014f"
+  },
+  "players": [
+    "6822182c07ccc1d959593253"
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-04T07:00:10.665Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-04T07:00:10.665Z"
+  },
+  "city": "",
+  "teamName": "team23"
+},
+{
+  "_id": {
+    "$oid": "698c53294b9900f228181ba5"
+  },
+  "team_name": "twekjs",
+  "owner_id": {
+    "$oid": "697c7aada5e481576f62014f"
+  },
+  "players": [
+    "6911c43f78c739f9151dc9c6"
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-11T10:00:09.346Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-11T10:00:09.346Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698cc1910eae908aea175172"
+  },
+  "team_name": "team3",
+  "owner_id": {
+    "$oid": "698cc06a0eae908aea17516c"
+  },
+  "players": [
+    {
+      "$oid": "68a43ebbe50a29519f8acd80"
+    },
+    {
+      "$oid": "68238e67a5d8b0b9893f6203"
+    },
+    {
+      "$oid": "68238e67a5d8b0b9893f620a"
+    },
+    {
+      "$oid": "6823966ea5d8b0b9893f6236"
+    },
+    {
+      "$oid": "6823951fa5d8b0b9893f6231"
+    },
+    {
+      "$oid": "6823966ea5d8b0b9893f6237"
+    },
+    {
+      "$oid": "682684738f2844121c572299"
+    },
+    {
+      "$oid": "68238e67a5d8b0b9893f6205"
+    },
+    {
+      "$oid": "6822182c07ccc1d95959324f"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593252"
+    },
+    {
+      "$oid": "6823951fa5d8b0b9893f622c"
+    },
+    {
+      "$oid": "698046afd8486af18a7db440"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-11T17:51:13.732Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-11T17:51:13.732Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698cc1b30eae908aea175176"
+  },
+  "team_name": "team4",
+  "owner_id": {
+    "$oid": "698cc0af0eae908aea17516d"
+  },
+  "players": [
+    {
+      "$oid": "6823929aa5d8b0b9893f6218"
+    },
+    {
+      "$oid": "68239496a5d8b0b9893f6221"
+    },
+    {
+      "$oid": "68239496a5d8b0b9893f6222"
+    },
+    {
+      "$oid": "697c83475ad014b2dac225f1"
+    },
+    {
+      "$oid": "6823966ea5d8b0b9893f6238"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593256"
+    },
+    {
+      "$oid": "6823951fa5d8b0b9893f6233"
+    },
+    {
+      "$oid": "6823929aa5d8b0b9893f621e"
+    },
+    {
+      "$oid": "682388cca5d8b0b9893f6200"
+    },
+    {
+      "$oid": "6909fe4bd5c65a38a65a8e59"
+    },
+    {
+      "$oid": "6911c43f78c739f9151dc9c6"
+    },
+    {
+      "$oid": "6823929aa5d8b0b9893f6219"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-11T17:51:47.316Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-11T17:51:47.316Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698cc1de0eae908aea17517a"
+  },
+  "team_name": "team5",
+  "owner_id": {
+    "$oid": "698cc0d90eae908aea17516e"
+  },
+  "players": [
+    {
+      "$oid": "6911a61fb98572f87682a4dd"
+    },
+    {
+      "$oid": "6822182c07ccc1d95959325c"
+    },
+    {
+      "$oid": "68239496a5d8b0b9893f6225"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593254"
+    },
+    {
+      "$oid": "682388cca5d8b0b9893f61fb"
+    },
+    {
+      "$oid": "698cc0d90eae908aea17516e"
+    },
+    {
+      "$oid": "682388cca5d8b0b9893f61ff"
+    },
+    {
+      "$oid": "698cc0af0eae908aea17516d"
+    },
+    {
+      "$oid": "6911a5c7b98572f87682a4d9"
+    },
+    {
+      "$oid": "6823951fa5d8b0b9893f622e"
+    },
+    {
+      "$oid": "68239496a5d8b0b9893f6223"
+    },
+    {
+      "$oid": "68238fcca5d8b0b9893f6210"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-11T17:52:30.432Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-11T17:52:30.432Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698d80ada68e4ee7bbf26648"
+  },
+  "team_name": "team 6",
+  "owner_id": {
+    "$oid": "698d7f5ca68e4ee7bbf26643"
+  },
+  "players": [
+    {
+      "$oid": "6823966ea5d8b0b9893f6239"
+    },
+    {
+      "$oid": "697c75e717b97aece295be4d"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593257"
+    },
+    {
+      "$oid": "6823929aa5d8b0b9893f621b"
+    },
+    {
+      "$oid": "6823951fa5d8b0b9893f622d"
+    },
+    {
+      "$oid": "6911a6d9b98572f87682a4e0"
+    },
+    {
+      "$oid": "682116ff024256d93dba09ae"
+    },
+    {
+      "$oid": "690a2cb30009a297c5fdb6e9"
+    },
+    {
+      "$oid": "6823929aa5d8b0b9893f621a"
+    },
+    {
+      "$oid": "68265b5b0b6745f28a721d84"
+    },
+    {
+      "$oid": "68238e67a5d8b0b9893f6209"
+    },
+    {
+      "$oid": "68238fcca5d8b0b9893f620e"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-12T07:26:37.984Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-12T07:26:37.984Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698d80c8a68e4ee7bbf2664c"
+  },
+  "team_name": "team 7",
+  "owner_id": {
+    "$oid": "698d7f7fa68e4ee7bbf26644"
+  },
+  "players": [
+    {
+      "$oid": "6822182c07ccc1d959593255"
+    },
+    {
+      "$oid": "682388cca5d8b0b9893f61f9"
+    },
+    {
+      "$oid": "6823966ea5d8b0b9893f623a"
+    },
+    {
+      "$oid": "68c71e09b5c88b8acb2de437"
+    },
+    {
+      "$oid": "682388cca5d8b0b9893f61fa"
+    },
+    {
+      "$oid": "6822182c07ccc1d95959325b"
+    },
+    {
+      "$oid": "690bb5ea292fd7166405123f"
+    },
+    {
+      "$oid": "68211b0bbbcea2576d6c8718"
+    },
+    {
+      "$oid": "6823951fa5d8b0b9893f6230"
+    },
+    {
+      "$oid": "68238fcca5d8b0b9893f6215"
+    },
+    {
+      "$oid": "6822182c07ccc1d95959324e"
+    },
+    {
+      "$oid": "6823951fa5d8b0b9893f6232"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-12T07:27:04.935Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-12T07:27:04.935Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698dd69bef7639941bfda6c8"
+  },
+  "team_name": "team dumi",
+  "owner_id": {
+    "$oid": "698cc0d90eae908aea17516e"
+  },
+  "players": [
+    {
+      "$oid": "6911c43f78c739f9151dc9c6"
+    },
+    {
+      "$oid": "68210f2cbb8d4c0998be7295"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-12T13:33:15.591Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-12T15:26:52.967Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698ddc238e086a809dd8917b"
+  },
+  "team_name": "team dummyyy",
+  "owner_id": {
+    "$oid": "698cc0d90eae908aea17516e"
+  },
+  "players": [
+    {
+      "$oid": "6822182c07ccc1d95959324d"
+    },
+    {
+      "$oid": "6822182c07ccc1d959593253"
+    }
+  ],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-12T13:56:51.000Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-12T14:15:17.322Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "698dffafa18229a5bbbae113"
+  },
+  "team_name": "team_recheck",
+  "owner_id": {
+    "$oid": "697c7aada5e481576f62014f"
+  },
+  "players": [],
+  "status": "active",
+  "created_at": {
+    "$date": "2026-02-12T16:28:31.989Z"
+  },
+  "updated_at": {
+    "$date": "2026-02-12T16:28:31.989Z"
+  }
+}]
