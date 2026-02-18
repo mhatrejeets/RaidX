@@ -4,6 +4,9 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/binary"
+	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -34,6 +37,12 @@ func SignupHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("❌ Failed to parse form data")
 	}
 
+	form.Email = strings.ToLower(strings.TrimSpace(form.Email))
+	form.UserID = strings.TrimSpace(form.UserID)
+	if form.UserID == "" {
+		return c.Status(fiber.StatusBadRequest).SendString("❌ Username is required")
+	}
+
 	// Check if the passwords match
 	if strings.TrimSpace(c.FormValue("password")) != strings.TrimSpace(c.FormValue("confirmPassword")) {
 		logrus.Warn("Warning:", "SignupHandler:", " Passwords do not match for email: %s", form.Email)
@@ -48,9 +57,26 @@ func SignupHandler(c *fiber.Ctx) error {
 	// Check if the email already exists
 	var existing models.User
 	err := collection.FindOne(ctx, bson.M{"email": form.Email}).Decode(&existing)
-	if err != mongo.ErrNoDocuments {
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		logrus.Error("Error:", "SignupHandler:", " Failed to check existing email: %v", err)
+		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not validate signup details")
+	}
+	if err == nil {
 		logrus.Info("Info:", "SignupHandler:", " Email already registered: %s", form.Email)
 		return c.Status(fiber.StatusConflict).SendString("❌ Email already registered")
+	}
+
+	usernameRegex := fmt.Sprintf("^%s$", regexp.QuoteMeta(form.UserID))
+	err = collection.FindOne(ctx, bson.M{
+		"userId": bson.M{"$regex": usernameRegex, "$options": "i"},
+	}).Decode(&existing)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		logrus.Error("Error:", "SignupHandler:", " Failed to check existing username: %v", err)
+		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not validate signup details")
+	}
+	if err == nil {
+		logrus.Info("Info:", "SignupHandler:", " Username already registered: %s", form.UserID)
+		return c.Status(fiber.StatusConflict).SendString("❌ Username already taken")
 	}
 
 	// Encode password with Base62 after hashing it

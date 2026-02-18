@@ -547,6 +547,10 @@ async function initOrganizerDashboard() {
                 if (eventIdInput) eventIdInput.value = newEventId;
                 localStorage.setItem('rbac_event_id', newEventId);
                 setStatus('organizer-status', `Event created: ${data.event_name} (${newEventId})`, 'success');
+                if (newEventId) {
+                    window.location.href = `/organizer/event/${newEventId}`;
+                    return;
+                }
                 await loadOrganizerEvents();
             } catch (e) {
                 setStatus('organizer-status', e.message, 'danger');

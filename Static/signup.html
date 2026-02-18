@@ -164,7 +164,7 @@
       <div class="mb-3" id="position-group">
         <label for="position" class="form-label">Playing Position</label>
         <select class="form-select" id="position" name="position" required>
-          <option selected disabled>Select Position</option>
+          <option value="" selected disabled>Select Position</option>
           <option value="raider">Raider</option>
           <option value="defender">Defender</option>
           <option value="allrounder">All-Rounder</option>
@@ -188,6 +188,7 @@
       const role = roleSelect.value;
       const isPlayer = role === 'player';
       positionSelect.required = isPlayer;
+      positionSelect.setCustomValidity('');
       
       if (!isPlayer) {
         positionSelect.value = '';
@@ -207,8 +208,15 @@
       const isPlayer = role === 'player';
       if (isPlayer && !positionSelect.value) {
         e.preventDefault();
-        alert('Please select a position');
+        positionSelect.setCustomValidity('Please select a position');
+        positionSelect.reportValidity();
+      } else {
+        positionSelect.setCustomValidity('');
       }
+    });
+
+    positionSelect.addEventListener('change', function() {
+      positionSelect.setCustomValidity('');
     });
 
     roleSelect.addEventListener('change', togglePositionRequired);

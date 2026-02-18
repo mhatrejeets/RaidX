@@ -345,8 +345,8 @@
         return;
       }
       container.innerHTML = teams.map(team => {
-        const name = team.teamName || 'Unknown Team';
         const owner = team.ownerName || 'Unknown Owner';
+        const name = team.teamName || owner || 'Unknown Team';
         const ownerId = team.ownerUserId || 'N/A';
         const declineReason = team.declineReason || team.decline_reason || '';
         return `

@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -22,25 +23,32 @@ func LoginHandler(c *fiber.Ctx) error {
 
 	// Support both JSON and form data
 	var loginData struct {
-		Email    string `json:"email" form:"email"`
-		Password string `json:"password" form:"password"`
+		Identifier string `json:"identifier" form:"identifier"`
+		Email      string `json:"email" form:"email"`
+		Password   string `json:"password" form:"password"`
 	}
 
 	// Try parsing JSON first
 	if err := c.BodyParser(&loginData); err != nil {
 		// If JSON parsing fails, try form data
+		loginData.Identifier = c.FormValue("identifier")
 		loginData.Email = c.FormValue("email")
 		loginData.Password = c.FormValue("password")
 	}
 
+	identifier := strings.TrimSpace(loginData.Identifier)
+	if identifier == "" {
+		identifier = strings.TrimSpace(loginData.Email)
+	}
+
 	// Validate required fields
-	if loginData.Email == "" || loginData.Password == "" {
+	if identifier == "" || loginData.Password == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Email and password are required",
+			"error": "Username/email and password are required",
 		})
 	}
 
-	email := strings.ToLower(strings.TrimSpace(loginData.Email))
+	email := strings.ToLower(identifier)
 	password := strings.TrimSpace(loginData.Password)
 	encodedPassword := hashAndEncodeBase62(password)
 
@@ -49,10 +57,13 @@ func LoginHandler(c *fiber.Ctx) error {
 	defer cancel()
 
 	var user models.Userr
-	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	err := collection.FindOne(ctx, bson.M{"$or": []bson.M{
+		{"email": email},
+		{"userId": bson.M{"$regex": fmt.Sprintf("^%s$", regexp.QuoteMeta(identifier)), "$options": "i"}},
+	}}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Email not registered"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Username or email not registered"})
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Server error"})
 	}

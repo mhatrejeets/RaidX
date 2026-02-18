@@ -145,8 +145,8 @@
     <h2>Login to RaidX</h2>
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" autocomplete="email" required>
+        <label for="identifier" class="form-label">Username or Email</label>
+        <input type="text" class="form-control" id="identifier" name="identifier" placeholder="Enter your username or email" autocomplete="username" required>
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
@@ -228,13 +228,13 @@
       event.preventDefault();
       console.log('Login form submitted');
       
-      const email = document.getElementById('email').value.trim();
+      const identifier = document.getElementById('identifier').value.trim();
       const password = document.getElementById('password').value.trim();
       
-      console.log('Email:', email, 'Password length:', password.length);
+      console.log('Identifier:', identifier, 'Password length:', password.length);
       
-      if (!email || !password) {
-        showError('Email and password are required');
+      if (!identifier || !password) {
+        showError('Username/email and password are required');
         return;
       }
 
@@ -249,7 +249,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ identifier, password })
         });
 
         const data = await response.json();

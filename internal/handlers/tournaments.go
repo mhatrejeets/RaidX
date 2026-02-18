@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -363,22 +364,119 @@ func StartTournamentMatchHandler(c *fiber.Ctx) error {
 
 func generateRoundRobinFixtures(tournamentID primitive.ObjectID, teams []primitive.ObjectID) []models.Fixture {
 	fixtures := make([]models.Fixture, 0)
-	n := len(teams)
+	if len(teams) < 2 {
+		return fixtures
+	}
 
-	for i := 0; i < n; i++ {
-		for j := i + 1; j < n; j++ {
-			fixture := models.Fixture{
-				ID:           primitive.NewObjectID(),
-				TournamentID: tournamentID,
-				Team1ID:      teams[i],
-				Team2ID:      teams[j],
-				MatchType:    models.FixtureTypeLeague,
-				Status:       models.FixtureStatusPending,
-				CreatedAt:    time.Now(),
-				UpdatedAt:    time.Now(),
-			}
-			fixtures = append(fixtures, fixture)
+	uniqueTeams := make([]primitive.ObjectID, 0, len(teams))
+	seen := make(map[primitive.ObjectID]struct{}, len(teams))
+	for _, teamID := range teams {
+		if teamID == primitive.NilObjectID {
+			continue
 		}
+		if _, ok := seen[teamID]; ok {
+			continue
+		}
+		seen[teamID] = struct{}{}
+		uniqueTeams = append(uniqueTeams, teamID)
+	}
+	if len(uniqueTeams) < 2 {
+		return fixtures
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(uniqueTeams), func(i, j int) {
+		uniqueTeams[i], uniqueTeams[j] = uniqueTeams[j], uniqueTeams[i]
+	})
+
+	working := append([]primitive.ObjectID(nil), uniqueTeams...)
+	isOdd := len(working)%2 != 0
+	if isOdd {
+		working = append(working, primitive.NilObjectID)
+	}
+
+	type pairing struct {
+		team1 primitive.ObjectID
+		team2 primitive.ObjectID
+	}
+
+	rounds := len(working) - 1
+	half := len(working) / 2
+	roundPairs := make([][]pairing, 0, rounds)
+
+	for round := 0; round < rounds; round++ {
+		pairs := make([]pairing, 0, half)
+		for i := 0; i < half; i++ {
+			t1 := working[i]
+			t2 := working[len(working)-1-i]
+			if t1 == primitive.NilObjectID || t2 == primitive.NilObjectID {
+				continue
+			}
+			if round%2 == 1 {
+				t1, t2 = t2, t1
+			}
+			pairs = append(pairs, pairing{team1: t1, team2: t2})
+		}
+		roundPairs = append(roundPairs, pairs)
+
+		if len(working) > 2 {
+			tail := append([]primitive.ObjectID(nil), working[1:]...)
+			last := tail[len(tail)-1]
+			copy(tail[1:], tail[:len(tail)-1])
+			tail[0] = last
+			working = append([]primitive.ObjectID{working[0]}, tail...)
+		}
+	}
+
+	orderedPairs := make([]pairing, 0)
+	lastTeamA := primitive.NilObjectID
+	lastTeamB := primitive.NilObjectID
+	teamInLastMatch := func(teamID primitive.ObjectID) bool {
+		return teamID == lastTeamA || teamID == lastTeamB
+	}
+
+	for _, pairs := range roundPairs {
+		pending := append([]pairing(nil), pairs...)
+		for len(pending) > 0 {
+			bestIdx := 0
+			bestScore := 3
+			for i, p := range pending {
+				score := 0
+				if teamInLastMatch(p.team1) {
+					score++
+				}
+				if teamInLastMatch(p.team2) {
+					score++
+				}
+				if score < bestScore {
+					bestScore = score
+					bestIdx = i
+					if score == 0 {
+						break
+					}
+				}
+			}
+
+			selected := pending[bestIdx]
+			orderedPairs = append(orderedPairs, selected)
+			lastTeamA = selected.team1
+			lastTeamB = selected.team2
+			pending = append(pending[:bestIdx], pending[bestIdx+1:]...)
+		}
+	}
+
+	for _, p := range orderedPairs {
+		fixture := models.Fixture{
+			ID:           primitive.NewObjectID(),
+			TournamentID: tournamentID,
+			Team1ID:      p.team1,
+			Team2ID:      p.team2,
+			MatchType:    models.FixtureTypeLeague,
+			Status:       models.FixtureStatusPending,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		}
+		fixtures = append(fixtures, fixture)
 	}
 
 	return fixtures
