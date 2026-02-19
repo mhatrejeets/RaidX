@@ -2,6 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { ROUTE_TEMPLATES, fillRoute } from "@raidx/shared";
 import { authClient } from "./authClient";
+import {
+  normalizeRole,
+  normalizeStatus,
+  getDeclineReason,
+  getInviteId,
+  getTeamId,
+  safeArray,
+  getObjectIdString,
+  getStatusDisplay,
+  isSupportedRole
+} from "./helpers";
+import { renderTab } from "./ui.jsx";
 
 function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -2009,47 +2021,6 @@ function OrganizerDashboard() {
   );
 }
 
-function normalizeStatus(invite) {
-  return String(invite?.status || invite?.Status || "pending").toLowerCase();
-}
-
-function getDeclineReason(invite) {
-  return invite?.declineReason || invite?.decline_reason || invite?.DeclineReason || "";
-}
-
-function getInviteId(invite) {
-  return invite?.id || invite?.ID || invite?._id || "";
-}
-
-function getTeamId(team) {
-  return team?.ID || team?.id || team?.teamId || team?.TeamID || "";
-}
-
-function safeArray(data) {
-  return Array.isArray(data) ? data : [];
-}
-
-function getObjectIdString(value) {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (typeof value === "object" && typeof value.$oid === "string") return value.$oid;
-  return "";
-}
-
-function getStatusDisplay(statusValue) {
-  const normalized = String(statusValue || "pending").toLowerCase();
-  const labels = {
-    invited_via_link: "waiting for approval",
-    accepted_by_owner: "accepted by owner",
-    declined_by_owner: "declined by owner",
-    accepted_by_organizer: "accepted by organizer",
-    declined_by_organizer: "declined by organizer",
-    pending: "pending",
-    accepted: "accepted",
-    declined: "declined"
-  };
-  return labels[normalized] || normalized;
-}
 
 function ViewerPage() {
   const [tab, setTab] = useState("match");
@@ -2241,28 +2212,6 @@ function ProfilePage() {
       </main>
     </div>
   );
-}
-
-function renderTab(current, setCurrent, value, label) {
-  return (
-    <button
-      className={`tab-btn ${current === value ? "active" : ""}`}
-      onClick={() => setCurrent(value)}
-      type="button"
-    >
-      {label}
-    </button>
-  );
-}
-
-function normalizeRole(role) {
-  const normalized = String(role || "player").toLowerCase();
-  if (normalized === "owner") return "team_owner";
-  return normalized;
-}
-
-function isSupportedRole(role) {
-  return role === "player" || role === "team_owner" || role === "organizer";
 }
 
 function SessionGate({ children }) {

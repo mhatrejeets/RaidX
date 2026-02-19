@@ -11,17 +11,15 @@ import (
 	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 )
 
+func serveReactApp(c *fiber.Ctx) error {
+	return c.SendFile("./frontend/apps/web/dist/index.html")
+}
+
 func setupPublicRoutes(app *fiber.App) {
 	// Public static pages
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/home.html")
-	})
-	app.Get("/login", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/login.html")
-	})
-	app.Get("/signup", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/signup.html")
-	})
+	app.Get("/", serveReactApp)
+	app.Get("/login", serveReactApp)
+	app.Get("/signup", serveReactApp)
 
 	// Public auth endpoints
 	app.Post("/signup", handlers.SignupHandler)
@@ -31,27 +29,15 @@ func setupPublicRoutes(app *fiber.App) {
 	app.Post("/refresh", handlers.RefreshTokenHandler)
 
 	// Public viewer access
-	app.Get("/viewer", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/viewer.html")
-	})
-	app.Get("/viewer/match/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/viewer-match.html")
-	})
-	app.Get("/viewer/match/:id/overview", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/viewer-match-overview.html")
-	})
-	app.Get("/rankings/:type/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/rankings.html")
-	})
-	app.Get("/viewer/tournament/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/viewer-tournament.html")
-	})
-	app.Get("/viewer/championship/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/viewer-championship.html")
-	})
+	app.Get("/viewer", serveReactApp)
+	app.Get("/viewer/match/:id", serveReactApp)
+	app.Get("/viewer/match/:id/overview", serveReactApp)
+	app.Get("/rankings/:type/:id", serveReactApp)
+	app.Get("/viewer/tournament/:id", serveReactApp)
+	app.Get("/viewer/championship/:id", serveReactApp)
 
 	// Public player profile page (client-side auth gate)
-	app.Get("/playerprofile/:id", handlers.PlayerProfileHandler)
+	app.Get("/playerprofile/:id", serveReactApp)
 
 	// Public API endpoint to fetch match details by ID (JSON) - no auth required for viewers
 	app.Get("/api/match/:id", handlers.GetMatchByIDJSON)
@@ -64,12 +50,8 @@ func setupPublicRoutes(app *fiber.App) {
 	app.Get("/api/public/championships/:id/stats", handlers.GetChampionshipStatsHandler)
 
 	// Public invite link pages (anyone can visit)
-	app.Get("/invite/team/:token", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/invite-team.html")
-	})
-	app.Get("/invite/event/:token", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/invite-event.html")
-	})
+	app.Get("/invite/team/:token", serveReactApp)
+	app.Get("/invite/event/:token", serveReactApp)
 	app.Get("/api/invite-link/team/:token/details", handlers.GetTeamInviteLinkDetails)
 	app.Get("/api/invite-link/event/:token/details", handlers.GetEventInviteLinkDetails)
 }
@@ -79,15 +61,9 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/me/profile", handlers.GetMyProfileHandler)
 
 	// Role-based dashboards (RBAC only)
-	app.Get("/player/dashboard", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/player-dashboard.html")
-	})
-	app.Get("/owner/dashboard", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/owner-dashboard-v2.html")
-	})
-	app.Get("/organizer/dashboard", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-dashboard.html")
-	})
+	app.Get("/player/dashboard", serveReactApp)
+	app.Get("/owner/dashboard", serveReactApp)
+	app.Get("/organizer/dashboard", serveReactApp)
 
 	// RBAC: Team Owner APIs
 	app.Post("/api/teams", middleware.RoleRequired(models.RoleTeamOwner), handlers.CreateTeamHandler)
@@ -127,85 +103,45 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/player/events", middleware.RoleRequired(models.RolePlayer), handlers.GetPlayerEventsHandler)
 
 	// RBAC: Team Owner - Team Management Pages
-	app.Get("/owner/teams", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/owner-teams.html")
-	})
-	app.Get("/owner/team/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/owner-team-detail.html")
-	})
-	app.Get("/owner/team/:id/edit", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/owner-team-detail.html")
-	})
+	app.Get("/owner/teams", serveReactApp)
+	app.Get("/owner/team/:id", serveReactApp)
+	app.Get("/owner/team/:id/edit", serveReactApp)
 
 	// RBAC: Organizer - Event & Match Management Pages
-	app.Get("/organizer/events", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-event-detail.html")
-	})
-	app.Get("/organizer/event/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-event-detail.html")
-	})
-	app.Get("/organizer/tournament", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-tournament-detail.html")
-	})
-	app.Get("/organizer/championship", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-championship-detail.html")
-	})
-	app.Get("/organizer/event/:id/matches", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-event-matches.html")
-	})
-	app.Get("/organizer/match/:id/teams", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-match-teams.html")
-	})
-	app.Get("/organizer/match/:id/stats", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-match-stats.html")
-	})
+	app.Get("/organizer/events", serveReactApp)
+	app.Get("/organizer/event/:id", serveReactApp)
+	app.Get("/organizer/tournament", serveReactApp)
+	app.Get("/organizer/championship", serveReactApp)
+	app.Get("/organizer/event/:id/matches", serveReactApp)
+	app.Get("/organizer/match/:id/teams", serveReactApp)
+	app.Get("/organizer/match/:id/stats", serveReactApp)
 
-	app.Get("/organizer/profile/:id", handlers.OrganizerProfileHandler)
-	app.Get("/owner/profile/:id", handlers.OwnerProfileHandler)
-	app.Get("/organizer/match/:id/scorer", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-scorer.html")
-	})
+	app.Get("/organizer/profile/:id", serveReactApp)
+	app.Get("/owner/profile/:id", serveReactApp)
+	app.Get("/organizer/match/:id/scorer", serveReactApp)
 
 	// RBAC: Player Selection & Scorer (Organizer only)
-	app.Get("/organizer/playerselection/:id", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer), func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/playerselection.html")
-	})
-	app.Get("/scorer", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer), func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/scorer.html")
-	})
+	app.Get("/organizer/playerselection/:id", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer), serveReactApp)
+	app.Get("/scorer", middleware.AuthRequired, middleware.RoleRequired(models.RoleOrganizer), serveReactApp)
 
 	// RBAC: Organizer - Event-specific Pending Approvals & Invite Links
-	app.Get("/organizer/events/:id/pending-approvals", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-event-pending-approvals.html")
-	})
-	app.Get("/organizer/event/:id/pending-approvals", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-event-pending-approvals.html")
-	})
-	app.Get("/organizer/invite-links", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/organizer-invite-links.html")
-	})
+	app.Get("/organizer/events/:id/pending-approvals", serveReactApp)
+	app.Get("/organizer/event/:id/pending-approvals", serveReactApp)
+	app.Get("/organizer/invite-links", serveReactApp)
 
 	// RBAC: Team Owner - Team-specific Pending Approvals & Invite Links
-	app.Get("/owner/teams/:id/pending-approvals", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/owner-team-pending-approvals.html")
-	})
-	app.Get("/owner/invite-links", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/owner-invite-links.html")
-	})
+	app.Get("/owner/teams/:id/pending-approvals", serveReactApp)
+	app.Get("/owner/invite-links", serveReactApp)
 
 	// RBAC: Shared Match Viewing (both team owner and organizer can view)
-	app.Get("/owner/match/:id/view", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/match-viewer.html")
-	})
-	app.Get("/organizer/match/:id/view", func(c *fiber.Ctx) error {
-		return c.SendFile("./Static/match-viewer.html")
-	})
+	app.Get("/owner/match/:id/view", serveReactApp)
+	app.Get("/organizer/match/:id/view", serveReactApp)
 
 	// RBAC: Shared Match APIs
 	app.Get("/api/matches", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.GetAllMatches)
 	app.Get("/api/matches/:id", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.GetMatchByID)
 	app.Post("/api/matches/raid", middleware.RoleRequired(models.RoleTeamOwner, models.RoleOrganizer), handlers.ProcessRaidResult)
-	app.Get("/endgame", middleware.AuthRequired, handlers.EndGameHandler)
+	app.Get("/endgame", middleware.AuthRequired, serveReactApp)
 	app.Get("/api/endgame", middleware.AuthRequired, handlers.EndGameHandler)
 
 	// RBAC: Invite Link APIs (Team Owner & Organizer)
@@ -266,8 +202,9 @@ func main() {
 	// WebSocket setup
 	handlers.SetupWebSocket(app)
 
-	// Static assets
+	// Static assets (legacy + React build)
 	app.Static("/static", "./Static")
+	app.Static("/assets", "./frontend/apps/web/dist/assets")
 
 	// Cleanup
 	defer db.CloseDB()
