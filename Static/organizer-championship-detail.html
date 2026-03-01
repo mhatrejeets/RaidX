@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -291,6 +291,9 @@
           <a id="rankings-link" class="btn btn-outline-light btn-sm ms-2" href="#">
             <i class="bi bi-bar-chart"></i> Rankings
           </a>
+          <button id="share-championship-btn" class="btn btn-outline-light btn-sm ms-2" type="button">
+            <i class="bi bi-share"></i> Share Championship
+          </button>
         </div>
       </div>
     </div>
@@ -369,8 +372,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/share-utils.js"></script>
   <script>
     const championshipId = new URLSearchParams(window.location.search).get('id');
+    const shareChampionshipBtn = document.getElementById('share-championship-btn');
     const rankingsLink = document.getElementById('rankings-link');
     if (rankingsLink && championshipId) {
       rankingsLink.href = `/rankings/championship/${encodeURIComponent(championshipId)}?back=${encodeURIComponent(window.location.href)}`;
@@ -401,7 +406,7 @@
         const data = await res.json();
         if (res.ok) {
           document.getElementById('championship-name').textContent = data.eventName || 'Championship';
-          document.getElementById('championship-subtitle').textContent = `Type: ${data.eventType || 'championship'} • Status: ${data.status || '-'}`;
+          document.getElementById('championship-subtitle').textContent = `Type: ${data.eventType || 'championship'} â€¢ Status: ${data.status || '-'}`;
           headerLoaded = true;
         }
       } catch (err) {
@@ -521,11 +526,19 @@
           <button class="btn btn-warning btn-sm" onclick="restartMatch('${fixture.id}')">
             <i class="bi bi-arrow-counterclockwise"></i> Restart Match
           </button>
+          <button class="btn btn-outline-light btn-sm ms-2" onclick="shareFixtureMatch('${fixture.matchId}')">
+            <i class="bi bi-share"></i> Share Match
+          </button>
         `;
       } else if (fixture.status === 'completed' && fixture.matchId) {
-        actionBtn = `<button class="btn btn-outline-light btn-sm" onclick="viewMatchStats('${fixture.matchId}')">
-          <i class="bi bi-bar-chart"></i> View Stats
-        </button>`;
+        actionBtn = `
+          <button class="btn btn-outline-light btn-sm" onclick="viewMatchStats('${fixture.matchId}')">
+            <i class="bi bi-bar-chart"></i> View Stats
+          </button>
+          <button class="btn btn-outline-light btn-sm ms-2" onclick="shareFixtureMatch('${fixture.matchId}')">
+            <i class="bi bi-share"></i> Share Match
+          </button>
+        `;
       }
 
       return `
@@ -599,6 +612,11 @@
       if (championshipId) params.set('championship_id', championshipId);
       const suffix = params.toString() ? `?${params.toString()}` : '';
       window.location.href = `/organizer/match/${matchId}/stats${suffix}`;
+    }
+
+    function shareFixtureMatch(matchId) {
+      const link = buildViewerShareLink('match', matchId);
+      shareViewerLink(link, { title: 'Share Match Viewer Link', copiedMessage: 'Match viewer link copied.' });
     }
 
     async function loadStats() {
@@ -712,6 +730,13 @@
     }
 
     // Load initial data
+    if (shareChampionshipBtn && championshipId) {
+      shareChampionshipBtn.onclick = () => {
+        const link = buildViewerShareLink('championship', championshipId);
+        shareViewerLink(link, { title: 'Share Championship Viewer Link', copiedMessage: 'Championship viewer link copied.' });
+      };
+    }
+
     loadChampionshipInfo();
     loadFixtures();
     loadStats();
@@ -721,5 +746,7 @@
     document.getElementById('stats-tab').addEventListener('click', loadStats);
     document.getElementById('bracket-tab').addEventListener('click', loadBracket);
   </script>
+  <script src="/static/branding.js"></script>
 </body>
 </html>
+

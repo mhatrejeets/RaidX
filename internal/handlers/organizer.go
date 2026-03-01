@@ -407,7 +407,7 @@ func GetOrganizerEventMatchStatsHandler(c *fiber.Ctx) error {
 	// Find latest match stats for this event
 	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
 	var matchDoc bson.M
-	findErr := matchesColl.FindOne(ctx, bson.M{"eventId": eventID.Hex()}).Decode(&matchDoc)
+	findErr := matchesColl.FindOne(ctx, bson.M{"event_id": eventID}).Decode(&matchDoc)
 	if findErr == mongo.ErrNoDocuments {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Match stats not found"})
 	}

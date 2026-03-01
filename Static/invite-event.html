@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -233,7 +233,7 @@
         if (response.ok) {
           document.getElementById('contentSection').style.display = 'block';
           document.getElementById('approvalMessage').style.display = 'block';
-          showMessage('✅ Invite added to your dashboard. Please accept it there.', 'success');
+          showMessage('âœ… Invite added to your dashboard. Please accept it there.', 'success');
           setTimeout(() => {
             window.location.href = '/owner/dashboard';
           }, 800);
@@ -266,6 +266,8 @@
     // Load on page load
     document.addEventListener('DOMContentLoaded', loadInviteDetails);
   </script>
+  <script src="/static/branding.js"></script>
 </body>
 
 </html>
+

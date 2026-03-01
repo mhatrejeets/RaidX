@@ -15,6 +15,8 @@ type Player struct {
 type PlayerStat struct {
 	Name              string `json:"name" bson:"name"`
 	ID                string `json:"id" bson:"id"`
+	IsCaptain         bool   `json:"isCaptain,omitempty" bson:"isCaptain,omitempty"`
+	IsViceCaptain     bool   `json:"isViceCaptain,omitempty" bson:"isViceCaptain,omitempty"`
 	RaidPoints        int    `json:"raidPoints" bson:"raidPoints"`
 	DefencePoints     int    `json:"defencePoints" bson:"defencePoints"`
 	TotalPoints       int    `json:"totalPoints" bson:"totalPoints"`

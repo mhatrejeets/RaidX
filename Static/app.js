@@ -40,6 +40,36 @@ let tossDecision = 'raid'; // 'raid' | 'defend'
 let firstRaidingTeam = 'teamA';
 let requireServerRosterHydration = false;
 let serverRosterHydrated = false;
+let teamACaptainId = '';
+let teamAViceCaptainId = '';
+let teamBCaptainId = '';
+let teamBViceCaptainId = '';
+
+function getPlayerRolePrefixById(playerId, teamSide) {
+    if (!playerId || !teamSide) return '';
+    if (teamSide === 'A') {
+        if (playerId === teamACaptainId) return '(C) ';
+        if (playerId === teamAViceCaptainId) return '(VC) ';
+        return '';
+    }
+    if (playerId === teamBCaptainId) return '(C) ';
+    if (playerId === teamBViceCaptainId) return '(VC) ';
+    return '';
+}
+
+function getPlayerDisplayName(player, teamSide) {
+    if (!player) return 'Player';
+    const prefix = getPlayerRolePrefixById(player.id, teamSide);
+    return `${prefix}${player.name || 'Player'}`;
+}
+
+function getDisplayNameById(playerId) {
+    const inTeamA = teamA.players.find(p => p.id === playerId);
+    if (inTeamA) return getPlayerDisplayName(inTeamA, 'A');
+    const inTeamB = teamB.players.find(p => p.id === playerId);
+    if (inTeamB) return getPlayerDisplayName(inTeamB, 'B');
+    return playerId || 'Player';
+}
 
 function hydrateTeamsFromServerState(serverData) {
     if (!serverData || !serverData.playerStats) return false;
@@ -139,6 +169,10 @@ function setupWebSocket() {
                     data: {
                         teamA: { name: teamA.name, score: teamA.score },
                         teamB: { name: teamB.name, score: teamB.score },
+                        teamACaptainId: teamACaptainId,
+                        teamAViceCaptainId: teamAViceCaptainId,
+                        teamBCaptainId: teamBCaptainId,
+                        teamBViceCaptainId: teamBViceCaptainId,
                         playerStats: playerStats,
                         teamAPlayerIds: teamA.players.map(p => p.id),
                         teamBPlayerIds: teamB.players.map(p => p.id),
@@ -187,6 +221,10 @@ function setupWebSocket() {
                 if (msg.data.tossWinner) tossWinner = msg.data.tossWinner;
                 if (msg.data.tossDecision) tossDecision = msg.data.tossDecision;
                 if (msg.data.firstRaidingTeam) firstRaidingTeam = msg.data.firstRaidingTeam;
+                teamACaptainId = msg.data.teamACaptainId || msg.data.TeamACaptainID || teamACaptainId;
+                teamAViceCaptainId = msg.data.teamAViceCaptainId || msg.data.TeamAViceCaptainID || teamAViceCaptainId;
+                teamBCaptainId = msg.data.teamBCaptainId || msg.data.TeamBCaptainID || teamBCaptainId;
+                teamBViceCaptainId = msg.data.teamBViceCaptainId || msg.data.TeamBViceCaptainID || teamBViceCaptainId;
 
                 updateDisplay();
                 updateRaidInfoUI();
@@ -254,10 +292,13 @@ function showScorerLockNotice(message) {
  * Game State Management (UI helpers only - all calculations done on backend)
  */
 function initializePlayerStats(team) {
+    const teamSide = team === teamA ? 'A' : 'B';
     team.players.forEach(player => {
         playerStats[player.id] = {
             name: player.name,
             id: player.id,
+            isCaptain: teamSide === 'A' ? player.id === teamACaptainId : player.id === teamBCaptainId,
+            isViceCaptain: teamSide === 'A' ? player.id === teamAViceCaptainId : player.id === teamBViceCaptainId,
             totalPoints: 0,
             raidPoints: 0,
             defencePoints: 0,
@@ -639,8 +680,9 @@ function updateCurrentRaidDisplay() {
     if (!selectedRaider) {
         display.innerHTML = `<strong>${raidingTeam.name}</strong> to raid. Select a raider.`;
     } else {
-        const defendersList = selectedDefenders.map(p => p.name).join(", ");
-        display.innerHTML = `Raider (<strong>${selectedRaider.name}</strong> from ${raidingTeam.name}), Defended By: ${defendersList || 'No defenders selected'}`;
+        const raiderDisplayName = getDisplayNameById(selectedRaider.id);
+        const defendersList = selectedDefenders.map(p => getDisplayNameById(p.id)).join(", ");
+        display.innerHTML = `Raider (<strong>${raiderDisplayName}</strong> from ${raidingTeam.name}), Defended By: ${defendersList || 'No defenders selected'}`;
     }
 
     updateTeamRoleHighlight();
@@ -655,6 +697,7 @@ function updateDisplay() {
 function renderPlayers() {
     const render = (team, containerId) => {
         const container = document.getElementById(containerId);
+        const teamSide = team === teamA ? 'A' : 'B';
         container.innerHTML = "";
         team.players.forEach(player => {
             const btn = document.createElement("button");
@@ -683,8 +726,7 @@ function renderPlayers() {
                   btn.setAttribute("aria-pressed", "false");
               }
 
-
-            btn.textContent = player.name;
+            btn.textContent = getPlayerDisplayName(player, teamSide);
             btn.onclick = () => handlePlayerClick(player.id);
 
             container.appendChild(btn);
@@ -832,6 +874,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Load selected players from localStorage
             const selectedA = resumeFlag ? null : JSON.parse(localStorage.getItem("teamA_selected"));
             const selectedB = resumeFlag ? null : JSON.parse(localStorage.getItem("teamB_selected"));
+            if (!resumeFlag) {
+                teamACaptainId = localStorage.getItem('teamA_captain_id') || '';
+                teamAViceCaptainId = localStorage.getItem('teamA_vice_captain_id') || '';
+                teamBCaptainId = localStorage.getItem('teamB_captain_id') || '';
+                teamBViceCaptainId = localStorage.getItem('teamB_vice_captain_id') || '';
+            }
 
             // 2. Initialize Teams and Players
             const team1Name = normalizeParam(params.get("team1_name"));

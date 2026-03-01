@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -404,7 +404,7 @@
                   <div class="invite-link-code">${inviteUrl}</div>
                   <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">
                     <i class="bi bi-calendar-check"></i> Expires: ${new Date(link.expiresAt).toLocaleDateString()} | 
-                    <i class="bi bi-arrow-repeat"></i> Uses: ${link.usesCount}${link.maxUses ? '/' + link.maxUses : '/∞'}
+                    <i class="bi bi-arrow-repeat"></i> Uses: ${link.usesCount}${link.maxUses ? '/' + link.maxUses : '/âˆž'}
                   </p>
                   ${link.message ? `<p style="color: #cbd5e1; font-style: italic; margin-top: 0.5rem;">"${link.message}"</p>` : ''}
                 </div>
@@ -464,5 +464,7 @@
       loadInviteLinks();
     });
   </script>
+  <script src="/static/branding.js"></script>
 </body>
 </html>
+

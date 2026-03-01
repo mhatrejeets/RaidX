@@ -1,10 +1,38 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RaidX – Kabaddi Live Platform</title>
+  <title>RaidX - Live Kabaddi Scoring, Live Score Streaming & Digital Kabaddi Platform</title>
+  <meta name="description" content="RaidX is a digital Kabaddi platform for live Kabaddi scoring, live score streaming, match commentary, player stats, and tournament management." />
+  <meta name="keywords" content="RaidX, kabaddi scoring, live kabaddi score, kabaddi live score streaming, digital kabaddi, kabaddi tournament, kabaddi platform" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="RaidX" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="canonical" href="/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="RaidX - Live Kabaddi Scoring & Live Score Streaming" />
+  <meta property="og:description" content="Digital Kabaddi platform for live score streaming, match commentary, and player insights." />
+  <meta property="og:site_name" content="RaidX" />
+  <meta property="og:url" content="/" />
+  <meta property="og:image" content="/static/raidxlogo-removebg-preview.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RaidX - Live Kabaddi Scoring & Live Score Streaming" />
+  <meta name="twitter:description" content="Follow live Kabaddi scores and digital match updates on RaidX." />
+  <meta name="twitter:image" content="/static/raidxlogo-removebg-preview.png" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "RaidX",
+      "url": "/",
+      "description": "RaidX is a digital Kabaddi platform for live Kabaddi scoring, live score streaming, and match updates."
+    }
+  </script>
 
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -115,6 +143,31 @@
       align-items: center;
       gap: 10px;
       color: #e2e8f0;
+    }
+
+    #features .role-col {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    #features .role-col h5 {
+      min-height: 32px;
+      margin-bottom: 15px;
+    }
+
+    #features .role-col .highlight {
+      min-height: 58px;
+      margin-bottom: 12px;
+    }
+
+    #features .role-col .highlight:last-child {
+      margin-bottom: 0;
+    }
+
+    #features .role-col .highlight i {
+      width: 18px;
+      flex-shrink: 0;
     }
 
     .footer {
@@ -369,69 +422,6 @@
       color: #E1306C;
     }
 
-    #how-to-use {
-      background-color: #1e293b;
-      padding: 50px 30px;
-      border-radius: 20px;
-      margin-top: 50px;
-      box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
-    }
-
-    .step-box {
-      background-color: #334155;
-      border-radius: 15px;
-      padding: 30px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .step-number {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #fbbf24;
-      margin-bottom: 10px;
-      border: 2px solid #fbbf24;
-      border-radius: 50%;
-      padding: 15px;
-      width: 60px;
-      height: 60px;
-      margin: 0 auto;
-    }
-
-    .step-box h5 {
-      font-size: 1.3rem;
-      color: #facc15;
-      margin-top: 15px;
-    }
-
-    .step-box p {
-      color: #cbd5e1;
-      margin-top: 10px;
-      font-size: 1rem;
-    }
-
-    .step-box:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
-    }
-
-    .final-step {
-      background-color: #0f172a;
-      box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 40px;
-    }
-
-    .final-step h5 {
-      color: #10b981;
-      font-size: 1.8rem;
-    }
-
-    .final-step p {
-      color: #94a3b8;
-      font-size: 1.1rem;
-    }
   </style>
 </head>
 
@@ -465,8 +455,8 @@
   </nav>
 
   <section id="hero" class="hero" data-aos="fade-up">
-    <h1>Welcome to <span class="text-warning">RaidX</span></h1>
-    <p>India’s Premier Real-Time Kabaddi Scoring & Viewing Platform</p>
+    <h1>Live Kabaddi Scoring on <span class="text-warning">RaidX</span></h1>
+    <p>Digital Kabaddi platform for live score streaming</p>
     <div class="d-flex justify-content-center gap-3 mt-4">
       <a href="/login" class="btn btn-orange">Login For Matches and Tournaments</a>
       <a href="/signup" class="btn btn-outline-light">Sign Up</a>
@@ -475,69 +465,41 @@
 
   <section id="about" class="container info-box" data-aos="fade-up">
     <div class="section-title text-center">About RaidX</div>
-    <p class="text-center">RaidX is a cutting-edge platform for real-time Kabaddi scoring and match streaming. We help
-      players and fans enjoy tournaments digitally — anytime, anywhere.</p>
-    <p class="text-center">RaidX is revolutionizing Kabaddi by providing real-time scoring, live streaming, and player
-      insights, making the sport more accessible and exciting for fans and players alike..</p>
-    <p class="text-center">Raidx – Apna Game, Apni Pehchaan!</p>
+    <p class="text-center">RaidX is a digital Kabaddi platform for live Kabaddi scoring, live score streaming, and match updates.
+      We help players, organizers, owners, and viewers stay connected to every raid.</p>
+    <p class="text-center">From local tournaments to big events, RaidX brings live Kabaddi action, player insights, and clear score tracking in one place.</p>
+    <p class="text-center">RaidX - Apna Game, Apni Pehchaan!</p>
   </section>
 
   <section id="features" class="container info-box" data-aos="fade-up">
     <div class="section-title text-center">Features</div>
-    <div class="row">
-      <div class="col-md-6" data-aos="fade-right">
-        <h5>For Scorers</h5>
-        <div class="highlight"><i class="bi bi-person-plus"></i>Select raiders by clicking on Team A</div>
-        <div class="highlight"><i class="bi bi-shield"></i>Select defenders from Team B</div>
-        <div class="highlight"><i class="bi bi-plus-circle"></i>Bonus, Super Tackles, Do or Die logic</div>
-        <div class="highlight"><i class="bi bi-upload"></i>Submit raid result instantly</div>
-        <div class="highlight"><i class="bi bi-tools"></i>Use review mode to fix errors</div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3 role-col" data-aos="fade-right">
+        <h5>Player</h5>
+        <div class="highlight"><i class="bi bi-person-check"></i>Join team and play matches</div>
+        <div class="highlight"><i class="bi bi-graph-up-arrow"></i>Track your points and performance</div>
+        <div class="highlight"><i class="bi bi-person-vcard"></i>View your profile and match stats</div>
       </div>
-      <div class="col-md-6" data-aos="fade-left">
-        <h5>For Viewers</h5>
-        <div class="highlight"><i class="bi bi-tv"></i>Real-time updates on all matches</div>
-        <div class="highlight"><i class="bi bi-person-check"></i>Raider and defenders live status</div>
-        <div class="highlight"><i class="bi bi-bar-chart-line"></i>Track team performance</div>
-        <div class="highlight"><i class="bi bi-clock-history"></i>Replay & timeline features</div>
-        <div class="highlight"><i class="bi bi-clock-history"></i>Live Textual Commentary</div>
+      <div class="col-md-6 col-lg-3 role-col" data-aos="fade-up">
+        <h5>Organizer</h5>
+        <div class="highlight"><i class="bi bi-calendar-event"></i>Create events, leagues, and fixtures</div>
+        <div class="highlight"><i class="bi bi-broadcast"></i>Run live matches and update score</div>
+        <div class="highlight"><i class="bi bi-share-fill"></i>Share event and match links instantly</div>
       </div>
-    </div>
-  </section>
-  <section id="how-to-use" class="container info-box" data-aos="fade-up">
-    <div class="section-title text-center">How to Use</div>
-    <div class="row">
-      <div class="col-md-4" data-aos="fade-right">
-        <div class="step-box">
-          <div class="step-number">1</div>
-          <h5>Host a Tournament</h5>
-          <p>Click on the "Host Match" button on the new page to start creating your match.</p>
-        </div>
+      <div class="col-md-6 col-lg-3 role-col" data-aos="fade-up">
+        <h5>Owner</h5>
+        <div class="highlight"><i class="bi bi-people"></i>Create and manage your teams</div>
+        <div class="highlight"><i class="bi bi-person-lines-fill"></i>Review player details and requests</div>
+        <div class="highlight"><i class="bi bi-trophy"></i>Follow your team journey in events</div>
       </div>
-      <div class="col-md-4" data-aos="fade-up">
-        <div class="step-box">
-          <div class="step-number">2</div>
-          <h5>Enter Match Details</h5>
-          <p>Provide the necessary details like name, venue, date, and time of the match.</p>
-        </div>
-      </div>
-      <div class="col-md-4" data-aos="fade-left">
-        <div class="step-box">
-          <div class="step-number">3</div>
-          <h5>Host the Match</h5>
-          <p>Click on "Host Now" to make your match visible to teams and viewers.</p>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12 text-center mt-4" data-aos="fade-up">
-        <div class="step-box final-step">
-          <h5>Your Match is Live!</h5>
-          <p>The match session has been successfully created, and players can join to play!</p>
-        </div>
+      <div class="col-md-6 col-lg-3 role-col" data-aos="fade-left">
+        <h5>Viewer</h5>
+        <div class="highlight"><i class="bi bi-tv"></i>Watch live score and match flow</div>
+        <div class="highlight"><i class="bi bi-bar-chart-line"></i>See team and player performance</div>
+        <div class="highlight"><i class="bi bi-chat-left-text"></i>Read live commentary and updates</div>
       </div>
     </div>
   </section>
-
 
   <section id="contact" class="container info-box" data-aos="fade-up">
     <div class="section-title text-center">Contact Us</div>
@@ -574,6 +536,7 @@
   <script>
     AOS.init();
   </script>
+  <script src="/static/branding.js"></script>
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -426,18 +426,18 @@
 
         if (response.ok) {
           const data = await response.json();
-          alert('✅ Team created! Redirecting...');
+          alert('âœ… Team created! Redirecting...');
           setTimeout(() => {
             window.location.href = `/owner/team/${data.team_id}/edit`;
           }, 500);
         } else {
           const errorData = await response.json();
           console.error('Create team error:', errorData);
-          alert('❌ Failed to create team: ' + (errorData.error || response.statusText));
+          alert('âŒ Failed to create team: ' + (errorData.error || response.statusText));
         }
       } catch (error) {
         console.error('Error creating team:', error);
-        alert('❌ Error creating team: ' + error.message);
+        alert('âŒ Error creating team: ' + error.message);
       }
     }
 
@@ -462,14 +462,14 @@
           });
 
           if (response.ok) {
-            alert('✅ Team deleted successfully');
+            alert('âœ… Team deleted successfully');
             loadTeams();
           } else {
-            alert('❌ Failed to delete team');
+            alert('âŒ Failed to delete team');
           }
         } catch (error) {
           console.error('Error deleting team:', error);
-          alert('❌ Error deleting team');
+          alert('âŒ Error deleting team');
         }
       }
     }
@@ -486,6 +486,8 @@
       loadTeams();
     });
   </script>
+  <script src="/static/branding.js"></script>
 </body>
 
 </html>
+

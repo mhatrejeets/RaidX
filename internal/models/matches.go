@@ -10,17 +10,23 @@ type Match struct {
 	EventType string              `json:"eventType" bson:"event_type"`                 // "match" | "tournament" | "championship"
 	EventID   *primitive.ObjectID `json:"eventId,omitempty" bson:"event_id,omitempty"` // Reference to event, tournament, or championship
 	Data      struct {
-		TeamA             TeamStat              `json:"teamA" bson:"teamA"`
-		TeamB             TeamStat              `json:"teamB" bson:"teamB"`
-		PlayerStats       map[string]PlayerStat `json:"playerStats" bson:"playerStats"`
-		RaidDetails       RaidDetails           `json:"raidDetails" bson:"raidDetails"`
-		RaidLog           []RaidLogEntry        `json:"raidLog,omitempty" bson:"raidLog,omitempty"`
-		PendingLobby      LobbyState            `json:"pendingLobby,omitempty" bson:"pendingLobby,omitempty"`
-		Awards            MatchAwards           `json:"awards,omitempty" bson:"awards,omitempty"`
-		TossWinner        string                `json:"tossWinner,omitempty" bson:"tossWinner,omitempty"`
-		TossDecision      string                `json:"tossDecision,omitempty" bson:"tossDecision,omitempty"`
-		FirstRaidingTeam  string                `json:"firstRaidingTeam,omitempty" bson:"firstRaidingTeam,omitempty"`
-		LastScoreChangeAt int64                 `json:"lastScoreChangeAt,omitempty" bson:"lastScoreChangeAt,omitempty"`
+		TeamA              TeamStat              `json:"teamA" bson:"teamA"`
+		TeamB              TeamStat              `json:"teamB" bson:"teamB"`
+		TeamAPlayerIDs     []string              `json:"teamAPlayerIds,omitempty" bson:"teamAPlayerIds,omitempty"`
+		TeamBPlayerIDs     []string              `json:"teamBPlayerIds,omitempty" bson:"teamBPlayerIds,omitempty"`
+		TeamACaptainID     string                `json:"teamACaptainId,omitempty" bson:"teamACaptainId,omitempty"`
+		TeamAViceCaptainID string                `json:"teamAViceCaptainId,omitempty" bson:"teamAViceCaptainId,omitempty"`
+		TeamBCaptainID     string                `json:"teamBCaptainId,omitempty" bson:"teamBCaptainId,omitempty"`
+		TeamBViceCaptainID string                `json:"teamBViceCaptainId,omitempty" bson:"teamBViceCaptainId,omitempty"`
+		PlayerStats        map[string]PlayerStat `json:"playerStats" bson:"playerStats"`
+		RaidDetails        RaidDetails           `json:"raidDetails" bson:"raidDetails"`
+		RaidLog            []RaidLogEntry        `json:"raidLog,omitempty" bson:"raidLog,omitempty"`
+		PendingLobby       LobbyState            `json:"pendingLobby,omitempty" bson:"pendingLobby,omitempty"`
+		Awards             MatchAwards           `json:"awards,omitempty" bson:"awards,omitempty"`
+		TossWinner         string                `json:"tossWinner,omitempty" bson:"tossWinner,omitempty"`
+		TossDecision       string                `json:"tossDecision,omitempty" bson:"tossDecision,omitempty"`
+		FirstRaidingTeam   string                `json:"firstRaidingTeam,omitempty" bson:"firstRaidingTeam,omitempty"`
+		LastScoreChangeAt  int64                 `json:"lastScoreChangeAt,omitempty" bson:"lastScoreChangeAt,omitempty"`
 	} `json:"data" bson:"data"`
 }
 
@@ -81,21 +87,25 @@ type MatchAwards struct {
 type EnhancedStatsMessage struct {
 	Type string `json:"type"`
 	Data struct {
-		TeamA             TeamStat              `json:"teamA"`
-		TeamB             TeamStat              `json:"teamB"`
-		PlayerStats       map[string]PlayerStat `json:"playerStats"`
-		RaidDetails       RaidDetails           `json:"raidDetails"`
-		RaidLog           []RaidLogEntry        `json:"raidLog,omitempty"`
-		PendingLobby      LobbyState            `json:"pendingLobby,omitempty"`
-		Awards            MatchAwards           `json:"awards,omitempty"`
-		RaidNumber        int                   `json:"raidNumber"`
-		TeamAPlayerIDs    []string              `json:"teamAPlayerIds" bson:"teamAPlayerIds"`
-		TeamBPlayerIDs    []string              `json:"teamBPlayerIds" bson:"teamBPlayerIds"`
-		TossWinner        string                `json:"tossWinner,omitempty" bson:"tossWinner,omitempty"`
-		TossDecision      string                `json:"tossDecision,omitempty" bson:"tossDecision,omitempty"`
-		FirstRaidingTeam  string                `json:"firstRaidingTeam,omitempty" bson:"firstRaidingTeam,omitempty"`
-		LastScoreChangeAt int64                 `json:"lastScoreChangeAt,omitempty" bson:"lastScoreChangeAt,omitempty"`
-		EmptyRaidCounts   struct {
+		TeamA              TeamStat              `json:"teamA"`
+		TeamB              TeamStat              `json:"teamB"`
+		TeamACaptainID     string                `json:"teamACaptainId,omitempty" bson:"teamACaptainId,omitempty"`
+		TeamAViceCaptainID string                `json:"teamAViceCaptainId,omitempty" bson:"teamAViceCaptainId,omitempty"`
+		TeamBCaptainID     string                `json:"teamBCaptainId,omitempty" bson:"teamBCaptainId,omitempty"`
+		TeamBViceCaptainID string                `json:"teamBViceCaptainId,omitempty" bson:"teamBViceCaptainId,omitempty"`
+		PlayerStats        map[string]PlayerStat `json:"playerStats"`
+		RaidDetails        RaidDetails           `json:"raidDetails"`
+		RaidLog            []RaidLogEntry        `json:"raidLog,omitempty"`
+		PendingLobby       LobbyState            `json:"pendingLobby,omitempty"`
+		Awards             MatchAwards           `json:"awards,omitempty"`
+		RaidNumber         int                   `json:"raidNumber"`
+		TeamAPlayerIDs     []string              `json:"teamAPlayerIds" bson:"teamAPlayerIds"`
+		TeamBPlayerIDs     []string              `json:"teamBPlayerIds" bson:"teamBPlayerIds"`
+		TossWinner         string                `json:"tossWinner,omitempty" bson:"tossWinner,omitempty"`
+		TossDecision       string                `json:"tossDecision,omitempty" bson:"tossDecision,omitempty"`
+		FirstRaidingTeam   string                `json:"firstRaidingTeam,omitempty" bson:"firstRaidingTeam,omitempty"`
+		LastScoreChangeAt  int64                 `json:"lastScoreChangeAt,omitempty" bson:"lastScoreChangeAt,omitempty"`
+		EmptyRaidCounts    struct {
 			TeamA int `json:"teamA"`
 			TeamB int `json:"teamB"`
 		} `json:"emptyRaidCounts"`

@@ -46,7 +46,7 @@ function applyEventInfo(source) {
     }
 }
 
-function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 'Team A', teamBName = 'Team B') {
+function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 'Team A', teamBName = 'Team B', roles = {}) {
     const listA = document.getElementById('scorecard-teamA-list');
     const listB = document.getElementById('scorecard-teamB-list');
     const labelA = document.getElementById('scorecard-teamA');
@@ -69,6 +69,33 @@ function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 
 
     const setA = new Set(teamAIds || []);
     const setB = new Set(teamBIds || []);
+    const teamACaptainId = roles.teamACaptainId || '';
+    const teamAViceCaptainId = roles.teamAViceCaptainId || '';
+    const teamBCaptainId = roles.teamBCaptainId || '';
+    const teamBViceCaptainId = roles.teamBViceCaptainId || '';
+
+    const getPrefix = (entry) => {
+        const stat = entry?.data || {};
+        const id = entry?.id || '';
+        const isCaptain = stat.isCaptain || stat.IsCaptain || false;
+        const isViceCaptain = stat.isViceCaptain || stat.IsViceCaptain || false;
+
+        if (setA.has(id)) {
+            if (id === teamACaptainId || isCaptain) return '(C) ';
+            if (id === teamAViceCaptainId || isViceCaptain) return '(VC) ';
+            return '';
+        }
+
+        if (setB.has(id)) {
+            if (id === teamBCaptainId || isCaptain) return '(C) ';
+            if (id === teamBViceCaptainId || isViceCaptain) return '(VC) ';
+            return '';
+        }
+
+        if (isCaptain) return '(C) ';
+        if (isViceCaptain) return '(VC) ';
+        return '';
+    };
 
     const inA = [];
     const inB = [];
@@ -93,6 +120,7 @@ function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 
         return arr.map(p => {
             const stat = p.data || {};
             const name = stat.name || stat.Name || 'Player';
+            const displayName = `${getPrefix(p)}${name}`;
             const raid = stat.raidPoints ?? stat.RaidPoints ?? 0;
             const def = stat.defencePoints ?? stat.DefencePoints ?? 0;
             const total = stat.totalPoints ?? stat.TotalPoints ?? 0;
@@ -108,7 +136,7 @@ function renderScorecard(playerStats, teamAIds = [], teamBIds = [], teamAName = 
                 <a href="${profileUrl}" style="text-decoration:none;color:inherit;">
                     <div style="border:1px solid rgba(255,255,255,0.1);background:rgba(30,41,59,0.7);border-radius:0.6rem;padding:0.75rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s ease;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
-                            <div style="font-weight:700;color:#fbbf24;">${name}</div>
+                            <div style="font-weight:700;color:#fbbf24;">${displayName}</div>
                             <div>${statusBadge}</div>
                         </div>
                         <div style="display:flex;gap:1rem;flex-wrap:wrap;color:#e2e8f0;">
@@ -209,8 +237,16 @@ function joinMatch(id) {
     if (joinDiv) joinDiv.style.display = 'none';
     const matchScoreBtn = document.getElementById('match-score-btn');
     const matchOverviewBtn = document.getElementById('match-overview-btn');
+    const shareViewerBtn = document.getElementById('share-viewer-btn');
     if (matchScoreBtn) matchScoreBtn.disabled = false;
     if (matchOverviewBtn) matchOverviewBtn.disabled = false;
+    if (shareViewerBtn) {
+        shareViewerBtn.disabled = false;
+        shareViewerBtn.onclick = () => {
+            const link = buildViewerShareLink('live', matchId);
+            shareViewerLink(link, { title: 'Share Live Viewer Link', copiedMessage: 'Live viewer link copied.' });
+        };
+    }
 
     // Try to fetch match metadata to get event info
     fetchMatchMetadata();
@@ -257,6 +293,13 @@ function joinMatch(id) {
             
             if (data.type === "gameStats" || data.data) {
                 const payload = data.data || data;
+
+                const conn = document.getElementById('viewer-conn');
+                if (conn) {
+                    conn.textContent = 'Connected';
+                    conn.style.background = '#10b981';
+                }
+
                 applyEventInfo(payload);
                 if (payload.teamA) document.getElementById("teamA-name").textContent = payload.teamA.name;
                 if (payload.teamA) document.getElementById("teamA-score").textContent = payload.teamA.score;
@@ -273,7 +316,13 @@ function joinMatch(id) {
                         payload.teamAPlayerIds || payload.teamAPlayerIDs || [],
                         payload.teamBPlayerIds || payload.teamBPlayerIDs || [],
                         payload.teamA?.name || 'Team A',
-                        payload.teamB?.name || 'Team B'
+                        payload.teamB?.name || 'Team B',
+                        {
+                            teamACaptainId: payload.teamACaptainId || payload.TeamACaptainID,
+                            teamAViceCaptainId: payload.teamAViceCaptainId || payload.TeamAViceCaptainID,
+                            teamBCaptainId: payload.teamBCaptainId || payload.TeamBCaptainID,
+                            teamBViceCaptainId: payload.teamBViceCaptainId || payload.TeamBViceCaptainID,
+                        }
                     );
                 }
 
@@ -398,7 +447,13 @@ function tryFetchFinalScore() {
                         data.teamAPlayerIds || data.teamAPlayerIDs || [],
                         data.teamBPlayerIds || data.teamBPlayerIDs || [],
                         data.teamA?.name || 'Team A',
-                        data.teamB?.name || 'Team B'
+                        data.teamB?.name || 'Team B',
+                        {
+                            teamACaptainId: data.teamACaptainId || data.TeamACaptainID,
+                            teamAViceCaptainId: data.teamAViceCaptainId || data.TeamAViceCaptainID,
+                            teamBCaptainId: data.teamBCaptainId || data.TeamBCaptainID,
+                            teamBViceCaptainId: data.teamBViceCaptainId || data.TeamBViceCaptainID,
+                        }
                     );
                 }
 
@@ -447,23 +502,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const joinBtn = document.getElementById('viewer-join-btn');
     const info = document.getElementById('viewer-info');
     const matchScoreBtn = document.getElementById('match-score-btn');
-        const matchOverviewBtn = document.getElementById('match-overview-btn');
+    const matchOverviewBtn = document.getElementById('match-overview-btn');
+    const shareViewerBtn = document.getElementById('share-viewer-btn');
     const typeSelect = document.getElementById('viewer-type-select');
 
     if (matchScoreBtn) {
         matchScoreBtn.disabled = true;
         matchScoreBtn.addEventListener('click', fetchMatchScore);
     }
-        if (matchOverviewBtn) {
-            matchOverviewBtn.disabled = true;
-            matchOverviewBtn.addEventListener('click', () => {
-                if (!matchId) {
-                    alert('No match ID available');
-                    return;
-                }
-                window.location.href = `/viewer/match/${matchId}/overview`;
-            });
-        }
+    if (matchOverviewBtn) {
+        matchOverviewBtn.disabled = true;
+        matchOverviewBtn.addEventListener('click', () => {
+            if (!matchId) {
+                alert('No match ID available');
+                return;
+            }
+            window.location.href = `/viewer/match/${matchId}/overview`;
+        });
+    }
+    if (shareViewerBtn) {
+        shareViewerBtn.disabled = true;
+    }
     updateEventNavButton();
 
     const updatePlaceholder = () => {

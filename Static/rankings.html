@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -130,7 +130,7 @@
       backBtn.href = back || document.referrer || '/viewer';
     }
 
-    document.getElementById('rankings-subtitle').textContent = `Type: ${eventType} • Event ID: ${eventId}`;
+    document.getElementById('rankings-subtitle').textContent = `Type: ${eventType} â€¢ Event ID: ${eventId}`;
 
     function renderRows(targetId, rows, label) {
       const tbody = document.getElementById(targetId);
@@ -169,5 +169,7 @@
     loadRankings();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/branding.js"></script>
 </body>
 </html>
+

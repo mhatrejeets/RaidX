@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -153,6 +153,9 @@
         <a class="btn btn-outline-light" id="match-overview-link" href="#" style="display:none;">
           <i class="bi bi-journal-text"></i> Match Overview
         </a>
+        <button class="btn btn-outline-light" id="share-event-viewer-btn" type="button">
+          <i class="bi bi-share"></i> Share Event
+        </button>
         <a class="btn btn-outline-light" id="pending-approvals-link" href="#">
           <i class="bi bi-clipboard-check"></i> Pending Approvals
         </a>
@@ -278,8 +281,11 @@
     </div>
 
     <div class="card mt-4 d-none" id="match-stats-card">
-      <div class="card-header">
+      <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Completed Match Stats</h5>
+        <button class="btn btn-outline-light btn-sm" id="share-match-viewer-btn" type="button" style="display:none;">
+          <i class="bi bi-share"></i> Share Match
+        </button>
       </div>
       <div class="card-body">
         <div class="row g-3 mb-3">
@@ -314,11 +320,15 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/share-utils.js"></script>
   <script>
     const eventId = window.location.pathname.split('/').pop();
     const pendingApprovalsLink = document.getElementById('pending-approvals-link');
     const matchOverviewLink = document.getElementById('match-overview-link');
+    const shareEventViewerBtn = document.getElementById('share-event-viewer-btn');
+    const shareMatchViewerBtn = document.getElementById('share-match-viewer-btn');
     let currentEventType = '';
+    let currentMatchId = '';
     if (pendingApprovalsLink && eventId) {
       pendingApprovalsLink.href = `/organizer/event/${eventId}/pending-approvals`;
     }
@@ -361,6 +371,18 @@
       }).join('');
     }
 
+    function updateEventShareButton(eventType) {
+      if (!shareEventViewerBtn || !eventId) return;
+      const normalizedType = String(eventType || '').toLowerCase();
+      const linkType = normalizedType === 'tournament' || normalizedType === 'championship'
+        ? normalizedType
+        : 'event_match';
+      shareEventViewerBtn.onclick = () => {
+        const link = buildViewerShareLink(linkType, eventId);
+        shareViewerLink(link, { title: 'Share Event Viewer Link', copiedMessage: 'Event viewer link copied.' });
+      };
+    }
+
     async function loadEventDetails() {
       if (!requireAuth()) return;
       hideStatus();
@@ -399,15 +421,16 @@
         const invited = data.counts?.invited || allTeams.length || 0;
 
         document.getElementById('event-name').textContent = data.eventName || 'Event';
-        document.getElementById('event-subtitle').textContent = `Type: ${data.eventType || '-'} • Status: ${data.status || '-'}`;
+        document.getElementById('event-subtitle').textContent = `Type: ${data.eventType || '-'} â€¢ Status: ${data.status || '-'}`;
         document.getElementById('event-type').textContent = data.eventType || '-';
         document.getElementById('event-status-badge').textContent = data.status || '-';
         document.getElementById('event-required-teams').textContent = requiredTeams > 0 ? requiredTeams : 'Not set';
         document.getElementById('event-accepted-count').textContent = accepted;
-        document.getElementById('event-counts').textContent = `Invited: ${invited} • Pending: ${pending} • Accepted: ${accepted} • Declined: ${declined}`;
+        document.getElementById('event-counts').textContent = `Invited: ${invited} â€¢ Pending: ${pending} â€¢ Accepted: ${accepted} â€¢ Declined: ${declined}`;
 
         const eventType = (data.eventType || '').toLowerCase();
         currentEventType = eventType;
+        updateEventShareButton(eventType);
 
         if (matchOverviewLink) {
           if (eventType === 'match') {
@@ -617,6 +640,20 @@
           throw new Error(match.error || 'Failed to load match stats');
         }
 
+        currentMatchId = match.matchId || match.matchID || match.id || (match.data && (match.data.matchId || match.data.matchID)) || '';
+        if (shareMatchViewerBtn) {
+          if (currentMatchId) {
+            shareMatchViewerBtn.style.display = '';
+            shareMatchViewerBtn.onclick = () => {
+              const link = buildViewerShareLink('match', currentMatchId);
+              shareViewerLink(link, { title: 'Share Match Viewer Link', copiedMessage: 'Match viewer link copied.' });
+            };
+          } else {
+            shareMatchViewerBtn.style.display = 'none';
+            shareMatchViewerBtn.onclick = null;
+          }
+        }
+
         const data = match.data || match.Data || {};
         const teamA = data.teamA || data.TeamA || {};
         const teamB = data.teamB || data.TeamB || {};
@@ -646,7 +683,7 @@
         const tossEl = document.getElementById('match-toss-info');
         if (tossEl) {
           if (tossWinnerName) {
-            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || '—'}`;
+            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || 'â€”'}`;
           } else {
             tossEl.textContent = '';
           }
@@ -662,19 +699,52 @@
           if (mvp) parts.push(`MVP: ${mvp.name} (${mvp.points})`);
           if (bestRaider) parts.push(`Best Raider: ${bestRaider.name} (${bestRaider.points})`);
           if (bestDefender) parts.push(`Best Defender: ${bestDefender.name} (${bestDefender.points})`);
-          awardsEl.textContent = parts.join(' • ');
+          awardsEl.textContent = parts.join(' â€¢ ');
         }
 
-        const teamAIdList = data.teamAPlayerIds || data.TeamAPlayerIDs || [];
-        const teamBIdList = data.teamBPlayerIds || data.TeamBPlayerIDs || [];
-        let teamAPlayers = teamAIdList.map(id => playerStats[id]).filter(Boolean);
-        let teamBPlayers = teamBIdList.map(id => playerStats[id]).filter(Boolean);
+        const teamAIdList = (data.teamAPlayerIds || data.TeamAPlayerIDs || []).map(id => String(id));
+        const teamBIdList = (data.teamBPlayerIds || data.TeamBPlayerIDs || []).map(id => String(id));
+        const teamACaptainId = data.teamACaptainId || data.TeamACaptainID || '';
+        const teamAViceCaptainId = data.teamAViceCaptainId || data.TeamAViceCaptainID || '';
+        const teamBCaptainId = data.teamBCaptainId || data.TeamBCaptainID || '';
+        const teamBViceCaptainId = data.teamBViceCaptainId || data.TeamBViceCaptainID || '';
+        let teamAPlayers = [];
+        let teamBPlayers = [];
 
-        if (teamAPlayers.length === 0 && teamBPlayers.length === 0) {
-          const entries = Object.values(playerStats || {});
+        const entries = Object.entries(playerStats || {}).map(([id, player]) => ({
+          __id: String(id),
+          ...(player || {})
+        }));
+
+        const setA = new Set(teamAIdList);
+        const setB = new Set(teamBIdList);
+
+        const getPrefix = (player, side, playerId = '') => {
+          const isCaptain = player?.isCaptain || player?.IsCaptain || (side === 'A' ? playerId === teamACaptainId : playerId === teamBCaptainId);
+          const isViceCaptain = player?.isViceCaptain || player?.IsViceCaptain || (side === 'A' ? playerId === teamAViceCaptainId : playerId === teamBViceCaptainId);
+          if (isCaptain) return '(C) ';
+          if (isViceCaptain) return '(VC) ';
+          return '';
+        };
+
+        if (setA.size === 0 && setB.size === 0) {
           const splitIndex = Math.ceil(entries.length / 2);
           teamAPlayers = entries.slice(0, splitIndex);
           teamBPlayers = entries.slice(splitIndex);
+        } else {
+          const unknownPlayers = [];
+          entries.forEach(player => {
+            if (setA.has(player.__id)) {
+              teamAPlayers.push(player);
+            } else if (setB.has(player.__id)) {
+              teamBPlayers.push(player);
+            } else {
+              unknownPlayers.push(player);
+            }
+          });
+          if (unknownPlayers.length) {
+            teamAPlayers.push(...unknownPlayers);
+          }
         }
 
         const renderPlayers = (containerId, players) => {
@@ -686,7 +756,7 @@
           }
           container.innerHTML = players.map(p => `
             <div class="team-card">
-              <h6>${p.name || p.Name || 'Player'}</h6>
+              <h6>${getPrefix(p, containerId === 'match-teamA-players' ? 'A' : 'B', p.__id || p.id || p.ID || '')}${p.name || p.Name || 'Player'}</h6>
               <div class="team-meta">Total: ${p.totalPoints ?? p.TotalPoints ?? 0}</div>
               <div class="team-meta">Raid: ${p.raidPoints ?? p.RaidPoints ?? 0}</div>
               <div class="team-meta">Defence: ${p.defencePoints ?? p.DefencePoints ?? 0}</div>
@@ -839,6 +909,8 @@
 
     document.addEventListener('DOMContentLoaded', loadEventDetails);
   </script>
+  <script src="/static/branding.js"></script>
 </body>
 
 </html>
+

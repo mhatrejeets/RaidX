@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -243,6 +243,9 @@
           <a id="rankings-link" class="btn btn-outline-light" href="#">
             <i class="bi bi-bar-chart"></i> Rankings
           </a>
+          <button id="share-championship-btn" class="btn btn-outline-light" type="button">
+            <i class="bi bi-share"></i> Share Championship
+          </button>
           <a id="dashboard-link" class="btn btn-outline-light" href="#" style="display:none;">
             <i class="bi bi-speedometer2"></i> Dashboard
           </a>
@@ -322,8 +325,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/share-utils.js"></script>
   <script>
     const championshipId = window.location.pathname.split('/').pop();
+    const shareChampionshipBtn = document.getElementById('share-championship-btn');
     let currentChampionship = null;
     const rankingsLink = document.getElementById('rankings-link');
     if (rankingsLink && championshipId) {
@@ -377,6 +382,9 @@
             <button class="btn btn-outline-light btn-sm" onclick="window.location.href='/viewer/match/${fixture.matchId}'">
               <i class="bi bi-bar-chart"></i> View Stats
             </button>
+            <button class="btn btn-outline-light btn-sm ms-2" onclick="shareFixtureMatch('${fixture.matchId}')">
+              <i class="bi bi-share"></i> Share Match
+            </button>
           `;
         }
       }
@@ -398,6 +406,11 @@
           </div>
         </div>
       `;
+    }
+
+    function shareFixtureMatch(matchId) {
+      const link = buildViewerShareLink('match', matchId);
+      shareViewerLink(link, { title: 'Share Match Viewer Link', copiedMessage: 'Match viewer link copied.' });
     }
 
     async function loadChampionshipInfo() {
@@ -590,6 +603,13 @@
     }
 
     // Load initial data
+    if (shareChampionshipBtn && championshipId) {
+      shareChampionshipBtn.onclick = () => {
+        const link = buildViewerShareLink('championship', championshipId);
+        shareViewerLink(link, { title: 'Share Championship Viewer Link', copiedMessage: 'Championship viewer link copied.' });
+      };
+    }
+
     loadChampionshipInfo();
     loadFixtures();
 
@@ -620,5 +640,7 @@
     }
   </script>
   <script src="/static/auth.js"></script>
+  <script src="/static/branding.js"></script>
 </body>
 </html>
+

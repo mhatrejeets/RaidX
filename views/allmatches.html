@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -145,16 +145,17 @@
 
       <h3>{{.Match.Data.TeamA.Name}} Players</h3>
 <div class="row mt-3">
-  {{range $index, $p := .PlayerStats}}
-    {{if lt $index 7}}
+        {{range $idx, $pid := .Match.Data.TeamAPlayerIDs}}
+            {{$p := index $.Match.Data.PlayerStats $pid}}
+            {{if $p}}
     <div class="col-md-4 mb-4">
       <div class="card bg-dark text-white border-warning h-100 shadow">
         <div class="card-body">
-          <h5 class="card-title text-warning">{{$p.Stat.Name}}</h5>
+                                            <h5 class="card-title text-warning">{{if $p.IsCaptain}}(C) {{else if $p.IsViceCaptain}}(VC) {{end}}{{$p.Name}}</h5>
           <p class="card-text">
-            <strong>Raid Points:</strong> {{$p.Stat.RaidPoints}}<br>
-            <strong>Defence Points:</strong> {{$p.Stat.DefencePoints}}<br>
-            <strong>Total Points:</strong> {{$p.Stat.TotalPoints}}<br>
+                            <strong>Raid Points:</strong> {{$p.RaidPoints}}<br>
+                            <strong>Defence Points:</strong> {{$p.DefencePoints}}<br>
+                            <strong>Total Points:</strong> {{$p.TotalPoints}}<br>
           </p>
         </div>
       </div>
@@ -165,16 +166,17 @@
 
 <h3>{{.Match.Data.TeamB.Name}} Players</h3>
 <div class="row mt-3">
-  {{range $index, $p := .PlayerStats}}
-    {{if and (ge $index 7) (lt $index 14)}}
+        {{range $idx, $pid := .Match.Data.TeamBPlayerIDs}}
+            {{$p := index $.Match.Data.PlayerStats $pid}}
+            {{if $p}}
     <div class="col-md-4 mb-4">
       <div class="card bg-dark text-white border-warning h-100 shadow">
         <div class="card-body">
-          <h5 class="card-title text-warning">{{$p.Stat.Name}}</h5>
+                                            <h5 class="card-title text-warning">{{if $p.IsCaptain}}(C) {{else if $p.IsViceCaptain}}(VC) {{end}}{{$p.Name}}</h5>
           <p class="card-text">
-            <strong>Raid Points:</strong> {{$p.Stat.RaidPoints}}<br>
-            <strong>Defence Points:</strong> {{$p.Stat.DefencePoints}}<br>
-            <strong>Total Points:</strong> {{$p.Stat.TotalPoints}}<br>
+                            <strong>Raid Points:</strong> {{$p.RaidPoints}}<br>
+                            <strong>Defence Points:</strong> {{$p.DefencePoints}}<br>
+                            <strong>Total Points:</strong> {{$p.TotalPoints}}<br>
           </p>
         </div>
       </div>
@@ -233,6 +235,7 @@
             }
         });
     </script>
+  <script src="/static/branding.js"></script>
 </body>
 
 </html>

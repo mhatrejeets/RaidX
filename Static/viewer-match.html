@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -58,6 +58,9 @@
       <h2 class="mb-0" style="color:#fbbf24;">Match Score</h2>
       <div>
         <button class="btn btn-orange me-2" id="goto-event-btn" style="display: none;">Go to Event</button>
+        <button class="btn btn-outline-light me-2" id="share-match-btn" type="button">
+          <i class="bi bi-share"></i> Share
+        </button>
         <a id="match-overview-link" class="btn btn-outline-light me-2" href="#">Match Overview</a>
         <a id="dashboard-link" class="btn btn-outline-light me-2" href="#" style="display:none;">
           <i class="bi bi-speedometer2"></i> Dashboard
@@ -158,14 +161,22 @@
     </div>
   </div>
 
+  <script src="/static/share-utils.js"></script>
   <script>
     const matchId = window.location.pathname.split('/').pop();
     const matchIdEl = document.getElementById('match-id');
     if (matchIdEl) matchIdEl.textContent = `Match: ${matchId}`;
+    const shareMatchBtn = document.getElementById('share-match-btn');
+    if (shareMatchBtn) {
+      shareMatchBtn.onclick = () => {
+        const link = buildViewerShareLink('match', matchId);
+        shareViewerLink(link, { title: 'Share Match Viewer Link', copiedMessage: 'Match viewer link copied.' });
+      };
+    }
     const matchOverviewLink = document.getElementById('match-overview-link');
     if (matchOverviewLink) matchOverviewLink.href = `/viewer/match/${matchId}/overview`;
 
-    function renderPlayerStats(stats, teamAName = 'Team A', teamBName = 'Team B') {
+    function renderPlayerStats(stats, teamAName = 'Team A', teamBName = 'Team B', roles = {}, teamIds = {}) {
       const listA = document.getElementById('scorecard-teamA-list');
       const listB = document.getElementById('scorecard-teamB-list');
       const labelA = document.getElementById('scorecard-teamA');
@@ -186,14 +197,62 @@
         data: value,
       }));
 
-      const teamAPlayers = entries.slice(0, 7);
-      const teamBPlayers = entries.slice(7, 14);
+      const teamAIdList = Array.isArray(teamIds.teamAPlayerIds) ? teamIds.teamAPlayerIds.map(id => String(id)) : [];
+      const teamBIdList = Array.isArray(teamIds.teamBPlayerIds) ? teamIds.teamBPlayerIds.map(id => String(id)) : [];
+      const setA = new Set(teamAIdList);
+      const setB = new Set(teamBIdList);
 
-      const renderCards = (arr) => {
+      const teamACaptainId = roles.teamACaptainId || '';
+      const teamAViceCaptainId = roles.teamAViceCaptainId || '';
+      const teamBCaptainId = roles.teamBCaptainId || '';
+      const teamBViceCaptainId = roles.teamBViceCaptainId || '';
+
+      const teamAPlayers = [];
+      const teamBPlayers = [];
+      const unknownPlayers = [];
+
+      entries.forEach(entry => {
+        const playerId = String(entry.id || '');
+        if (setA.has(playerId)) {
+          teamAPlayers.push(entry);
+        } else if (setB.has(playerId)) {
+          teamBPlayers.push(entry);
+        } else {
+          unknownPlayers.push(entry);
+        }
+      });
+
+      if (setA.size === 0 && setB.size === 0) {
+        const splitIndex = Math.ceil(entries.length / 2);
+        teamAPlayers.length = 0;
+        teamBPlayers.length = 0;
+        teamAPlayers.push(...entries.slice(0, splitIndex));
+        teamBPlayers.push(...entries.slice(splitIndex));
+      } else if (unknownPlayers.length) {
+        teamAPlayers.push(...unknownPlayers);
+      }
+
+      const getPrefix = (entry, side) => {
+        const stat = entry?.data || {};
+        const id = entry?.id || '';
+        const isCaptain = stat.isCaptain || stat.IsCaptain || false;
+        const isViceCaptain = stat.isViceCaptain || stat.IsViceCaptain || false;
+        if (side === 'A') {
+          if (id === teamACaptainId || isCaptain) return '(C) ';
+          if (id === teamAViceCaptainId || isViceCaptain) return '(VC) ';
+          return '';
+        }
+        if (id === teamBCaptainId || isCaptain) return '(C) ';
+        if (id === teamBViceCaptainId || isViceCaptain) return '(VC) ';
+        return '';
+      };
+
+      const renderCards = (arr, side) => {
         if (!arr.length) return '<div class="muted">No players available.</div>';
         return arr.map(p => {
           const stat = p.data || {};
           const name = stat.name || stat.Name || 'Player';
+          const displayName = `${getPrefix(p, side)}${name}`;
           const raid = stat.raidPoints ?? stat.RaidPoints ?? 0;
           const def = stat.defencePoints ?? stat.DefencePoints ?? 0;
           const total = stat.totalPoints ?? stat.TotalPoints ?? 0;
@@ -209,7 +268,7 @@
             <a href="${profileUrl}" style="text-decoration:none;color:inherit;">
               <div style="border:1px solid rgba(255,255,255,0.1);background:rgba(30,41,59,0.7);border-radius:0.6rem;padding:0.75rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s ease;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
-                  <div style="font-weight:700;color:#fbbf24;">${name}</div>
+                  <div style="font-weight:700;color:#fbbf24;">${displayName}</div>
                   <div>${statusBadge}</div>
                 </div>
                 <div style="display:flex;gap:1rem;flex-wrap:wrap;color:#e2e8f0;">
@@ -225,8 +284,8 @@
         }).join('');
       };
 
-      listA.innerHTML = renderCards(teamAPlayers);
-      listB.innerHTML = renderCards(teamBPlayers);
+      listA.innerHTML = renderCards(teamAPlayers, 'A');
+      listB.innerHTML = renderCards(teamBPlayers, 'B');
     }
 
     async function loadMatchScore() {
@@ -290,7 +349,15 @@
           };
         }
 
-        renderPlayerStats(match.playerStats || data.playerStats || {}, teamAName, teamBName);
+        renderPlayerStats(match.playerStats || data.playerStats || {}, teamAName, teamBName, {
+          teamACaptainId: match.teamACaptainId || data.teamACaptainId,
+          teamAViceCaptainId: match.teamAViceCaptainId || data.teamAViceCaptainId,
+          teamBCaptainId: match.teamBCaptainId || data.teamBCaptainId,
+          teamBViceCaptainId: match.teamBViceCaptainId || data.teamBViceCaptainId,
+        }, {
+          teamAPlayerIds: match.teamAPlayerIds || match.teamAPlayerIDs || data.teamAPlayerIds || data.teamAPlayerIDs || [],
+          teamBPlayerIds: match.teamBPlayerIds || match.teamBPlayerIDs || data.teamBPlayerIds || data.teamBPlayerIDs || [],
+        });
       } catch (e) {
         const container = document.getElementById('player-stats');
         if (container) container.innerHTML = `<div class="text-danger">${e.message}</div>`;
@@ -318,5 +385,7 @@
     }
   </script>
   <script src="/static/auth.js"></script>
+  <script src="/static/branding.js"></script>
 </body>
 </html>
+

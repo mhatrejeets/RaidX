@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Player Profile – RaidX Kabaddi</title>
+    <title>Player Profile â€“ RaidX Kabaddi</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -17,6 +17,7 @@
 
     <!-- Auth helper -->
     <script src="/static/auth.js"></script>
+    <script src="/static/share-utils.js"></script>
 
     <!-- Custom CSS -->
     <style>
@@ -192,6 +193,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><button id="share-profile-btn" class="btn btn-sm btn-outline-info"><i class="bi bi-share-fill"></i> Share Profile</button></li>
                     <li class="nav-item"><a id="dashboard-link" class="btn btn-sm btn-outline-light" href="#" style="display:none;"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
                     <li class="nav-item ms-2"><button class="btn btn-sm btn-danger" onclick="logout()">Logout</button></li>
                 </ul>
@@ -332,6 +334,21 @@
         document.addEventListener('DOMContentLoaded', () => {
             requireAuth();
 
+            const shareProfileBtn = document.getElementById('share-profile-btn');
+            if (shareProfileBtn) {
+                shareProfileBtn.addEventListener('click', async () => {
+                    try {
+                        if (typeof shareViewerLink === 'function') {
+                            await shareViewerLink(window.location.href, 'Player Profile');
+                        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(window.location.href);
+                        }
+                    } catch (error) {
+                        console.warn('Unable to share profile link:', error);
+                    }
+                });
+            }
+
             // Setup dashboard link based on user role
             const dashboardLink = document.getElementById('dashboard-link');
             if (dashboardLink && typeof getRoleFromToken === 'function') {
@@ -351,6 +368,8 @@
             }
         });
     </script>
+  <script src="/static/branding.js"></script>
 </body>
 
 </html>
+
