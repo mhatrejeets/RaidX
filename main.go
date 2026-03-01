@@ -49,6 +49,9 @@ func setupPublicRoutes(app *fiber.App) {
 	app.Get("/viewer/championship/:id", func(c *fiber.Ctx) error {
 		return c.SendFile("./Static/viewer-championship.html")
 	})
+	app.Get("/viewer/team/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./Static/viewer-team.html")
+	})
 
 	// Public player profile page (client-side auth gate)
 	app.Get("/playerprofile/:id", handlers.PlayerProfileHandler)
@@ -62,6 +65,7 @@ func setupPublicRoutes(app *fiber.App) {
 	app.Get("/api/public/championships/:id", handlers.GetChampionshipByIDHandler)
 	app.Get("/api/public/championships/:id/fixtures", handlers.GetChampionshipFixturesHandler)
 	app.Get("/api/public/championships/:id/stats", handlers.GetChampionshipStatsHandler)
+	app.Get("/api/public/team/:id", handlers.GetPublicTeamByIDHandler)
 
 	// Public invite link pages (anyone can visit)
 	app.Get("/invite/team/:token", func(c *fiber.Ctx) error {
@@ -103,12 +107,16 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/organizer/events/:id/match", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventMatchStatsHandler)
 	app.Get("/api/organizer/event-invites", middleware.RoleRequired(models.RoleOrganizer), handlers.GetOrganizerEventInvitesHandler)
 	app.Post("/api/organizer/events/:id/start", middleware.RoleRequired(models.RoleOrganizer), handlers.StartOrganizerEventHandler)
+	app.Post("/api/organizer/events/:id/continue-match", middleware.RoleRequired(models.RoleOrganizer), handlers.ContinueOrganizerMatchHandler)
+	app.Post("/api/organizer/events/:id/restart-match", middleware.RoleRequired(models.RoleOrganizer), handlers.RestartOrganizerMatchHandler)
 
 	// RBAC: Tournament APIs
 	app.Post("/api/tournaments/initialize/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.InitializeTournamentHandler)
 	app.Get("/api/tournaments/:id/fixtures", middleware.RoleRequired(models.RoleOrganizer), handlers.GetTournamentFixturesHandler)
 	app.Get("/api/tournaments/:id/standings", middleware.RoleRequired(models.RoleOrganizer), handlers.GetTournamentStandingsHandler)
 	app.Post("/api/tournaments/:id/start-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.StartTournamentMatchHandler)
+	app.Post("/api/tournaments/:id/continue-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.ContinueTournamentMatchHandler)
+	app.Post("/api/tournaments/:id/restart-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.RestartTournamentMatchHandler)
 
 	// RBAC: Championship APIs
 	app.Post("/api/championships/initialize/:id", middleware.RoleRequired(models.RoleOrganizer), handlers.InitializeChampionshipHandler)
@@ -116,6 +124,8 @@ func setupProtectedRoutes(app *fiber.App) {
 	app.Get("/api/championships/:id/fixtures", middleware.RoleRequired(models.RoleOrganizer), handlers.GetChampionshipFixturesHandler)
 	app.Get("/api/championships/:id/stats", middleware.RoleRequired(models.RoleOrganizer), handlers.GetChampionshipStatsHandler)
 	app.Post("/api/championships/:id/start-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.StartChampionshipMatchHandler)
+	app.Post("/api/championships/:id/continue-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.ContinueChampionshipMatchHandler)
+	app.Post("/api/championships/:id/restart-match/:fixtureId", middleware.RoleRequired(models.RoleOrganizer), handlers.RestartChampionshipMatchHandler)
 
 	// RBAC: Invitations (players and team owners)
 	app.Put("/api/invitations/:id", middleware.RoleRequired(models.RolePlayer, models.RoleTeamOwner), handlers.UpdateInvitationStatusHandler)

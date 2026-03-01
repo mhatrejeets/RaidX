@@ -57,3 +57,11 @@ func GetRedisKey(key string, dest interface{}) error {
 
 	return json.Unmarshal([]byte(val), dest)
 }
+
+func DeleteRedisKey(key string) error {
+	return RedisClient.Del(ctx, key).Err()
+}
+
+func ListRedisKeys(pattern string) ([]string, error) {
+	return RedisClient.Keys(ctx, pattern).Result()
+}

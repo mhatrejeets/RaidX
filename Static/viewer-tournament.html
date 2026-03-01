@@ -281,6 +281,7 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/auth.js"></script>
   <script>
     const tournamentId = window.location.pathname.split('/').pop();
     let currentTournament = null;
@@ -524,6 +525,7 @@
         const dashboardPaths = {
           'player': '/player/dashboard',
           'owner': '/owner/dashboard',
+          'team_owner': '/owner/dashboard',
           'organizer': '/organizer/dashboard'
         };
         const path = dashboardPaths[role.toLowerCase()];
@@ -534,6 +536,5 @@
       }
     }
   </script>
-  <script src="/static/auth.js"></script>
 </body>
 </html>

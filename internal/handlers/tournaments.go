@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/models"
+	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -356,6 +357,119 @@ func StartTournamentMatchHandler(c *fiber.Ctx) error {
 			tournament.ID.Hex(),
 			fixtureID,
 			matchID.Hex(),
+		),
+	})
+}
+
+func ContinueTournamentMatchHandler(c *fiber.Ctx) error {
+	tournamentID := c.Params("id")
+	fixtureID := c.Params("fixtureId")
+
+	if tournamentID == "" || fixtureID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Tournament ID and Fixture ID required"})
+	}
+
+	fixtureObjID, err := primitive.ObjectIDFromHex(fixtureID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid fixture ID"})
+	}
+
+	ctx := context.Background()
+	tournament, err := resolveTournamentByIDOrEventID(ctx, tournamentID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Tournament not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to load tournament"})
+	}
+
+	var fixture models.Fixture
+	err = db.FixturesCollection.FindOne(ctx, bson.M{"_id": fixtureObjID, "tournamentId": tournament.ID}).Decode(&fixture)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Fixture not found"})
+	}
+	if fixture.Status != models.FixtureStatusOngoing || fixture.MatchID == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Fixture is not in ongoing state"})
+	}
+
+	forceScorerTakeover(fixture.MatchID.Hex(), fmt.Sprintf("/organizer/tournament?id=%s", tournament.ID.Hex()))
+
+	return c.JSON(fiber.Map{
+		"matchId": fixture.MatchID.Hex(),
+		"redirectUrl": fmt.Sprintf(
+			"/scorer?team1_id=%s&team2_id=%s&event_id=%s&tournament_id=%s&fixture_id=%s&match_id=%s&resume=1",
+			fixture.Team1ID.Hex(),
+			fixture.Team2ID.Hex(),
+			tournament.EventID.Hex(),
+			tournament.ID.Hex(),
+			fixture.ID.Hex(),
+			fixture.MatchID.Hex(),
+		),
+	})
+}
+
+func RestartTournamentMatchHandler(c *fiber.Ctx) error {
+	tournamentID := c.Params("id")
+	fixtureID := c.Params("fixtureId")
+
+	if tournamentID == "" || fixtureID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Tournament ID and Fixture ID required"})
+	}
+
+	fixtureObjID, err := primitive.ObjectIDFromHex(fixtureID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid fixture ID"})
+	}
+
+	ctx := context.Background()
+	tournament, err := resolveTournamentByIDOrEventID(ctx, tournamentID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Tournament not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to load tournament"})
+	}
+
+	var fixture models.Fixture
+	err = db.FixturesCollection.FindOne(ctx, bson.M{"_id": fixtureObjID, "tournamentId": tournament.ID}).Decode(&fixture)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Fixture not found"})
+	}
+
+	if fixture.MatchID != nil {
+		_ = redisImpl.DeleteRedisKey("gameStats:" + fixture.MatchID.Hex())
+		_ = redisImpl.DeleteRedisKey("scorer_lock:" + fixture.MatchID.Hex())
+		_, _ = db.MongoClient.Database("raidx").Collection("match_snapshots").DeleteOne(ctx, bson.M{"matchId": fixture.MatchID.Hex()})
+	}
+
+	newMatchID := primitive.NewObjectID()
+	_, err = db.FixturesCollection.UpdateOne(ctx, bson.M{"_id": fixtureObjID}, bson.M{
+		"$set": bson.M{
+			"status":     models.FixtureStatusOngoing,
+			"matchId":    newMatchID,
+			"winnerId":   nil,
+			"team1Score": 0,
+			"team2Score": 0,
+			"isDraw":     false,
+			"updatedAt":  time.Now(),
+		},
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to restart fixture"})
+	}
+
+	return c.JSON(fiber.Map{
+		"matchId": newMatchID.Hex(),
+		"redirectUrl": fmt.Sprintf(
+			"/organizer/playerselection/%s?team_id=%s&team_key=teamA_selected&team1_id=%s&team2_id=%s&event_id=%s&tournament_id=%s&fixture_id=%s&match_id=%s",
+			newMatchID.Hex(),
+			fixture.Team1ID.Hex(),
+			fixture.Team1ID.Hex(),
+			fixture.Team2ID.Hex(),
+			tournament.EventID.Hex(),
+			tournament.ID.Hex(),
+			fixture.ID.Hex(),
+			newMatchID.Hex(),
 		),
 	})
 }

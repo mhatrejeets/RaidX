@@ -3,7 +3,10 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
@@ -14,6 +17,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var viewerClients = struct {
@@ -24,6 +28,135 @@ var viewerClients = struct {
 }
 
 var broadcastChan = make(chan []byte)
+var snapshotWorkerOnce sync.Once
+
+const scorerLockTTL = 45 * time.Second
+
+func scorerLockKey(matchID string) string {
+	return "scorer_lock:" + matchID
+}
+
+func acquireScorerLock(matchID, owner string) (bool, error) {
+	key := scorerLockKey(matchID)
+	ok, err := redisImpl.RedisClient.SetNX(context.Background(), key, owner, scorerLockTTL).Result()
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+func refreshScorerLock(matchID, owner string) {
+	key := scorerLockKey(matchID)
+	val, err := redisImpl.RedisClient.Get(context.Background(), key).Result()
+	if err != nil || val != owner {
+		return
+	}
+	_, _ = redisImpl.RedisClient.Expire(context.Background(), key, scorerLockTTL).Result()
+}
+
+func releaseScorerLock(matchID, owner string) {
+	key := scorerLockKey(matchID)
+	val, err := redisImpl.RedisClient.Get(context.Background(), key).Result()
+	if err != nil || val != owner {
+		return
+	}
+	_ = redisImpl.DeleteRedisKey(key)
+}
+
+func persistMatchSnapshot(matchID string, match models.EnhancedStatsMessage) {
+	snapshotsColl := db.MongoClient.Database("raidx").Collection("match_snapshots")
+	_, err := snapshotsColl.UpdateOne(
+		context.Background(),
+		bson.M{"matchId": matchID},
+		bson.M{"$set": bson.M{
+			"matchId":           matchID,
+			"type":              "ongoing_snapshot",
+			"data":              match.Data,
+			"lastScoreChangeAt": match.Data.LastScoreChangeAt,
+			"updatedAt":         time.Now(),
+		}},
+		mongoOptionsUpsert(),
+	)
+	if err != nil {
+		logrus.Warnf("snapshot persist failed for match %s: %v", matchID, err)
+	}
+}
+
+func loadMatchSnapshot(matchID string, target *models.EnhancedStatsMessage) error {
+	snapshotsColl := db.MongoClient.Database("raidx").Collection("match_snapshots")
+	var snapshot struct {
+		MatchID string `bson:"matchId"`
+		Data    bson.M `bson:"data"`
+	}
+	err := snapshotsColl.FindOne(context.Background(), bson.M{"matchId": matchID}).Decode(&snapshot)
+	if err == nil {
+		raw, mErr := bson.Marshal(snapshot.Data)
+		if mErr != nil {
+			return mErr
+		}
+		if uErr := bson.Unmarshal(raw, &target.Data); uErr != nil {
+			return uErr
+		}
+		target.Type = "enhancedStats"
+		return nil
+	}
+
+	matchesColl := db.MongoClient.Database("raidx").Collection("matches")
+	var matchDoc struct {
+		Type string `bson:"type"`
+		Data bson.M `bson:"data"`
+	}
+	err = matchesColl.FindOne(context.Background(), bson.M{"matchId": matchID}).Decode(&matchDoc)
+	if err != nil {
+		return err
+	}
+	raw, mErr := bson.Marshal(matchDoc.Data)
+	if mErr != nil {
+		return mErr
+	}
+	if uErr := bson.Unmarshal(raw, &target.Data); uErr != nil {
+		return uErr
+	}
+	target.Type = "enhancedStats"
+	return nil
+}
+
+func mongoOptionsUpsert() *options.UpdateOptions {
+	upsert := true
+	return &options.UpdateOptions{Upsert: &upsert}
+}
+
+func startIdleSnapshotWorker() {
+	snapshotWorkerOnce.Do(func() {
+		go func() {
+			ticker := time.NewTicker(time.Minute)
+			defer ticker.Stop()
+			for range ticker.C {
+				keys, err := redisImpl.ListRedisKeys("gameStats:*")
+				if err != nil {
+					continue
+				}
+				now := time.Now().Unix()
+				for _, key := range keys {
+					var current models.EnhancedStatsMessage
+					if err := redisImpl.GetRedisKey(key, &current); err != nil {
+						continue
+					}
+					if current.Data.LastScoreChangeAt == 0 {
+						current.Data.LastScoreChangeAt = now
+						_ = redisImpl.SetRedisKey(key, current)
+						continue
+					}
+					if now-current.Data.LastScoreChangeAt < int64(15*time.Minute/time.Second) {
+						continue
+					}
+					matchID := strings.TrimPrefix(key, "gameStats:")
+					persistMatchSnapshot(matchID, current)
+				}
+			}
+		}()
+	})
+}
 
 func StartBroadcastWorker() {
 	go func() {
@@ -54,12 +187,13 @@ func BroadcastToViewers(message models.EnhancedStatsMessage) {
 func SetupWebSocket(app *fiber.App) {
 	// Start the broadcast worker
 	StartBroadcastWorker()
+	startIdleSnapshotWorker()
 
 	// Handle scorer WebSocket
 	app.Get("/ws/scorer", websocket.New(func(c *websocket.Conn) {
 		// JWT token must be present in query param
 		token := c.Query("token")
-		_, err := middleware.AuthWebSocket(token)
+		claims, err := middleware.AuthWebSocket(token)
 		if err != nil {
 			logrus.Warn("WebSocket scorer: JWT invalid or missing")
 			c.WriteMessage(websocket.TextMessage, []byte(`{"error":"Unauthorized: Invalid JWT"}`))
@@ -86,9 +220,24 @@ func SetupWebSocket(app *fiber.App) {
 		}
 
 		matchID := join.MatchID
+		scorerOwner := fmt.Sprintf("%v:%v", claims["user_id"], claims["session_id"])
+		acquired, lockErr := acquireScorerLock(matchID, scorerOwner)
+		if lockErr != nil {
+			_ = c.WriteMessage(websocket.TextMessage, []byte(`{"error":"Failed to acquire scorer lock"}`))
+			c.Close()
+			return
+		}
+		if !acquired {
+			_ = c.WriteMessage(websocket.TextMessage, []byte(`{"error":"This match is already being scored by another active scorer"}`))
+			c.Close()
+			return
+		}
+
 		room := GetRoom(matchID)
 		room.AddScorer(c)
 		defer func() {
+			releaseScorerLock(matchID, scorerOwner)
+			room.RemoveScorer(c)
 			logrus.Info("Info:", "SetupWebSocket:", " Scorer connection closed")
 			c.Close()
 		}()
@@ -100,10 +249,17 @@ func SetupWebSocket(app *fiber.App) {
 		redisKey := "gameStats:" + matchID
 		if err := redisImpl.GetRedisKey(redisKey, &currentMatch); err != nil {
 			if err == redisImpl.RedisNull {
-				// Ask client to send initial state
-				req := map[string]string{"type": "requestInit"}
-				if data, e := json.Marshal(req); e == nil {
-					_ = c.WriteMessage(websocket.TextMessage, data)
+				if snapErr := loadMatchSnapshot(matchID, &currentMatch); snapErr == nil {
+					_ = redisImpl.SetRedisKey(redisKey, currentMatch)
+					if data, e := json.Marshal(currentMatch); e == nil {
+						_ = c.WriteMessage(websocket.TextMessage, data)
+					}
+				} else {
+					// Ask client to send initial state
+					req := map[string]string{"type": "requestInit"}
+					if data, e := json.Marshal(req); e == nil {
+						_ = c.WriteMessage(websocket.TextMessage, data)
+					}
 				}
 			} else {
 				logrus.Error("Error:", "SetupWebSocket:", " Failed to get gameStats for match %s: %v", matchID, err)
@@ -122,6 +278,7 @@ func SetupWebSocket(app *fiber.App) {
 				logrus.Error("Error:", "SetupWebSocket:", " Error reading message from scorer: %v", err)
 				break
 			}
+			refreshScorerLock(matchID, scorerOwner)
 
 			// First probe if this is a raid payload (from scorer UI) or a full state update
 			var probe struct {
@@ -133,7 +290,11 @@ func SetupWebSocket(app *fiber.App) {
 				// client sent initial full state for this match - persist
 				var received models.EnhancedStatsMessage
 				if err := json.Unmarshal(msg, &received); err == nil {
+					if received.Data.LastScoreChangeAt == 0 {
+						received.Data.LastScoreChangeAt = time.Now().Unix()
+					}
 					if err := redisImpl.SetRedisKey(redisKey, received); err == nil {
+						persistMatchSnapshot(matchID, received)
 						if data, e := json.Marshal(received); e == nil {
 							room.BroadcastBytes(data)
 						}
@@ -170,6 +331,9 @@ func SetupWebSocket(app *fiber.App) {
 					continue
 				}
 
+				prevTeamAScore := currentMatch.Data.TeamA.Score
+				prevTeamBScore := currentMatch.Data.TeamB.Score
+
 				switch payload.RaidType {
 				case "successful":
 					processSuccessfulRaid(&currentMatch, payload)
@@ -182,11 +346,15 @@ func SetupWebSocket(app *fiber.App) {
 				}
 
 				currentMatch.Data.Awards = computeAwardsFromPlayerStats(currentMatch.Data.PlayerStats)
+				if currentMatch.Data.TeamA.Score != prevTeamAScore || currentMatch.Data.TeamB.Score != prevTeamBScore {
+					currentMatch.Data.LastScoreChangeAt = time.Now().Unix()
+				}
 
 				if err := redisImpl.SetRedisKey(redisKey, currentMatch); err != nil {
 					logrus.Error("Error:", "SetupWebSocket:", " Failed to set gameStats: %v", err)
 					continue
 				}
+				persistMatchSnapshot(matchID, currentMatch)
 				if data, err := json.Marshal(currentMatch); err == nil {
 					room.BroadcastBytes(data)
 					_ = c.WriteMessage(websocket.TextMessage, data)
@@ -230,10 +398,16 @@ func SetupWebSocket(app *fiber.App) {
 					continue
 				}
 
+				prevTeamAScore := currentMatch.Data.TeamA.Score
+				prevTeamBScore := currentMatch.Data.TeamB.Score
+
 				if lobbyPayload.Data.ScoringTeam == "A" {
 					currentMatch.Data.TeamA.Score++
 				} else {
 					currentMatch.Data.TeamB.Score++
+				}
+				if currentMatch.Data.TeamA.Score != prevTeamAScore || currentMatch.Data.TeamB.Score != prevTeamBScore {
+					currentMatch.Data.LastScoreChangeAt = time.Now().Unix()
 				}
 
 				raiderName := ""
@@ -274,6 +448,7 @@ func SetupWebSocket(app *fiber.App) {
 					logrus.Error("Error:", "SetupWebSocket:", " Failed to set gameStats for lobbyTouch: %v", err)
 					continue
 				}
+				persistMatchSnapshot(matchID, currentMatch)
 				if data, err := json.Marshal(currentMatch); err == nil {
 					room.BroadcastBytes(data)
 					_ = c.WriteMessage(websocket.TextMessage, data)
@@ -291,14 +466,16 @@ func SetupWebSocket(app *fiber.App) {
 			if err := redisImpl.SetRedisKey(redisKey, receivedMessage); err != nil {
 				logrus.Error("Error:", "SetupWebSocket:", " Error storing data in Redis: %v", err)
 			}
+			if receivedMessage.Data.LastScoreChangeAt == 0 {
+				receivedMessage.Data.LastScoreChangeAt = time.Now().Unix()
+			}
+			persistMatchSnapshot(matchID, receivedMessage)
 
 			if data, err := json.Marshal(receivedMessage); err == nil {
 				room.BroadcastBytes(data)
 			}
 		}
 
-		// cleanup
-		room.RemoveScorer(c)
 	}))
 
 	// Handle viewer WebSocket

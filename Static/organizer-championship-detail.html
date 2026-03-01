@@ -513,6 +513,15 @@
         actionBtn = `<button class="btn btn-primary-orange btn-sm" onclick="startMatch('${fixture.id}')">
           <i class="bi bi-play-fill"></i> Start Match
         </button>`;
+      } else if (fixture.status === 'ongoing' && fixture.matchId) {
+        actionBtn = `
+          <button class="btn btn-outline-light btn-sm me-2" onclick="continueMatch('${fixture.id}')">
+            <i class="bi bi-arrow-repeat"></i> Continue Match
+          </button>
+          <button class="btn btn-warning btn-sm" onclick="restartMatch('${fixture.id}')">
+            <i class="bi bi-arrow-counterclockwise"></i> Restart Match
+          </button>
+        `;
       } else if (fixture.status === 'completed' && fixture.matchId) {
         actionBtn = `<button class="btn btn-outline-light btn-sm" onclick="viewMatchStats('${fixture.matchId}')">
           <i class="bi bi-bar-chart"></i> View Stats
@@ -549,6 +558,39 @@
       } catch (error) {
         console.error('Failed to start match:', error);
         alert('Failed to start match: ' + error.message);
+      }
+    }
+
+    async function continueMatch(fixtureId) {
+      try {
+        const res = await apiRequest(`/api/championships/${championshipId}/continue-match/${fixtureId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to continue match');
+        }
+
+        window.location.href = data.redirectUrl;
+      } catch (error) {
+        console.error('Failed to continue match:', error);
+        alert('Failed to continue match: ' + error.message);
+      }
+    }
+
+    async function restartMatch(fixtureId) {
+      if (!confirm('Restart this match from player selection? Current live score will be reset.')) return;
+      try {
+        const res = await apiRequest(`/api/championships/${championshipId}/restart-match/${fixtureId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to restart match');
+        }
+
+        window.location.href = data.redirectUrl;
+      } catch (error) {
+        console.error('Failed to restart match:', error);
+        alert('Failed to restart match: ' + error.message);
       }
     }
 

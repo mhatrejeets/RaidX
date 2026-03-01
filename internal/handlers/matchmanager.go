@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"sync"
 	"time"
 
@@ -126,4 +127,30 @@ func (r *MatchRoom) BroadcastBytes(b []byte) {
 	default:
 		// drop if full
 	}
+}
+
+func (r *MatchRoom) NotifyAndCloseScorers(redirectURL string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if len(r.scorers) == 0 {
+		return
+	}
+
+	payload := map[string]string{
+		"type":        "scorerTakeover",
+		"message":     "Continued on other device",
+		"redirectUrl": redirectURL,
+	}
+	b, _ := json.Marshal(payload)
+
+	for conn := range r.scorers {
+		if len(b) > 0 {
+			_ = conn.WriteMessage(websocket.TextMessage, b)
+		}
+		_ = conn.Close()
+		delete(r.scorers, conn)
+	}
+
+	r.lastActivity = time.Now()
 }

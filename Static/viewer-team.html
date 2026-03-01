@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaidX - Team Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: white;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      padding-top: 2.5rem;
+      padding-bottom: 2.5rem;
+    }
+
+    .page-header h1 {
+      color: #fbbf24;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: #cbd5e1;
+    }
+
+    .info-card {
+      background-color: rgba(30, 41, 59, 0.95);
+      border: 1px solid #334155;
+      border-radius: 0.9rem;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-label {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+      color: #f8fafc;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .section-card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .section-card .card-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .player-card {
+      background-color: rgba(30, 41, 59, 0.8);
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      height: 100%;
+    }
+
+    .player-card h6 {
+      color: #fbbf24;
+      margin-bottom: 0.4rem;
+    }
+
+    .meta {
+      color: #cbd5e1;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .badge-custom {
+      background-color: #334155;
+      color: #f97316;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <h1 id="team-name"><i class="bi bi-people"></i> Team</h1>
+        <p class="subtitle mb-0" id="team-subtitle">Loading team details...</p>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <a id="dashboard-link" class="btn btn-outline-light" href="#" style="display:none;">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a class="btn btn-outline-light" href="/viewer">Back to Viewer</a>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-md-4">
+        <div class="info-card">
+          <div class="info-label">Owner</div>
+          <div class="info-value" id="team-owner">—</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card">
+          <div class="info-label">Status</div>
+          <div class="info-value"><span id="team-status" class="badge-custom">—</span></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card">
+          <div class="info-label">Players</div>
+          <div class="info-value" id="team-player-count">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card" id="team-description-wrap" style="display:none;">
+      <div class="info-label">Description</div>
+      <div class="info-value" id="team-description"></div>
+    </div>
+
+    <div class="section-card card">
+      <div class="card-header">Team Players</div>
+      <div class="card-body">
+        <div id="players-list" class="row g-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/auth.js"></script>
+  <script>
+    const teamId = window.location.pathname.split('/').pop();
+
+    async function loadTeam() {
+      const nameEl = document.getElementById('team-name');
+      const subtitleEl = document.getElementById('team-subtitle');
+      const ownerEl = document.getElementById('team-owner');
+      const statusEl = document.getElementById('team-status');
+      const countEl = document.getElementById('team-player-count');
+      const descWrapEl = document.getElementById('team-description-wrap');
+      const descEl = document.getElementById('team-description');
+      const playersEl = document.getElementById('players-list');
+
+      try {
+        const res = await fetch(`/api/public/team/${encodeURIComponent(teamId)}`);
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load team details');
+        }
+
+        nameEl.innerHTML = `<i class="bi bi-people"></i> ${data.teamName || 'Team'}`;
+        subtitleEl.textContent = `Team ID: ${data.id || teamId}`;
+        ownerEl.textContent = data.ownerName || 'Unknown';
+        statusEl.textContent = data.status || 'active';
+        countEl.textContent = String(data.playerCount || (Array.isArray(data.players) ? data.players.length : 0));
+
+        if (data.description) {
+          descWrapEl.style.display = 'block';
+          descEl.textContent = data.description;
+        }
+
+        const players = Array.isArray(data.players) ? data.players : [];
+        if (!players.length) {
+          playersEl.innerHTML = '<div class="col-12"><p class="mb-0" style="color:#facc15;">No players available.</p></div>';
+          return;
+        }
+
+        playersEl.innerHTML = players.map(player => {
+          const profileUrl = player.id ? `/playerprofile/${encodeURIComponent(player.id)}` : '#';
+          return `
+            <div class="col-md-6 col-lg-4">
+              <a href="${profileUrl}" style="text-decoration:none;color:inherit;">
+                <div class="player-card">
+                  <h6>${player.fullName || 'Player'}</h6>
+                  <p class="meta">User ID: ${player.userId || '-'}</p>
+                  <p class="meta">Position: ${player.position || '-'}</p>
+                </div>
+              </a>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        subtitleEl.textContent = error.message || 'Unable to load team';
+        playersEl.innerHTML = '<div class="col-12"><p class="mb-0" style="color:#ef4444;">Failed to load team details.</p></div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const dashboardLink = document.getElementById('dashboard-link');
+      if (dashboardLink && typeof getRoleFromToken === 'function') {
+        const role = getRoleFromToken();
+        if (role) {
+          const dashboardPaths = {
+            'player': '/player/dashboard',
+            'owner': '/owner/dashboard',
+            'team_owner': '/owner/dashboard',
+            'organizer': '/organizer/dashboard'
+          };
+          const path = dashboardPaths[String(role).toLowerCase()];
+          if (path) {
+            dashboardLink.href = path;
+            dashboardLink.style.display = 'inline-block';
+          }
+        }
+      }
+
+      if (!teamId) {
+        document.getElementById('team-subtitle').textContent = 'Invalid team ID';
+        return;
+      }
+      loadTeam();
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

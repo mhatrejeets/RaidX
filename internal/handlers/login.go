@@ -131,12 +131,12 @@ func LoginHandler(c *fiber.Ctx) error {
 		// JWT token expired but refresh token valid - generate new JWT
 	}
 
-	// New device: Check active session count for this user (max 5)
+	// New device: Check active session count for this user (max 10)
 	activeSessions, err := sessionColl.CountDocuments(ctx, bson.M{
 		"user_id": user.ID.Hex(),
 		"active":  true,
 	})
-	if err == nil && activeSessions >= 5 {
+	if err == nil && activeSessions >= 10 {
 		// Invalidate oldest session
 		oldestSession := models.Session{}
 		opts := options.FindOne().SetSort(bson.M{"created_at": 1})

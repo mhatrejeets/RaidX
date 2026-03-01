@@ -53,6 +53,16 @@ function getInviteField(invite, camelName, snakeName) {
     return invite?.[camelName] || invite?.[snakeName] || '';
 }
 
+function getViewerEventUrl(eventType, eventId) {
+    const normalizedType = String(eventType || '').toLowerCase();
+    if (!eventId) return null;
+
+    if (normalizedType === 'tournament' || normalizedType === 'championship') {
+        return `/viewer/${normalizedType}/${encodeURIComponent(eventId)}`;
+    }
+    return `/viewer/match/${encodeURIComponent(eventId)}`;
+}
+
 async function updateInvite(inviteId, status, extra = {}) {
     try {
         const res = await apiRequest(`/api/invitations/${inviteId}`, {
@@ -195,12 +205,20 @@ async function loadPlayerTeams() {
         data.forEach(team => {
             const card = document.createElement('div');
             card.className = 'request-card';
+            const teamId = formatId(team.teamId);
             card.innerHTML = `
                 <h6>${team.teamName || 'Team'}</h6>
-                <p class="mb-1">Team ID: <span class="text-white">${formatId(team.teamId)}</span></p>
+                <p class="mb-1">Team ID: <span class="text-white">${teamId}</span></p>
                 ${team.description ? `<p class="mb-1">Description: ${team.description}</p>` : ''}
                 <p>Status: <span class="badge-custom">${team.status || 'active'}</span></p>
             `;
+
+            if (teamId) {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    window.location.href = `/viewer/team/${encodeURIComponent(teamId)}`;
+                });
+            }
             list.appendChild(card);
         });
     } catch (e) {
@@ -225,13 +243,22 @@ async function loadPlayerEvents() {
             const card = document.createElement('div');
             card.className = 'request-card';
             const typeLabel = evt.eventType ? evt.eventType.replace('_', ' ') : 'event';
+            const eventId = formatId(evt.eventId);
+            const eventUrl = getViewerEventUrl(evt.eventType, eventId);
             card.innerHTML = `
                 <h6>${evt.eventName || 'Event'}</h6>
                 <p class="mb-1">Type: <span class="badge-custom">${typeLabel}</span></p>
                 ${evt.status ? `<p class="mb-1">Status: <span class="badge-custom">${evt.status}</span></p>` : ''}
                 <p class="mb-1">Matches Played: <span class="text-white">${evt.matchCount || 0}</span></p>
-                ${evt.eventId ? `<p class="mb-1">Event ID: <span class="text-white">${formatId(evt.eventId)}</span></p>` : ''}
+                ${evt.eventId ? `<p class="mb-1">Event ID: <span class="text-white">${eventId}</span></p>` : ''}
             `;
+
+            if (eventUrl) {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    window.location.href = eventUrl;
+                });
+            }
             list.appendChild(card);
         });
     } catch (e) {

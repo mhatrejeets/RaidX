@@ -38,6 +38,56 @@ let currentRaidNumber = 1;
 let tossWinner = null; // 'teamA' | 'teamB'
 let tossDecision = 'raid'; // 'raid' | 'defend'
 let firstRaidingTeam = 'teamA';
+let requireServerRosterHydration = false;
+let serverRosterHydrated = false;
+
+function hydrateTeamsFromServerState(serverData) {
+    if (!serverData || !serverData.playerStats) return false;
+
+    const statsMap = serverData.playerStats || {};
+    let teamAIds = Array.isArray(serverData.teamAPlayerIds) ? serverData.teamAPlayerIds.filter(Boolean) : [];
+    let teamBIds = Array.isArray(serverData.teamBPlayerIds) ? serverData.teamBPlayerIds.filter(Boolean) : [];
+
+    if (teamAIds.length === 0 && teamBIds.length === 0) {
+        const allIds = Object.keys(statsMap);
+        teamAIds = allIds.slice(0, 7);
+        teamBIds = allIds.slice(7, 14);
+    }
+
+    const buildPlayer = (playerId) => {
+        const stat = statsMap[playerId] || {};
+        return {
+            id: playerId,
+            name: stat.name || stat.Name || playerId,
+            status: stat.status || stat.Status || 'in'
+        };
+    };
+
+    if (teamAIds.length > 0) {
+        teamA.players = teamAIds.map(buildPlayer);
+    }
+    if (teamBIds.length > 0) {
+        teamB.players = teamBIds.map(buildPlayer);
+    }
+
+    const teamAName = (serverData.teamA && serverData.teamA.name) || teamA.name || 'Team A';
+    const teamBName = (serverData.teamB && serverData.teamB.name) || teamB.name || 'Team B';
+
+    teamA.name = teamAName;
+    teamB.name = teamBName;
+
+    const teamANameEl = document.getElementById('teamA-name');
+    const teamBNameEl = document.getElementById('teamB-name');
+    const teamAHeaderEl = document.getElementById('teamA-header');
+    const teamBHeaderEl = document.getElementById('teamB-header');
+    if (teamANameEl) teamANameEl.textContent = teamAName;
+    if (teamBNameEl) teamBNameEl.textContent = teamBName;
+    if (teamAHeaderEl) teamAHeaderEl.textContent = teamAName;
+    if (teamBHeaderEl) teamBHeaderEl.textContent = teamBName;
+
+    serverRosterHydrated = true;
+    return true;
+}
 
 /**
  * WebSocket Connection Management
@@ -75,6 +125,13 @@ function setupWebSocket() {
     socket.onmessage = (event) => {
         try {
             const msg = JSON.parse(event.data);
+            if (msg.type === 'scorerTakeover') {
+                const takeoverMsg = msg.message || 'Continued on other device';
+                const redirectUrl = msg.redirectUrl || '/organizer/dashboard';
+                alert(takeoverMsg);
+                window.location.href = redirectUrl;
+                return;
+            }
             // Server requests client to initialize game state on first connection
             if (msg.type === 'requestInit') {
                 const initialState = {
@@ -96,6 +153,13 @@ function setupWebSocket() {
                 return;
             }
             if (msg.error) {
+                const errText = String(msg.error || '');
+                if (errText.toLowerCase().includes('already being scored')) {
+                    setConnectionStatus('Locked');
+                    showScorerLockNotice('This match is locked by other device.');
+                    try { socket.close(); } catch (e) { /* ignore */ }
+                    return;
+                }
                 alert(`Server error: ${msg.error}`);
                 return;
             }
@@ -105,6 +169,10 @@ function setupWebSocket() {
                 if (msg.data.teamB) teamB.score = msg.data.teamB.score;
                 if (msg.data.playerStats) {
                     playerStats = msg.data.playerStats;
+                    const hydrated = hydrateTeamsFromServerState(msg.data);
+                    if (requireServerRosterHydration && hydrated) {
+                        requireServerRosterHydration = false;
+                    }
                     // sync the per-player `status` into the team player objects
                     syncPlayerStatusesFromPlayerStats();
                 }
@@ -156,6 +224,30 @@ function setMatchIdDisplay(id) {
         if (!el) return;
         el.textContent = `Match: ${id || '—'}`;
     } catch (e) { /* ignore */ }
+}
+
+function showScorerLockNotice(message) {
+    try {
+        let banner = document.getElementById('scorer-lock-notice');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'scorer-lock-notice';
+            banner.style.position = 'fixed';
+            banner.style.top = '56px';
+            banner.style.right = '12px';
+            banner.style.zIndex = '100000';
+            banner.style.background = '#b91c1c';
+            banner.style.color = '#fff';
+            banner.style.padding = '8px 12px';
+            banner.style.borderRadius = '8px';
+            banner.style.fontWeight = '600';
+            banner.style.boxShadow = '0 4px 16px rgba(0,0,0,0.35)';
+            document.body.appendChild(banner);
+        }
+        banner.textContent = message || 'This match is locked by other device.';
+    } catch (e) {
+        alert(message || 'This match is locked by other device.');
+    }
 }
 
 /**
@@ -321,11 +413,55 @@ function nextRaid() {
     updateRaidInfoUI();
 }
 
+function updateTeamRoleHighlight() {
+    const teamASection = document.getElementById('teamA-section');
+    const teamBSection = document.getElementById('teamB-section');
+    const phaseEl = document.getElementById('raid-phase');
+    if (!teamASection || !teamBSection) return;
+
+    teamASection.classList.remove('raiding-team-active', 'defending-team-active');
+    teamBSection.classList.remove('raiding-team-active', 'defending-team-active');
+
+    const raidingTeam = getRaidingTeam();
+    const defendingTeam = getDefendingTeam();
+
+    if (!selectedRaider) {
+        if (phaseEl) {
+            phaseEl.textContent = 'Phase: Select Raider';
+            phaseEl.classList.remove('phase-defender');
+            phaseEl.classList.add('phase-raider');
+        }
+        if (raidingTeam === teamA) {
+            teamASection.classList.add('raiding-team-active');
+        } else {
+            teamBSection.classList.add('raiding-team-active');
+        }
+        return;
+    }
+
+    if (phaseEl) {
+        phaseEl.textContent = 'Phase: Select Defenders / Register Result';
+        phaseEl.classList.remove('phase-raider');
+        phaseEl.classList.add('phase-defender');
+    }
+
+    if (defendingTeam === teamA) {
+        teamASection.classList.add('defending-team-active');
+    } else {
+        teamBSection.classList.add('defending-team-active');
+    }
+}
+
 
 /**
  * UI Interaction Handlers
  */
 function handlePlayerClick(playerId) {
+    if (requireServerRosterHydration || !serverRosterHydrated) {
+        alert("Syncing live roster from server. Please wait a moment and try again.");
+        return;
+    }
+
     const currentTeam = getRaidingTeam();
     const opposingTeam = getDefendingTeam();
 
@@ -348,6 +484,7 @@ function handlePlayerClick(playerId) {
 
     updateCurrentRaidDisplay();
     updateBonusToggleVisibility();
+    updateTeamRoleHighlight();
     renderPlayers(); // Re-render to show selection highlighting
 }
 
@@ -357,6 +494,7 @@ function toggleDefenderSelection(player) {
     } else {
         selectedDefenders.push(player);
     }
+    updateTeamRoleHighlight();
     renderPlayers(); // Re-render to update selection highlighting
 }
 
@@ -437,6 +575,8 @@ function updateCurrentRaidDisplay() {
         const defendersList = selectedDefenders.map(p => p.name).join(", ");
         display.innerHTML = `Raider (<strong>${selectedRaider.name}</strong> from ${raidingTeam.name}), Defended By: ${defendersList || 'No defenders selected'}`;
     }
+
+    updateTeamRoleHighlight();
 }
 
 function updateDisplay() {
@@ -603,6 +743,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prefillMatchId = params.get("match_id");
     // Optional resume flag to auto-join without showing overlay
     const resumeFlag = params.get("resume") === "1";
+    requireServerRosterHydration = resumeFlag;
+    serverRosterHydrated = !resumeFlag;
     let autoJoinedFromPrefill = false;
 
     console.log("DOM fully loaded. Starting initialization.");
@@ -621,8 +763,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const data2 = await res2.json();
 
             // Load selected players from localStorage
-            const selectedA = JSON.parse(localStorage.getItem("teamA_selected"));
-            const selectedB = JSON.parse(localStorage.getItem("teamB_selected"));
+            const selectedA = resumeFlag ? null : JSON.parse(localStorage.getItem("teamA_selected"));
+            const selectedB = resumeFlag ? null : JSON.parse(localStorage.getItem("teamB_selected"));
 
             // 2. Initialize Teams and Players
             const team1Name = normalizeParam(params.get("team1_name"));

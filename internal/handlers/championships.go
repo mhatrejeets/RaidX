@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhatrejeets/RaidX/internal/db"
 	"github.com/mhatrejeets/RaidX/internal/models"
+	"github.com/mhatrejeets/RaidX/internal/redisImpl"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -467,6 +468,114 @@ func StartChampionshipMatchHandler(c *fiber.Ctx) error {
 		"team2Id":        (*fixture.Team2ID).Hex(),
 		"fixtureId":      fixtureID,
 		"matchId":        matchID.Hex(),
+	})
+}
+
+func ContinueChampionshipMatchHandler(c *fiber.Ctx) error {
+	championshipID := c.Params("id")
+	fixtureID := c.Params("fixtureId")
+
+	championshipObjID, err := primitive.ObjectIDFromHex(championshipID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid championship ID"})
+	}
+
+	fixtureObjID, err := primitive.ObjectIDFromHex(fixtureID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid fixture ID"})
+	}
+
+	var fixture models.ChampionshipFixture
+	err = db.ChampionshipFixturesCollection.FindOne(
+		context.Background(),
+		bson.M{"_id": fixtureObjID, "championshipId": championshipObjID},
+	).Decode(&fixture)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Fixture not found"})
+	}
+	if fixture.Status != models.ChampionshipFixtureStatusOngoing || fixture.MatchID == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Fixture is not in ongoing state"})
+	}
+	if fixture.Team2ID == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot continue a bye fixture"})
+	}
+
+	forceScorerTakeover(fixture.MatchID.Hex(), fmt.Sprintf("/organizer/championship?id=%s", championshipObjID.Hex()))
+
+	return c.JSON(fiber.Map{
+		"matchId": fixture.MatchID.Hex(),
+		"redirectUrl": fmt.Sprintf(
+			"/scorer?team1_id=%s&team2_id=%s&championship_id=%s&championship_fixture_id=%s&match_id=%s&resume=1",
+			fixture.Team1ID.Hex(),
+			fixture.Team2ID.Hex(),
+			championshipObjID.Hex(),
+			fixtureObjID.Hex(),
+			fixture.MatchID.Hex(),
+		),
+	})
+}
+
+func RestartChampionshipMatchHandler(c *fiber.Ctx) error {
+	championshipID := c.Params("id")
+	fixtureID := c.Params("fixtureId")
+
+	championshipObjID, err := primitive.ObjectIDFromHex(championshipID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid championship ID"})
+	}
+
+	fixtureObjID, err := primitive.ObjectIDFromHex(fixtureID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid fixture ID"})
+	}
+
+	var fixture models.ChampionshipFixture
+	err = db.ChampionshipFixturesCollection.FindOne(
+		context.Background(),
+		bson.M{"_id": fixtureObjID, "championshipId": championshipObjID},
+	).Decode(&fixture)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Fixture not found"})
+	}
+	if fixture.Team2ID == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot restart a bye fixture"})
+	}
+
+	if fixture.MatchID != nil {
+		_ = redisImpl.DeleteRedisKey("gameStats:" + fixture.MatchID.Hex())
+		_ = redisImpl.DeleteRedisKey("scorer_lock:" + fixture.MatchID.Hex())
+		_, _ = db.MongoClient.Database("raidx").Collection("match_snapshots").DeleteOne(context.Background(), bson.M{"matchId": fixture.MatchID.Hex()})
+	}
+
+	newMatchID := primitive.NewObjectID()
+	_, err = db.ChampionshipFixturesCollection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": fixtureObjID},
+		bson.M{
+			"$set": bson.M{
+				"status":     models.ChampionshipFixtureStatusOngoing,
+				"matchId":    newMatchID,
+				"winnerId":   nil,
+				"team1Score": 0,
+				"team2Score": 0,
+				"updatedAt":  time.Now(),
+			},
+		},
+	)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to restart fixture"})
+	}
+
+	return c.JSON(fiber.Map{
+		"matchId": newMatchID.Hex(),
+		"redirectUrl": fmt.Sprintf(
+			"/organizer/playerselection/match?team1_id=%s&team2_id=%s&match_id=%s&championship_id=%s&championship_fixture_id=%s",
+			fixture.Team1ID.Hex(),
+			fixture.Team2ID.Hex(),
+			newMatchID.Hex(),
+			championshipObjID.Hex(),
+			fixtureObjID.Hex(),
+		),
 	})
 }
 

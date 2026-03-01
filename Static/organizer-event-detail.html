@@ -427,7 +427,7 @@
         }
 
         const eventStatus = (data.status || '').toLowerCase();
-        const isOngoingOrCompleted = eventStatus === 'ongoing' || eventStatus === 'completed';
+        const isOngoingOrCompleted = eventStatus === 'active' || eventStatus === 'ongoing' || eventStatus === 'completed';
         const isTournamentOrChampionship = eventType === 'tournament' || eventType === 'championship';
 
         const manageCard = document.getElementById('event-manage-card');
@@ -497,7 +497,13 @@
         }
 
         // Handle button display based on event type and status
-        if (isTournamentOrChampionship && (eventStatus === 'ongoing' || eventStatus === 'completed')) {
+        if (eventType === 'match' && (eventStatus === 'active' || eventStatus === 'ongoing')) {
+          actionButtonContainer.style.display = '';
+          actionButtonContainer.innerHTML = `
+            <button class="btn btn-outline-light" onclick="continueActiveMatch()">Continue Match</button>
+            <button class="btn btn-warning" onclick="restartActiveMatch()">Restart Match</button>
+          `;
+        } else if (isTournamentOrChampionship && (eventStatus === 'ongoing' || eventStatus === 'completed')) {
           // Show "Go to Fixtures" button for ongoing/completed tournaments/championships
           const fixturesUrl = eventType === 'tournament' 
             ? `/organizer/tournament?id=${data.tournamentId || eventId}` 
@@ -564,12 +570,12 @@
               throw new Error(startData.error || 'Failed to start event');
             }
             if ((data.eventType || '').toLowerCase() === 'match') {
-              const acceptedTeams = (teamBuckets.accepted || []).filter(team => team.teamId);
-              if (acceptedTeams.length < 2) {
+              const team1Id = startData.team1Id || (teamBuckets.accepted || []).find(team => team.teamId)?.teamId;
+              const team2Id = startData.team2Id || (teamBuckets.accepted || []).filter(team => team.teamId)[1]?.teamId;
+              const matchId = startData.matchId || null;
+              if (!team1Id || !team2Id) {
                 throw new Error('Match requires exactly 2 accepted teams with team IDs.');
               }
-              const team1Id = acceptedTeams[0].teamId;
-              const team2Id = acceptedTeams[1].teamId;
               const token = getValidToken();
               console.log('Token retrieved:', token ? 'Yes' : 'No', token ? token.substring(0, 20) + '...' : 'null');
               if (!token) {
@@ -581,6 +587,7 @@
                 team1_id: team1Id,
                 team2_id: team2Id,
                 event_id: eventId,
+                ...(matchId ? { match_id: matchId } : {}),
                 token: token
               });
               const redirectUrl = `/organizer/playerselection/${eventId}?${query.toString()}`;
@@ -774,6 +781,29 @@
         }
       } catch (e) {
         setStatus(e.message, 'danger');
+      }
+    }
+
+    async function continueActiveMatch() {
+      try {
+        const res = await apiRequest(`/api/organizer/events/${eventId}/continue-match`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to continue match');
+        window.location.href = data.redirectUrl;
+      } catch (e) {
+        setStatus(e.message || 'Failed to continue match', 'danger');
+      }
+    }
+
+    async function restartActiveMatch() {
+      if (!confirm('Restart match from player selection? Current live scoring state will be reset.')) return;
+      try {
+        const res = await apiRequest(`/api/organizer/events/${eventId}/restart-match`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to restart match');
+        window.location.href = data.redirectUrl;
+      } catch (e) {
+        setStatus(e.message || 'Failed to restart match', 'danger');
       }
     }
 
