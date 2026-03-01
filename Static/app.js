@@ -285,14 +285,11 @@ function getRaidingTeam() {
 
 function handleLobbyTouch(player, isRaiderTouchingLobby) {
     if (!player) return alert("Select a player first.");
-    
     const raidingTeam = getRaidingTeam();
     const defendingTeam = getDefendingTeam();
 
-    // Determine the team that gets the point
     const scoringTeam = isRaiderTouchingLobby ? defendingTeam : raidingTeam;
-    
-    // Create the payload for the server (backend will handle all calculations)
+
     const lobbyPayload = {
         type: "lobbyTouch",
         data: {
@@ -312,8 +309,69 @@ function handleLobbyTouch(player, isRaiderTouchingLobby) {
     }
 }
 
+function normalizeIdValue(value) {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') {
+        if (value.id) return String(value.id);
+        if (value._id) return String(value._id);
+        if (value.$oid) return String(value.$oid);
+    }
+    return String(value);
+}
 
-function endGame() {
+async function validateNoTieForKnockoutStage(params, token) {
+    const tournamentId = params.get('tournament_id');
+    const fixtureId = params.get('fixture_id');
+    const championshipId = params.get('championship_id');
+    const championshipFixtureId = params.get('championship_fixture_id');
+
+    const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    if (tournamentId && fixtureId) {
+        const res = await fetch(`/api/tournaments/${encodeURIComponent(tournamentId)}/fixtures`, { headers: authHeaders });
+        if (res.ok) {
+            const fixtures = await res.json();
+            if (Array.isArray(fixtures)) {
+                const fixture = fixtures.find(f => normalizeIdValue(f.id) === fixtureId);
+                const matchType = String(fixture?.matchType || '').toLowerCase();
+                if (matchType === 'semifinal' || matchType === 'final') {
+                    return {
+                        blocked: true,
+                        message: `Tie is not allowed in tournament ${matchType}. Please continue match until winner is decided.`
+                    };
+                }
+            }
+        }
+    }
+
+    if (championshipId && championshipFixtureId) {
+        const [championshipRes, fixturesRes] = await Promise.all([
+            fetch(`/api/championships/${encodeURIComponent(championshipId)}`, { headers: authHeaders }),
+            fetch(`/api/championships/${encodeURIComponent(championshipId)}/fixtures`, { headers: authHeaders })
+        ]);
+
+        if (championshipRes.ok && fixturesRes.ok) {
+            const championship = await championshipRes.json();
+            const fixtures = await fixturesRes.json();
+            if (championship && Array.isArray(fixtures)) {
+                const fixture = fixtures.find(f => normalizeIdValue(f.id) === championshipFixtureId);
+                const totalRounds = Number(championship.totalRounds || 0);
+                const roundNumber = Number(fixture?.roundNumber || 0);
+                if (totalRounds > 0 && roundNumber >= totalRounds - 1) {
+                    return {
+                        blocked: true,
+                        message: 'Tie is not allowed in championship semifinal/final. Please continue match until winner is decided.'
+                    };
+                }
+            }
+        }
+    }
+
+    return { blocked: false };
+}
+
+async function endGame() {
     game = false;
     let message = "";
 
@@ -347,53 +405,62 @@ function endGame() {
         return;
     }
 
-    // Derive playerId from token payload (use helper) and fall back to URL path
-    let playerId = (typeof getUserIdFromToken === 'function') ? getUserIdFromToken() : null;
-    if (!playerId) {
-        // fallback: try to extract from URL path (legacy flows)
-        playerId = window.location.pathname.split("/").pop();
+    const queryParams = new URLSearchParams(window.location.search);
+
+    if (teamA.score === teamB.score) {
+        try {
+            const tieValidation = await validateNoTieForKnockoutStage(queryParams, token);
+            if (tieValidation?.blocked) {
+                alert(tieValidation.message || 'Tie is not allowed at this knockout stage.');
+                return;
+            }
+        } catch (validationError) {
+            console.warn('Tie pre-validation skipped due to fetch error:', validationError);
+        }
     }
 
     // Clear stored match id so refresh won't attempt to rejoin a finished match
     try { localStorage.removeItem(MATCH_STORAGE_KEY); } catch (e) { /* ignore */ }
 
     // Send API request to end game with authentication
-    const eventId = new URLSearchParams(window.location.search).get('event_id');
-    const tournamentId = new URLSearchParams(window.location.search).get('tournament_id');
-    const fixtureId = new URLSearchParams(window.location.search).get('fixture_id');
-    const championshipId = new URLSearchParams(window.location.search).get('championship_id');
-    const championshipFixtureId = new URLSearchParams(window.location.search).get('championship_fixture_id');
+    const eventId = queryParams.get('event_id');
+    const tournamentId = queryParams.get('tournament_id');
+    const fixtureId = queryParams.get('fixture_id');
+    const championshipId = queryParams.get('championship_id');
+    const championshipFixtureId = queryParams.get('championship_fixture_id');
     const eventParam = eventId ? `&event_id=${encodeURIComponent(eventId)}` : '';
     const tournamentParam = tournamentId ? `&tournament_id=${encodeURIComponent(tournamentId)}` : '';
     const fixtureParam = fixtureId ? `&fixture_id=${encodeURIComponent(fixtureId)}` : '';
     const championshipParam = championshipId ? `&championship_id=${encodeURIComponent(championshipId)}` : '';
     const championshipFixtureParam = championshipFixtureId ? `&championship_fixture_id=${encodeURIComponent(championshipFixtureId)}` : '';
-    fetch(`/api/endgame?match_id=${encodeURIComponent(matchId)}${eventParam}${tournamentParam}${fixtureParam}${championshipParam}${championshipFixtureParam}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    }).then(response => {
-        if (response.ok) {
-            // Successfully ended game, redirect appropriately
-            if (tournamentId) {
-                // Redirect to tournament dashboard
-                window.location.href = `/organizer/tournament?id=${tournamentId}&token=${encodeURIComponent(token)}`;
-            } else if (championshipId) {
-                // Redirect to championship dashboard
-                window.location.href = `/organizer/championship?id=${championshipId}&token=${encodeURIComponent(token)}`;
-            } else if (eventId) {
-                window.location.href = `/organizer/event/${eventId}?token=${encodeURIComponent(token)}`;
-            } else {
-                window.location.href = `/organizer/events?token=${encodeURIComponent(token)}`;
+    try {
+        const response = await fetch(`/api/endgame?match_id=${encodeURIComponent(matchId)}${eventParam}${tournamentParam}${fixtureParam}${championshipParam}${championshipFixtureParam}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-        } else {
-            throw new Error('Failed to end game');
+        });
+
+        if (!response.ok) {
+            const errPayload = await response.json().catch(() => null);
+            const errorMsg = (errPayload && errPayload.error) ? errPayload.error : 'Failed to end game';
+            throw new Error(errorMsg);
         }
-    }).catch(error => {
+
+        // Successfully ended game, redirect appropriately
+        if (tournamentId) {
+            window.location.href = `/organizer/tournament?id=${tournamentId}&token=${encodeURIComponent(token)}`;
+        } else if (championshipId) {
+            window.location.href = `/organizer/championship?id=${championshipId}&token=${encodeURIComponent(token)}`;
+        } else if (eventId) {
+            window.location.href = `/organizer/event/${eventId}?token=${encodeURIComponent(token)}`;
+        } else {
+            window.location.href = `/organizer/events?token=${encodeURIComponent(token)}`;
+        }
+    } catch (error) {
         console.error('Error ending game:', error);
-        alert('Failed to end game. Please try again.');
-    });
+        alert(error.message || 'Failed to end game. Please try again.');
+    }
 }
 
 

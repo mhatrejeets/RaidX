@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -16,6 +17,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var ErrKnockoutTieNotAllowed = errors.New("knockout tie not allowed")
 
 func EndGameHandler(c *fiber.Ctx) error {
 	ctx := context.Background()
@@ -109,6 +112,9 @@ func EndGameHandler(c *fiber.Ctx) error {
 
 	if tournamentIDParam != "" && fixtureIDParam != "" {
 		if err := updateTournamentAfterMatch(ctx, tournamentIDParam, fixtureIDParam, gameStats); err != nil {
+			if errors.Is(err, ErrKnockoutTieNotAllowed) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+			}
 			logrus.Error("Error:", "EndGameHandler:", " Failed to update tournament: %v", err)
 			// Don't fail the whole endgame, just log the error
 		}
@@ -119,6 +125,9 @@ func EndGameHandler(c *fiber.Ctx) error {
 
 	if championshipIDParam != "" && championshipFixtureIDParam != "" {
 		if err := updateChampionshipAfterMatch(ctx, championshipIDParam, championshipFixtureIDParam, gameStats); err != nil {
+			if errors.Is(err, ErrKnockoutTieNotAllowed) {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+			}
 			logrus.Error("Error:", "EndGameHandler:", " Failed to update championship: %v", err)
 			// Don't fail the whole endgame, just log the error
 		}
@@ -283,6 +292,9 @@ func updateTournamentAfterMatch(ctx context.Context, tournamentID, fixtureID str
 	} else if team2Score > team1Score {
 		winnerID = &fixture.Team2ID
 	} else {
+		if fixture.MatchType == models.FixtureTypeSemifinal || fixture.MatchType == models.FixtureTypeFinal {
+			return fmt.Errorf("%w: tournament %s match cannot end in a tie", ErrKnockoutTieNotAllowed, fixture.MatchType)
+		}
 		isDraw = true
 	}
 

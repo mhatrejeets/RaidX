@@ -444,6 +444,9 @@ func SetupWebSocket(app *fiber.App) {
 
 				checkAndHandleAllOut(&currentMatch)
 
+				// Increment raid number so next team raids (same as successful/defense/empty raid actions)
+				currentMatch.Data.RaidNumber++
+
 				if err := redisImpl.SetRedisKey(redisKey, currentMatch); err != nil {
 					logrus.Error("Error:", "SetupWebSocket:", " Failed to set gameStats for lobbyTouch: %v", err)
 					continue
