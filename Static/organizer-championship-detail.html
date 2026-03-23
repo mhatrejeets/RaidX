@@ -406,7 +406,7 @@
         const data = await res.json();
         if (res.ok) {
           document.getElementById('championship-name').textContent = data.eventName || 'Championship';
-          document.getElementById('championship-subtitle').textContent = `Type: ${data.eventType || 'championship'} â€¢ Status: ${data.status || '-'}`;
+          document.getElementById('championship-subtitle').textContent = `Type: ${data.eventType || 'championship'} | Status: ${data.status || '-'}`;
           headerLoaded = true;
         }
       } catch (err) {

@@ -421,12 +421,12 @@
         const invited = data.counts?.invited || allTeams.length || 0;
 
         document.getElementById('event-name').textContent = data.eventName || 'Event';
-        document.getElementById('event-subtitle').textContent = `Type: ${data.eventType || '-'} â€¢ Status: ${data.status || '-'}`;
+        document.getElementById('event-subtitle').textContent = `Type: ${data.eventType || '-'} | Status: ${data.status || '-'}`;
         document.getElementById('event-type').textContent = data.eventType || '-';
         document.getElementById('event-status-badge').textContent = data.status || '-';
         document.getElementById('event-required-teams').textContent = requiredTeams > 0 ? requiredTeams : 'Not set';
         document.getElementById('event-accepted-count').textContent = accepted;
-        document.getElementById('event-counts').textContent = `Invited: ${invited} â€¢ Pending: ${pending} â€¢ Accepted: ${accepted} â€¢ Declined: ${declined}`;
+        document.getElementById('event-counts').textContent = `Invited: ${invited} | Pending: ${pending} | Accepted: ${accepted} | Declined: ${declined}`;
 
         const eventType = (data.eventType || '').toLowerCase();
         currentEventType = eventType;
@@ -683,7 +683,7 @@
         const tossEl = document.getElementById('match-toss-info');
         if (tossEl) {
           if (tossWinnerName) {
-            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || 'â€”'}`;
+            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || '-'}`;
           } else {
             tossEl.textContent = '';
           }
@@ -699,7 +699,7 @@
           if (mvp) parts.push(`MVP: ${mvp.name} (${mvp.points})`);
           if (bestRaider) parts.push(`Best Raider: ${bestRaider.name} (${bestRaider.points})`);
           if (bestDefender) parts.push(`Best Defender: ${bestDefender.name} (${bestDefender.points})`);
-          awardsEl.textContent = parts.join(' â€¢ ');
+          awardsEl.textContent = parts.join(' | ');
         }
 
         const teamAIdList = (data.teamAPlayerIds || data.TeamAPlayerIDs || []).map(id => String(id));

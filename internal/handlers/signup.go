@@ -112,7 +112,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	_, err = collection.InsertOne(ctx, newUser)
 	if err != nil {
 		logrus.Error("Error:", "SignupHandler:", " Failed to insert user: %v", err)
-		return c.Status(fiber.StatusInternalServerError).SendString("❌ Could not store user")
+		return c.Status(fiber.StatusInternalServerError).SendString("Could not store user")
 	}
 
 	// Return success message
@@ -121,7 +121,7 @@ func SignupHandler(c *fiber.Ctx) error {
 	<html>
 	<head>
 		<script>
-			alert("✅ Signup successful!");
+			alert("Signup successful!");
 			window.location.href = "/";
 		</script>
 	</head>

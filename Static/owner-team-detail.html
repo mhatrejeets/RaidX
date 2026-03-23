@@ -472,7 +472,7 @@
           const messageDiv = document.getElementById('inviteLinkMessage');
           if (messageDiv) {
             const inviteUrl = data.invite_url ? `<div class="small">Invite link: <a href="${data.invite_url}" target="_blank">${data.invite_url}</a></div>` : '';
-            messageDiv.innerHTML = `<div class="message success">âœ… Invitation sent.</div>${inviteUrl}`;
+            messageDiv.innerHTML = `<div class="message success">Success: Invitation sent.</div>${inviteUrl}`;
           }
         } else {
           const errorData = await response.json().catch(() => ({}));
@@ -570,7 +570,7 @@
 
         if (response.ok) {
           const messageDiv = document.getElementById('editMessage');
-          messageDiv.innerHTML = '<div class="message success">âœ… Team updated successfully</div>';
+          messageDiv.innerHTML = '<div class="message success">Success: Team updated successfully</div>';
           setTimeout(() => loadTeamDetails(), 1000);
         } else {
           const errorData = await response.json().catch(() => ({}));

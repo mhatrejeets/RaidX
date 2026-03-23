@@ -426,18 +426,18 @@
 
         if (response.ok) {
           const data = await response.json();
-          alert('âœ… Team created! Redirecting...');
+          alert('Success: Team created! Redirecting...');
           setTimeout(() => {
             window.location.href = `/owner/team/${data.team_id}/edit`;
           }, 500);
         } else {
           const errorData = await response.json();
           console.error('Create team error:', errorData);
-          alert('âŒ Failed to create team: ' + (errorData.error || response.statusText));
+          alert('Error: Failed to create team: ' + (errorData.error || response.statusText));
         }
       } catch (error) {
         console.error('Error creating team:', error);
-        alert('âŒ Error creating team: ' + error.message);
+        alert('Error: Error creating team: ' + error.message);
       }
     }
 
@@ -462,14 +462,14 @@
           });
 
           if (response.ok) {
-            alert('âœ… Team deleted successfully');
+            alert('Success: Team deleted successfully');
             loadTeams();
           } else {
-            alert('âŒ Failed to delete team');
+            alert('Error: Failed to delete team');
           }
         } catch (error) {
           console.error('Error deleting team:', error);
-          alert('âŒ Error deleting team');
+          alert('Error: Error deleting team');
         }
       }
     }

@@ -228,7 +228,7 @@
         const tossEl = document.getElementById('match-toss-info');
         if (tossEl) {
           if (tossWinnerName) {
-            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || 'â€”'}`;
+            tossEl.textContent = `Toss: ${tossWinnerName} | Decided To: ${tossDecisionText || '-'}`;
           } else {
             tossEl.textContent = '';
           }
@@ -244,7 +244,7 @@
           if (mvp?.name) parts.push(`MVP: ${mvp.name} (${mvp.points || 0})`);
           if (bestRaider?.name) parts.push(`Best Raider: ${bestRaider.name} (${bestRaider.points || 0})`);
           if (bestDefender?.name) parts.push(`Best Defender: ${bestDefender.name} (${bestDefender.points || 0})`);
-          awardsEl.textContent = parts.join(' â€¢ ');
+          awardsEl.textContent = parts.join(' | ');
         }
 
         const playerStats = data?.data?.playerStats || {};

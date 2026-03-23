@@ -130,7 +130,7 @@
       backBtn.href = back || document.referrer || '/viewer';
     }
 
-    document.getElementById('rankings-subtitle').textContent = `Type: ${eventType} â€¢ Event ID: ${eventId}`;
+    document.getElementById('rankings-subtitle').textContent = `Type: ${eventType} | Event ID: ${eventId}`;
 
     function renderRows(targetId, rows, label) {
       const tbody = document.getElementById(targetId);

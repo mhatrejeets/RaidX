@@ -349,7 +349,7 @@
         const data = await res.json();
         if (res.ok) {
           document.getElementById('tournament-name').textContent = data.eventName || 'Tournament';
-          document.getElementById('tournament-subtitle').textContent = `Type: ${data.eventType || 'tournament'} â€¢ Status: ${data.status || '-'}`;
+          document.getElementById('tournament-subtitle').textContent = `Type: ${data.eventType || 'tournament'} | Status: ${data.status || '-'}`;
           headerLoaded = true;
         }
       } catch (err) {

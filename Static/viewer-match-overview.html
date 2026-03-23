@@ -173,7 +173,7 @@
         if (lobbyDef.length) tags.push(`Defender lobby: ${lobbyDef.join(', ')}`);
         if (lobbyRaid) tags.push('Raider entered lobby');
       }
-      if (tags.length) line += ` (${tags.join(' â€¢ ')})`;
+      if (tags.length) line += ` (${tags.join(' | ')})`;
       return line;
     }
 
@@ -209,7 +209,7 @@
       if (awards.mvp) awardsParts.push(`MVP: ${awards.mvp.name} (${awards.mvp.points})`);
       if (awards.bestRaider) awardsParts.push(`Best Raider: ${awards.bestRaider.name} (${awards.bestRaider.points})`);
       if (awards.bestDefender) awardsParts.push(`Best Defender: ${awards.bestDefender.name} (${awards.bestDefender.points})`);
-      document.getElementById('summary-awards').textContent = awardsParts.length ? awardsParts.join(' â€¢ ') : 'Awards: -';
+      document.getElementById('summary-awards').textContent = awardsParts.length ? awardsParts.join(' | ') : 'Awards: -';
 
       document.getElementById('summary-narrative').textContent = `${winner} won the match and decided to ${tossDecisionText.toLowerCase()}.`;
 
