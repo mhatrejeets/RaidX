@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// GetTeams lists all teams for selection.
 func GetTeams(c *fiber.Ctx) error {
 	collection := db.MongoClient.Database("raidx").Collection("teams")
 
