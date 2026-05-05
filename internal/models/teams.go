@@ -1,6 +1,6 @@
 package models
 
-// TeamStat represents a team's score and name (used across models)
+// TeamStat represents a team's score and name (used across models) ok
 type TeamStat struct {
 	Name  string `json:"name" bson:"name"`
 	Score int    `json:"score" bson:"score"`
